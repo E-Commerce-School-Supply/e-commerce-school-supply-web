@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # school-supply-ecommerce
 
 This template should help get you started developing with Vue 3 in Vite.
@@ -71,3 +72,6 @@ npm run test:e2e -- --debug
 ```sh
 npm run lint
 ```
+=======
+# e-commerce-school-supply-web
+>>>>>>> 2498d543619c42c8d5a01e98b67087719a3281b8

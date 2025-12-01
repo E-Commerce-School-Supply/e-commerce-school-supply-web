@@ -30,10 +30,10 @@ import { IconArrowBack } from '@tabler/icons-vue'
           >
             Submit
           </button>
-          <a href="/signin" class="text-extralight text-sm hover:underline flex items-center gap-1">
+          <router-link to="/" class="text-extralight text-sm hover:underline flex items-center gap-1">
             <IconArrowBack class="w-4 h-4" />
             Back to Sign in
-          </a>
+          </router-link>
         </div>
       </div>
     </form>

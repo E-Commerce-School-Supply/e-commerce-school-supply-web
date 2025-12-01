@@ -3,6 +3,11 @@ import { createRouter, createWebHistory } from 'vue-router'
 const route = [
   {
     path: '/',
+    name: 'signin',
+    component: () => import('../views/auth/SigninPage.vue'),
+  },
+  {
+    path: '/home',
     name: 'home',
     component: () => import('../views/HomeView.vue'),
   },
@@ -13,8 +18,7 @@ const route = [
   },
   {
     path: '/signin',
-    name: 'signin',
-    component: () => import('../views/auth/SigninPage.vue'),
+    redirect: '/',
   },
   {
     path: '/signup',

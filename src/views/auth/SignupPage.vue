@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { authService } from '@/services/authService'
+
+const router = useRouter()
 
 // 1. Create reactive variables for the form data
 const form = ref({
@@ -25,7 +29,7 @@ const passwordsMismatch = computed(() => {
 })
 
 // 4. Handle Form Submission
-const handleRegister = () => {
+const handleRegister = async () => {
   // Double check validation before sending
   if (form.value.password.length < 8) {
     alert('Password is too short!')
@@ -36,9 +40,17 @@ const handleRegister = () => {
     return
   }
 
-  // If validation passes:
-  console.log('Form Submitted:', form.value)
-  alert('Account created successfully!')
+  try {
+    await authService.register({
+      username: form.value.username,
+      email: form.value.email,
+      password: form.value.password,
+    })
+    alert('Account created successfully!')
+    router.push('/')
+  } catch (error: any) {
+    alert(error.message)
+  }
 }
 </script>
 
@@ -150,7 +162,7 @@ const handleRegister = () => {
           </button>
           <span class="text-extralight text-sm">
             Already have an account?
-            <a href="/signin" class="text-accent hover:underline">Sign in</a>
+            <router-link to="/" class="text-accent hover:underline">Sign in</router-link>
           </span>
         </div>
       </div>

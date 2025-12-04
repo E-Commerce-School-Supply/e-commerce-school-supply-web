@@ -1,10 +1,10 @@
 <template>
   <!-- Product grid -->
-  <div class="flex flex-wrap gap-12">
+  <div class="flex flex-wrap gap-12 font-sans">
     <div
       v-for="(product, index) in products"
       :key="index"
-      class="w-[300px] h-[325px] bg-white rounded-[20px] overflow-hidden border-[0.3px] border-[#7B7B7B]"
+      class="w-[300px] h-[330px] bg-white rounded-[20px] overflow-hidden border-[0.3px] border-[#7B7B7B]"
     >
       <!-- Image Section -->
       <div class="relative flex justify-center items-center h-[160px]">
@@ -30,12 +30,12 @@
           <img 
             v-if="!isLiked[index]" 
             src="/src/assets/images/Heart.png" 
-            class="w-[18px] h-[16px]"
+            class="w-[27px] h-[24px]"
           />
           <img 
             v-else 
             src="/src/assets/images/Heart-fill.png" 
-            class="w-[18px] h-[16px]"
+            class="w-[27px] h-[24px]"
           />
         </button>
       </div>
@@ -43,7 +43,7 @@
       <!-- Info Section -->
       <div class="p-4 bg-[#F5F5F5] m-2 rounded-[20px]">
         <!-- Product Name -->
-        <h1 class="text-[14px] font-semibold">{{ product.name }}</h1>
+        <h1 class="text-[14px] font-bold">{{ product.name }}</h1>
         
         <!-- Rating -->
         <div class="flex items-center mb-3 text-[#FF6B6B]">
@@ -62,12 +62,12 @@
           <div>
             <h2 class="text-sm text-gray-500">Price</h2>
             <div class="flex items-end">
-              <p class="font-bold text-[24px]">${{(product.price-(product.price*product.discount/100)).toFixed(2)}}</p>   
+              <p class="font-bold text-[24px]">${{getDiscountedPrice(product)}}</p> 
               <p v-if="product.discount" class="font-bold text-[12px] ml-2 line-through">${{(product.price).toFixed(2)}}</p>    
             </div>
           </div>
-
-          <button @click="btnLink(index)" class="text-white w-[70px] h-[30px] rounded-md text-[10px]">
+ 
+          <button @click="btnLink(index)" class="text-white w-[80px] h-[30px] rounded-md text-[12px] font-semibold">
             <div 
               v-if="!linkBtn[index]"
               class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm"
@@ -95,7 +95,7 @@ import { defineComponent, ref, watch } from "vue";
 interface Product {
   image: string;
   name: string;
-  discount: number;
+  discount: number | null;
   rating: number;
   price: number;
 }
@@ -125,6 +125,11 @@ export default defineComponent({
       { immediate: true }
     );
 
+    const getDiscountedPrice = (product: Product) => {
+      const discount = product.discount ?? 0; // handle null
+      const priceAfterDiscount = product.price - (product.price * discount / 100);
+      return (Math.floor(priceAfterDiscount * 100) / 100).toFixed(2);
+    };
 
     const toggleLike = (index: number) => {
       isLiked.value[index] = !isLiked.value[index];
@@ -138,7 +143,8 @@ export default defineComponent({
       isLiked,
       linkBtn,
       toggleLike,
-      btnLink
+      btnLink,
+      getDiscountedPrice
     };
   }
 });

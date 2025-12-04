@@ -25,7 +25,7 @@
                 name: "UrbanTrail Classic 25L Backpack",
                 price: 39.99,
                 rating: 2.8,
-                discount: 10
+                discount: null
             },
             {
                 image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
@@ -39,14 +39,14 @@
                 name: "Comfort Sneakers",
                 price: 40.0,
                 rating: 4.5,
-                discount: 50
+                discount: null
             },
             {
                 image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
                 name: "Comfort Sneakers",
-                price: 40.0,
+                price: 39.99,
                 rating: 4.5,
-                discount: 30
+                discount: 80
             },
             {
                 image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",

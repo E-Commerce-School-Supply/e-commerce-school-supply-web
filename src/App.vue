@@ -15,6 +15,7 @@ onMounted(() => {
   </router-view>
 </template>
 
+
 <style scoped>
 .fade-enter-active,
 .fade-leave-active {

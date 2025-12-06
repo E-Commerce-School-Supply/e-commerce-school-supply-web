@@ -1,16 +1,19 @@
 <template>
-    <div class="flex ...">
+    <!-- Header --> 
+    <div class="h-40 border-b fixed top-0 w-full z-50 bg-white"></div>
+    <!-- Body -->
+    <div class="flex pt-40 ...">
         <div class="w-1/20 ..."></div>
         <div class="w-18/20">
             <div>
-                <h1 class="text-[20px] my-15 ...">
+                <h1 class="text-[20px] my-10 ...">
                     Home / Pen
                 </h1>
             </div>
             
             <div class="grid grid-cols-6 gap-4 relative ...">
                 <!-- Left sid product -->
-                <div class=" grid grid-flow-col grid-rows-4 grid-cols-8 gap-4 col-start-1 col-end-5 h-[600px] sticky top-0 w-25/22 ...">
+                <div class=" grid grid-flow-col grid-rows-4 grid-cols-8 gap-4 col-start-1 col-end-5 h-[600px] sticky top-50 w-25/22 ...">
                     <productImageComponent :images="images"/>
                 </div>
                 
@@ -30,7 +33,7 @@
             <div class="grid grid-cols-6 gap-4 relative ...">
 
                 <!-- left side review =========================================================================================== -->
-                <div class="grid grid-flow-col grid-rows-4 grid-cols-8 col-start-1 col-end-3 h-[600px] sticky top-0">
+                <div class="grid grid-flow-col grid-rows-4 grid-cols-8 col-start-1 col-end-3 h-[600px] sticky top-50">
 
                     <!-- Top Review Summary -->
                     <div class="row-span-2 row-start-1 col-start-1 col-end-9 bg-[#F5F5F5] rounded-t-md p-6 ">
@@ -65,11 +68,7 @@
                     <p>See All</p>
                 </div>
                 
-
-                <div class="flex flex-wrap gap-12">
-                    <!-- Use your ProductCard component -->
-                    <product-card-component :products="products" />
-                </div>                 
+                <product-card-component :products="products" />
             </div>
 
             <!-- Contact -->
@@ -83,7 +82,8 @@
         </div>
         <div class="w-1/20 ..."></div>
     </div>
-
+    <!-- Footer -->
+    <div class="h-[455px] bg-[#1A535C]  w-full"></div>
 </template>
 
 <script lang="ts">

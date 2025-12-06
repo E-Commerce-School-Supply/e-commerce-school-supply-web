@@ -1,6 +1,6 @@
 <template>
   <!-- Main Image -->
-  <div class="row-span-4 col-start-2 col-end-8 bg-[#F5F5F5] rounded-md justify-center flex items-center ...">
+  <div class="row-span-4 col-start-2 col-end-8 bg-[#F5F5F5] rounded-md justify-center flex items-center border border-gray-300 ...">
     <img :src="activeImage" alt="" class="max-h-[95%] max-w-[95%]  ..." />
   </div>
 
@@ -8,7 +8,7 @@
   <div
     v-for="(img, index) in images"
     :key="index"
-    class="col-span-1 bg-[#F5F5F5] rounded-md justify-center flex ..."
+    class="col-span-1 bg-[#F5F5F5] rounded-md justify-center flex border border-gray-300 ..."
     @click="activeImage = img"
   >
     <img :src="img" alt="">

@@ -12,9 +12,9 @@ const route = [
     component: () => import('../views/AboutUsView.vue'),
   },
   {
-    path: '/ProductDetail',
-    nmae: 'Product Detail',
-    component: () => import('../views/ProductDetailView.vue'),
+    path: '/ProductList',
+    nmae: 'Product List',
+    component: () => import('../views/ProductListView.vue'),
   }
 ]
 

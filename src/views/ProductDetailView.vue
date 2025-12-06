@@ -60,7 +60,11 @@
             </div>
 
             <div>
-                <h1 class="text-[36px] my-15">More product you may like!!</h1>
+                <div class="flex justify-between items-baseline text-[20px]">
+                    <h1 class="text-[36px] my-15">More product you may like!!</h1>
+                    <p>See All</p>
+                </div>
+                
 
                 <div class="flex flex-wrap gap-12">
                     <!-- Use your ProductCard component -->

@@ -67,7 +67,7 @@
             </div>
           </div>
  
-          <button @click="btnLink(index)" class="text-white w-[80px] h-[30px] rounded-md text-[12px] font-semibold">
+          <button @click="btnLink(index)" class="text-white w-[120px] h-[35px] rounded-md text-[12px] font-semibold">
             <div 
               v-if="!linkBtn[index]"
               class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm"
@@ -76,9 +76,9 @@
             </div>
             <div 
               v-else 
-              class="bg-[#C3C3C3] w-full h-full flex justify-center items-center rounded-sm"
+              class="bg-[#df6868] w-full h-full flex justify-center items-center rounded-sm"
             >
-              Added
+              Add another cart
             </div>
           </button>
         </div>

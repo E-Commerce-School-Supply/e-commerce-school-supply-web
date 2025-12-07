@@ -1,3 +1,4 @@
+import { initFlowbite } from 'flowbite'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const route = [
@@ -17,6 +18,7 @@ const route = [
     component: () => import('../views/AboutUsView.vue'),
   },
   {
+<<<<<<< HEAD
 <<<<<<< HEAD
     path: '/signin',
     redirect: '/',
@@ -50,12 +52,25 @@ const route = [
     name: 'cart',
     component: () => import('../views/cartView.vue'),
 >>>>>>> origin/ui/cart
+=======
+    path: '/profile',
+    name: 'profile',
+    component: () => import('../views/profile/ProfileView.vue'),
+>>>>>>> origin/feature/user-profile
   },
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes: route,
+})
+
+router.afterEach((to, from) => {
+  // We use setTimeout to give Vue a split second to finish rendering the HTML
+  // before we tell Flowbite to scan the DOM again.
+  setTimeout(() => {
+    initFlowbite()
+  })
 })
 
 export default router

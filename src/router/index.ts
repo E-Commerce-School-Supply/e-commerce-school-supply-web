@@ -17,6 +17,7 @@ const route = [
     component: () => import('../views/AboutUsView.vue'),
   },
   {
+<<<<<<< HEAD
     path: '/signin',
     redirect: '/',
   },
@@ -44,6 +45,11 @@ const route = [
     path: '/ProductList',
     nmae: 'Product List',
     component: () => import('../views/ProductListView.vue'),
+=======
+    path: '/cart',
+    name: 'cart',
+    component: () => import('../views/cartView.vue'),
+>>>>>>> origin/ui/cart
   },
 ]
 

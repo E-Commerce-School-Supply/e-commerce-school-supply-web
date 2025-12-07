@@ -8,7 +8,7 @@ const route = [
   },
   {
     path: '/home',
-    name: 'home',
+    name: 'Home',
     component: () => import('../views/HomeView.vue'),
   },
   {
@@ -39,6 +39,11 @@ const route = [
     path: '/reset',
     name: 'reset',
     component: () => import('../views/auth/ResetPage.vue'),
+  },
+  {
+    path: '/ProductList',
+    nmae: 'Product List',
+    component: () => import('../views/ProductListView.vue'),
   },
 ]
 

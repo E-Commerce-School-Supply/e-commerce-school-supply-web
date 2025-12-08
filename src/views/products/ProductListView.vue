@@ -123,8 +123,9 @@
             <h1 class="text-[20px]">“Backpack” this is what you’re looking for</h1>
             <p class="text-[16px] font-light">168 items</p>
           </div>
-
-          <product-card-component :products="products" />
+          <div class="flex flex-wrap gap-5 justify-between">
+            <product-card-component :products="products" />
+          </div>
 
           <div class="flex justify-end my-20 items-center gap-6 text-[16px]">
             <!-- Previous -->

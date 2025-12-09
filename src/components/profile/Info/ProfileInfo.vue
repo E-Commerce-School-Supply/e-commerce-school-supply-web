@@ -82,6 +82,7 @@ const userDetail = ref<InfoItem[]>([
       <div class="flex flex-wrap gap-5 w-full justify-between items-center mt-5">
         <InfoCard
           v-for="detail in userDetail"
+          :key="detail.label"
           :label="detail.label"
           :value="detail.value"
           :icon="detail.icon"

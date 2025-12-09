@@ -9,12 +9,20 @@ const password = ref('')
 
 const handleLogin = async () => {
   try {
+    // Local admin shortcut: username 'admin' and password 'admin' go to admin dashboard
+    if (email.value === 'admin@gmail.com' && password.value === 'admin') {
+      // In a real app you would set auth state and a token. This is a local bypass for admin.
+      router.replace({ name: 'Admin Dashboard' })
+      return
+    }
+
     await authService.login({
       email: email.value,
       password: password.value,
     })
     alert('Login successful!')
-    router.push('/home')
+    // Navigate to product listing after login
+    router.replace({ name: 'Product List' })
   } catch (error: any) {
     alert(error.message)
   }

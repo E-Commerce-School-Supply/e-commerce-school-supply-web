@@ -1,9 +1,10 @@
 <template>
-  <!-- Header -->
-  <div class="h-40 border-b fixed top-0 w-full z-50 bg-white"></div>
+  <div class="product-list-view">
+    <!-- Header -->
+    <div class="h-40 border-b fixed top-0 w-full z-50 bg-white"></div>
 
-  <!-- Body -->
-  <div class="flex ... pt-40">
+    <!-- Body -->
+    <div class="flex ... pt-40">
     <!-- ✨ Added pt-40 so the header won’t cover content -->
 
     <div class="w-1/20"></div>
@@ -129,7 +130,7 @@
 
           <div class="flex justify-end my-20 items-center gap-6 text-[16px]">
             <!-- Previous -->
-            <div class="cursor-pointer text-[#757575]"><- Previous</div>
+            <div class="cursor-pointer text-[#757575]">&larr; Previous</div>
 
             <!-- Page Numbers -->
             <div class="flex items-center gap-2">
@@ -156,7 +157,7 @@
             </div>
 
             <!-- Next -->
-            <div class="cursor-pointer">Next -></div>
+            <div class="cursor-pointer">Next &rarr;</div>
           </div>
         </div>
       </div>
@@ -164,18 +165,22 @@
 
     <div class="w-1/20"></div>
   </div>
+
   <!-- Footer -->
-  <div class="h-[455px] bg-[#1A535C] w-full"></div>
+  <Footer />
+</div>
 </template>
 
 <script lang="ts">
 import ProductCardComponent from '@/components/product/product-card-component.vue'
+import Footer from '@/components/Footer.vue'
 
 export default {
   name: 'product-list-view',
 
   components: {
     ProductCardComponent,
+    Footer,
   },
 
   data() {

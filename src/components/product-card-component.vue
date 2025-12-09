@@ -1,6 +1,6 @@
 <template>
   <!-- Product grid -->
-  <div class="flex flex-wrap grid-cols-5 justify-center gap-10 font-sans items-center">
+  <div class="flex flex-wrap grid-cols-5 justify-center gap-5 font-sans items-center">
     <div
       v-for="(product, index) in products"
       :key="index"

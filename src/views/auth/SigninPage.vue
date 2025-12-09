@@ -22,7 +22,7 @@ const handleLogin = async () => {
     toast.showToast('Welcome back! Redirecting...', 'success')
 
     setTimeout(() => {
-      router.push('/dashboard')
+      router.push('/profile')
     }, 1500)
   } catch (error: any) {
     const msg = error.message || 'Invalid email or password.'

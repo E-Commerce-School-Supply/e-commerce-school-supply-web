@@ -43,7 +43,7 @@ const route = [
   {
     path: '/product-list',
     name: 'Product List',
-    component: () => import('../views/ProductListView.vue'),
+    component: () => import('../views/products/ProductListView.vue'),
   },
   {
     path: '/profile',

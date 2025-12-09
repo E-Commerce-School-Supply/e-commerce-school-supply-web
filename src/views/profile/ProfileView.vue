@@ -4,17 +4,17 @@ import MyCard from '@/components/profile/MyCard.vue'
 import MyFavorite from '@/components/profile/MyFavorite.vue'
 import MyOrders from '@/components/profile/MyOrders.vue'
 import MyProfile from '@/components/profile/MyProfile.vue'
-import type { User } from '@/types/user'
+import type { UserProfile } from '@/types/user'
 import { ref } from 'vue'
 
 // 2. The fake user data
-const userData = ref<User>({
-  name: 'Sok Dara',
-  role: 'User',
-  email: 'sok.dara@example.com',
-  phoneNumber: '+855 12 345 678',
-  avatar: 'https://i.pravatar.cc/150?img=11', // Free fake profile image service
-})
+// const userData = ref<UserProfile>({
+//   username: 'Sok Dara',
+//   role: 'User',
+//   email: 'sok.dara@example.com',
+//   phoneNumber: '+855 12 345 678',
+//   avatarUrl: 'https://i.pravatar.cc/150?img=11', // Free fake profile image service
+// })
 </script>
 
 <template>

@@ -23,101 +23,15 @@
                     <div class="sticky top-50">
 
                         <h1 class="text-[20px] font-semibold mb-5">Category</h1>
+                        <!-- Category component -->
+                        <CategoryComponent :categories="categories" @update="onCategoryChange"/>
 
-                        <div class="text-base/8 text-[15px]">
-                            <div class="flex items-center">
-                                <div class="h-5 w-5 rounded-full border-2 border-black "></div>
-                                <p class="ml-2 text-[15px]">Writing Instruments</p>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="h-5 w-5 rounded-full border-2 border-black "></div>
-                                <p class="ml-2 text-[15px]">Paper Products</p>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="h-5 w-5 rounded-full border-2 border-black "></div>
-                                <p class="ml-2 text-[15px]">Art & Craft Supplies</p>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="h-5 w-5 rounded-full border-2 border-black "></div>
-                                <p class="ml-2 text-[15px]">Organization & Storage</p>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="h-5 w-5 rounded-full border-2 border-black "></div>
-                                <p class="ml-2 text-[15px]">School Bags & Carriers</p>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="h-5 w-5 rounded-full border-2 border-black "></div>
-                                <p class="ml-2 text-[15px]">Classroom & Teaching Supplies</p>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="h-5 w-5 rounded-full border-2 border-black "></div>
-                                <p class="ml-2 text-[15px]">Books & Learning Materials</p>
-                            </div>
-                        </div>
-
-                        <div class="pr-20">
-                            <h1 class="text-[20px] font-semibold my-5">Price</h1>
-
-                            <div class="flex justify-between">
-                                <p>Range</p>
-                                <p>$0-100</p>
-                            </div>
-
-                            <div class="my-2 relative">
-                                <div class="flex items-center justify-between w-full">
-                                    <div class="w-5 h-5 rounded-full bg-black z-10"></div>
-                                    <div class="w-5 h-5 rounded-full bg-black z-10"></div>
-                                </div>
-
-                                <div class="w-full h-3 bg-[#E6E6E6] absolute top-1/2 transform rounded-full -translate-y-1/2"></div>
-                            </div>
-                        </div>
+                        <!-- Price Range -->
+                        <PriceRangeSlider :products="products" @update:maxPrice="onPriceChange"/>
 
                         <div class="mb-10 mt-5">
                             <h1 class="text-[20px] font-semibold mb-5">Customer Review</h1>
-                            <div class="text-base/8 text-[15px]">
-
-                                <div class="flex items-center">
-                                    <div class="h-5 w-5 rounded-full border-2 border-black "></div>
-                                    <div class="ml-2 text-[#FF6B6B] text-[24px] flex items-baseline">
-                                        ★ ★ ★ ★ ★
-                                        <p class="ml-2 text-black text-[16px] font-light">5.0</p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center">
-                                    <div class="h-5 w-5 rounded-full border-2 border-black "></div>
-                                    <div class="ml-2 text-[#FF6B6B] text-[24px] flex items-baseline">
-                                        ★ ★ ★ ★ ☆
-                                        <p class="ml-2 text-black text-[16px] font-light">4.0</p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center">
-                                    <div class="h-5 w-5 rounded-full border-2 border-black "></div>
-                                    <div class="ml-2 text-[#FF6B6B] text-[24px] flex items-baseline">
-                                        ★ ★ ★ ☆ ☆
-                                        <p class="ml-2 text-black text-[16px] font-light">3.0</p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center">
-                                    <div class="h-5 w-5 rounded-full border-2 border-black "></div>
-                                    <div class="ml-2 text-[#FF6B6B] text-[24px] flex items-baseline">
-                                        ★ ★ ☆ ☆ ☆
-                                        <p class="ml-2 text-black text-[16px] font-light">2.0</p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center">
-                                    <div class="h-5 w-5 rounded-full border-2 border-black "></div>
-                                    <div class="ml-2 text-[#FF6B6B] text-[24px] flex items-baseline">
-                                        ★ ☆ ☆ ☆ ☆
-                                        <p class="ml-2 text-black text-[16px] font-light">1.0</p>
-                                    </div>
-                                </div>
-
-                            </div>
+                            <star-category-component :rating-options="ratingOptions" @update="onRatingChange" />
                         </div>
                     </div>
 
@@ -127,34 +41,21 @@
                 <div class="col-start-2 col-end-6 ...">
 
                     <div class="flex justify-between mb-10 items-baseline">
-                        <h1 class="text-[20px]">“Backpack” this is what you’re looking for</h1>
-                        <p class="text-[16px] font-light">168 items</p>
+                        <h1 class="text-[20px]"><a class="text-[#FF6B6B] font-semibold">{{selectedCategory}}</a> This is what you’re looking for.</h1>
+                        <p class="text-[16px] font-light">{{ filteredProducts.length }} items</p>
                     </div>
 
-                    <product-card-component :products="products" />
-
-                    <div class="flex justify-end my-20 items-center gap-6 text-[16px]">
-                        <!-- Previous -->
-                        <div class="cursor-pointer text-[#757575]"><- Previous</div>
-
-                        <!-- Page Numbers -->
-                        <div class="flex items-center gap-2">
-                            <div class="h-10 w-10 text-white bg-[#2C2C2C] rounded-lg flex items-center justify-center">1</div>
-                            <div class="h-10 w-10 rounded-md flex items-center justify-center cursor-pointer">2</div>
-                            <div class="h-10 w-10 rounded-md flex items-center justify-center cursor-pointer">3</div>
-                            <div class="h-10 w-10 rounded-md flex items-center justify-center cursor-pointer">...</div>
-                            <div class="h-10 w-10 rounded-md flex items-center justify-center cursor-pointer">64</div>
-                            <div class="h-10 w-10 rounded-md flex items-center justify-center cursor-pointer">65</div>
-                        </div>
-
-                        <!-- Next -->
-                        <div class="cursor-pointer">Next -></div>
+                    <div class="min-h-[70%]">
+                        <!-- Display product -->
+                        <product-card-component :products="paginatedProducts" />                        
                     </div>
 
+
+                    <!-- Pagination show product page to page when products found less than 20 it won't show Pagination -->
+                    <Pagination v-if="totalPages > 0" v-model:current="page" :total="totalPages" />
 
                 </div>
 
-                
             </div>
         </div>
 
@@ -166,193 +67,346 @@
 
 
 <script lang="ts">
+import CategoryComponent from '@/components/Product LIst/category-component.vue';
+import Pagination from '@/components/Product LIst/pagination.vue';
+import PriceRangeSlider from '@/components/Product LIst/price-range-slider.vue';
+import StarCategoryComponent from '@/components/Product LIst/star-category-component.vue';
 import ProductCardComponent from '@/components/product-card-component.vue';
+import { ref, computed } from "vue";
 
 export default {
     name: 'product-list-view',
 
     components: {
-        ProductCardComponent
+        ProductCardComponent,
+        CategoryComponent,
+        StarCategoryComponent,
+        Pagination,
+        PriceRangeSlider
     },
 
     data() {
-        return {};
+        return {
+
+        };
     },
 
     setup(){
         const products = [
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/668/original/backpack-transparent-background-with-ai-generative-free-png.png",
-            name: "UrbanTrail Classic 25L Backpack",
-            price: 39.99,
-            rating: 2.8,
-            discount: null
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://i.pinimg.com/originals/a4/b0/2d/a4b02dd9c6ec52fe882845b2866c5f2e.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: null
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 1111149.99,
-            rating: 4.5,
-            discount: 99.99
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        },
-        {
-            image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-            name: "Comfort Sneakers",
-            price: 40.0,
-            rating: 4.5,
-            discount: 30
-        }
+            {
+                image: "https://pngimg.com/d/pen_PNG7404.png",
+                name: "UrbanTrail Classic 25L Backpack",
+                price: 39.99,
+                rating: 2.8,
+                discount: null,
+                group: "Writing Instruments"
+            },
+            {
+                image: "https://static.vecteezy.com/system/resources/previews/045/649/636/original/blue-notebook-on-transparent-background-png.png",
+                name: "Comfort Sneakers",
+                price: 40.0,
+                rating: 4.5,
+                discount: 30,
+                group: "Paper Products"
+            },
+            {
+                image: "https://cdn.pixabay.com/photo/2018/09/21/17/05/pens-3693522_960_720.jpg",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "Art & Craft Supplies"
+            },
+            {
+                image: "https://th.bing.com/th/id/R.5420809975318eff018f4ada0099571c?rik=2fntAFhFGHmSOA&riu=http%3a%2f%2fwww.pngall.com%2fwp-content%2fuploads%2f2016%2f04%2fBackpack-PNG.png&ehk=5dco3F7ACS81%2bzR3aMjW3QN3Vz%2frB41ORW21GBZZFMM%3d&risl=&pid=ImgRaw&r=0",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "Organization & Storage"
+            },
+            {
+                image: "https://static.vecteezy.com/system/resources/previews/026/792/668/large_2x/backpack-transparent-background-with-ai-generative-free-png.png",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "School Bags & Carriers"
+            },
+            {
+                image: "https://th.bing.com/th/id/R.fa8dc10ff326af8f103506d6dc342352?rik=j4ULR70wcQ0ecA&riu=http%3a%2f%2fpluspng.com%2fimg-png%2fscissors-hd-png-scissors-png-image-2747.png&ehk=x5UBSsR62ca7d2NHGa4a8dPTNXMAA0R9C4gbEQQc7N0%3d&risl=&pid=ImgRaw&r=0",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "Classroom & Teaching Supplies"
+            },
+            {
+                image: "https://pictures.abebooks.com/inventory/31813701922.jpg",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "Books & Learning Materials"
+            },
+            {
+                image: "https://pngimg.com/d/pen_PNG7404.png",
+                name: "UrbanTrail Classic 25L Backpack",
+                price: 39.99,
+                rating: 2.8,
+                discount: null,
+                group: "Writing Instruments"
+            },
+            {
+                image: "https://static.vecteezy.com/system/resources/previews/045/649/636/original/blue-notebook-on-transparent-background-png.png",
+                name: "Comfort Sneakers",
+                price: 40.0,
+                rating: 4.5,
+                discount: 30,
+                group: "Paper Products"
+            },
+            {
+                image: "https://cdn.pixabay.com/photo/2018/09/21/17/05/pens-3693522_960_720.jpg",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "Art & Craft Supplies"
+            },
+            {
+                image: "https://th.bing.com/th/id/R.5420809975318eff018f4ada0099571c?rik=2fntAFhFGHmSOA&riu=http%3a%2f%2fwww.pngall.com%2fwp-content%2fuploads%2f2016%2f04%2fBackpack-PNG.png&ehk=5dco3F7ACS81%2bzR3aMjW3QN3Vz%2frB41ORW21GBZZFMM%3d&risl=&pid=ImgRaw&r=0",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "Organization & Storage"
+            },
+            {
+                image: "https://static.vecteezy.com/system/resources/previews/026/792/668/large_2x/backpack-transparent-background-with-ai-generative-free-png.png",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "School Bags & Carriers"
+            },
+            {
+                image: "https://th.bing.com/th/id/R.fa8dc10ff326af8f103506d6dc342352?rik=j4ULR70wcQ0ecA&riu=http%3a%2f%2fpluspng.com%2fimg-png%2fscissors-hd-png-scissors-png-image-2747.png&ehk=x5UBSsR62ca7d2NHGa4a8dPTNXMAA0R9C4gbEQQc7N0%3d&risl=&pid=ImgRaw&r=0",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "Classroom & Teaching Supplies"
+            },
+            {
+                image: "https://pictures.abebooks.com/inventory/31813701922.jpg",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "Books & Learning Materials"
+            },
+            {
+                image: "https://pngimg.com/d/pen_PNG7404.png",
+                name: "UrbanTrail Classic 25L Backpack",
+                price: 39.99,
+                rating: 2.8,
+                discount: null,
+                group: "Writing Instruments"
+            },
+            {
+                image: "https://static.vecteezy.com/system/resources/previews/045/649/636/original/blue-notebook-on-transparent-background-png.png",
+                name: "Comfort Sneakers",
+                price: 40.0,
+                rating: 4.5,
+                discount: 30,
+                group: "Paper Products"
+            },
+            {
+                image: "https://cdn.pixabay.com/photo/2018/09/21/17/05/pens-3693522_960_720.jpg",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "Art & Craft Supplies"
+            },
+            {
+                image: "https://th.bing.com/th/id/R.5420809975318eff018f4ada0099571c?rik=2fntAFhFGHmSOA&riu=http%3a%2f%2fwww.pngall.com%2fwp-content%2fuploads%2f2016%2f04%2fBackpack-PNG.png&ehk=5dco3F7ACS81%2bzR3aMjW3QN3Vz%2frB41ORW21GBZZFMM%3d&risl=&pid=ImgRaw&r=0",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "Organization & Storage"
+            },
+            {
+                image: "https://static.vecteezy.com/system/resources/previews/026/792/668/large_2x/backpack-transparent-background-with-ai-generative-free-png.png",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "School Bags & Carriers"
+            },
+            {
+                image: "https://th.bing.com/th/id/R.fa8dc10ff326af8f103506d6dc342352?rik=j4ULR70wcQ0ecA&riu=http%3a%2f%2fpluspng.com%2fimg-png%2fscissors-hd-png-scissors-png-image-2747.png&ehk=x5UBSsR62ca7d2NHGa4a8dPTNXMAA0R9C4gbEQQc7N0%3d&risl=&pid=ImgRaw&r=0",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "Classroom & Teaching Supplies"
+            },
+            {
+                image: "https://pictures.abebooks.com/inventory/31813701922.jpg",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "Books & Learning Materials"
+            },
+            {
+                image: "https://pngimg.com/d/pen_PNG7404.png",
+                name: "UrbanTrail Classic 25L Backpack",
+                price: 39.99,
+                rating: 2.8,
+                discount: null,
+                group: "Writing Instruments"
+            },
+            {
+                image: "https://static.vecteezy.com/system/resources/previews/045/649/636/original/blue-notebook-on-transparent-background-png.png",
+                name: "Comfort Sneakers",
+                price: 40.0,
+                rating: 4.5,
+                discount: 30,
+                group: "Paper Products"
+            },
+            {
+                image: "https://cdn.pixabay.com/photo/2018/09/21/17/05/pens-3693522_960_720.jpg",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "Art & Craft Supplies"
+            },
+            {
+                image: "https://th.bing.com/th/id/R.5420809975318eff018f4ada0099571c?rik=2fntAFhFGHmSOA&riu=http%3a%2f%2fwww.pngall.com%2fwp-content%2fuploads%2f2016%2f04%2fBackpack-PNG.png&ehk=5dco3F7ACS81%2bzR3aMjW3QN3Vz%2frB41ORW21GBZZFMM%3d&risl=&pid=ImgRaw&r=0",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "Organization & Storage"
+            },
+            {
+                image: "https://static.vecteezy.com/system/resources/previews/026/792/668/large_2x/backpack-transparent-background-with-ai-generative-free-png.png",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "School Bags & Carriers"
+            },
+            {
+                image: "https://th.bing.com/th/id/R.fa8dc10ff326af8f103506d6dc342352?rik=j4ULR70wcQ0ecA&riu=http%3a%2f%2fpluspng.com%2fimg-png%2fscissors-hd-png-scissors-png-image-2747.png&ehk=x5UBSsR62ca7d2NHGa4a8dPTNXMAA0R9C4gbEQQc7N0%3d&risl=&pid=ImgRaw&r=0",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "Classroom & Teaching Supplies"
+            },
+            {
+                image: "https://pictures.abebooks.com/inventory/31813701922.jpg",
+                name: "Laptop Bag",
+                price: 50.0,
+                rating: 4.2,
+                discount: 10,
+                group: "Books & Learning Materials"
+            }
+        // ...add category/group to every product
         ];
+
+        const categories = [
+            "Writing Instruments",
+            "Paper Products",
+            "Art & Craft Supplies",
+            "Organization & Storage",
+            "School Bags & Carriers",
+            "Classroom & Teaching Supplies",
+            "Books & Learning Materials",
+        ];
+
+        const ratingOptions = [
+            { stars: "★ ★ ★ ★ ★", value: 5.0 },
+            { stars: "★ ★ ★ ★ ☆", value: 4.0 },
+            { stars: "★ ★ ★ ☆ ☆", value: 3.0 },
+            { stars: "★ ★ ☆ ☆ ☆", value: 2.0 },
+            { stars: "★ ☆ ☆ ☆ ☆", value: 1.0 },
+        ];
+
+        const selectedCategory = ref<string>("");
+        const page = ref<number>(1);
+        const pageSize = 20;
+
+        function onCategoryChange(cat: string | null) {
+            if (cat) {
+                selectedCategory.value = cat;
+            } else {
+                selectedCategory.value = ""; // show all products when unselect
+            }
+            page.value = 1; // reset pagination
+        }
+
+        const selectedRating = ref<number | null>(null);
+
+        function onRatingChange(value: number | null) {
+            selectedRating.value = value;
+            page.value = 1; // reset pagination
+        }
+
+        // Filtered products including rating
+    const filteredProducts = computed(() => {
+        return products.filter(p => {
+            const effectivePrice = p.discount ? p.price * (1 - p.discount / 100) : p.price;
+
+            const matchesCategory = selectedCategory.value === "" || p.group === selectedCategory.value;
+
+            const matchesRating = selectedRating.value === null
+            ? true
+            : (selectedRating.value === 5
+                ? p.rating === 5
+                : p.rating >= selectedRating.value && p.rating < selectedRating.value + 1);
+
+            const matchesPrice = maxPrice.value === null ? true : effectivePrice <= maxPrice.value;
+
+            return matchesCategory && matchesRating && matchesPrice;
+        });
+    });
+
+        // Price Range
+
+        const maxPrice = ref<number | null>(null);
+
+        function onPriceChange(value: number) {
+            maxPrice.value = value;
+            page.value = 1; // reset pagination
+        }
+
+        // Pagination
+        const totalPages = computed(() => Math.ceil(filteredProducts.value.length / pageSize));
+
+        const paginatedProducts = computed(() => {
+            const start = (page.value - 1) * pageSize;
+            const end = start + pageSize;
+            return filteredProducts.value.slice(start, end);
+        });
         
         return {
-            products
+            products,
+            paginatedProducts,
+            page,
+            totalPages,
+            categories,
+            ratingOptions,
+            onCategoryChange,
+            filteredProducts,
+            selectedCategory,
+            onRatingChange,
+            onPriceChange
         }
     }
 }

@@ -98,6 +98,7 @@ interface Product {
   discount: number | null;
   rating: number;
   price: number;
+  group: string
 }
 
 export default defineComponent({

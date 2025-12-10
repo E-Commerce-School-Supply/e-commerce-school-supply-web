@@ -11,7 +11,7 @@
         <div class="w-18/20 relative ...">
 
             <div>
-                <h1 class="text-[20px] my-10 ...">
+                <h1 class="text-[20px] my-5 ...">
                     Home / Products
                 </h1>
             </div>
@@ -41,20 +41,26 @@
                 <div class="col-start-2 col-end-6 ...">
 
                     <div class="flex justify-between mb-10 items-baseline">
-                        <h1 class="text-[20px]"><a class="text-[#FF6B6B] font-semibold">{{selectedCategory}}</a> This is what you’re looking for.</h1>
+                        <h1 class="text-[20px]"><a class="text-[#FF6B6B] font-semibold">{{selectedCategory || ''}}</a> This is what you’re looking for.</h1>
                         <p class="text-[16px] font-light">{{ filteredProducts.length }} items</p>
                     </div>
 
-                    <div class="min-h-[70%]">
-                        <!-- Display product -->
-                        <product-card-component :products="paginatedProducts" />                        
+                    <div class="min-h-[70%] flex justify-center items-center">
+                        <!-- Show message if no products found -->
+                        <div v-if="filteredProducts.length === 0" class="text-center">
+                            <img src="/src/assets/images/no-product-found.png" alt="No products" class="mx-auto w-[430px] h-[430px] mb-4" />
+                            <p class="text-[24px] font-medium text-[#BFBFBF]">Oops! No items match your search.</p>
+                        </div>
+
+                        <!-- Show products if available -->
+                        <product-card-component v-else :products="paginatedProducts" />                        
                     </div>
 
-
-                    <!-- Pagination show product page to page when products found less than 20 it won't show Pagination -->
+                    <!-- Pagination: only show if there are products -->
                     <Pagination v-if="totalPages > 0" v-model:current="page" :total="totalPages" />
 
                 </div>
+
 
             </div>
         </div>

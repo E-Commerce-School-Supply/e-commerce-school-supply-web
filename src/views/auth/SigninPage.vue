@@ -1,30 +1,38 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/stores/authStore'
+import { useToastStore } from '@/stores/toastStore'
+import type { LoginCredentials } from '@/types/auth'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { authService } from '@/services/authService'
 
+const authStore = useAuthStore()
+const toast = useToastStore()
 const router = useRouter()
-const email = ref('')
-const password = ref('')
+
+const form = ref<LoginCredentials>({
+  email: '',
+  password: '',
+})
 
 const handleLogin = async () => {
   try {
-    // Local admin shortcut: username 'admin' and password 'admin' go to admin dashboard
-    if (email.value === 'admin@gmail.com' && password.value === 'admin') {
-      // In a real app you would set auth state and a token. This is a local bypass for admin.
+    // Local admin shortcut: allow a quick local admin login
+    if (form.value.email === 'admin@gmail.com' && form.value.password === 'admin') {
       router.replace({ name: 'Admin Dashboard' })
       return
     }
 
-    await authService.login({
-      email: email.value,
-      password: password.value,
-    })
-    alert('Login successful!')
-    // Navigate to product listing after login
-    router.replace({ name: 'Product List' })
+    await authStore.login({ email: form.value.email, password: form.value.password })
+
+    // Show success toast and redirect to profile
+    toast.showToast('Welcome back! Redirecting...', 'success')
+
+    setTimeout(() => {
+      router.push('/profile')
+    }, 1500)
   } catch (error: any) {
-    alert(error.message)
+    const msg = error?.message || 'Invalid email or password.'
+    toast.showToast(msg, 'error')
   }
 }
 </script>
@@ -44,7 +52,7 @@ const handleLogin = async () => {
         <div class="mb-5 w-full">
           <label for="email" class="block mb-2 text-sm font-medium text-heading">Email</label>
           <input
-            v-model="email"
+            v-model="form.email"
             type="email"
             id="email"
             class="bg-primary border border-default-medium text-heading text-sm rounded-base focus:ring-secondary focus:border-secondary block w-full px-3 py-2.5 shadow-xs placeholder:text-body"
@@ -55,7 +63,7 @@ const handleLogin = async () => {
         <div class="mb-5 w-full">
           <label for="password" class="block mb-2 text-sm font-medium text-heading">Password</label>
           <input
-            v-model="password"
+            v-model="form.password"
             type="password"
             id="password"
             class="bg-primary border border-default-medium text-heading text-sm rounded-base focus:ring-secondary focus:border-secondary block w-full px-3 py-2.5 shadow-xs placeholder:text-body"
@@ -65,16 +73,13 @@ const handleLogin = async () => {
         </div>
         <div class="flex justify-between items-start mb-5 w-full">
           <label for="remember" class="flex items-center w-1/2">
-            <input
-              id="remember"
-              type="checkbox"
-              class="w-4 h-4 border accent-accent rounded-xs"
-              required
-            />
+            <input id="remember" type="checkbox" class="w-4 h-4 border accent-accent rounded-xs" />
             <p class="ms-2 text-sm font-medium text-heading select-none">Remember me</p>
           </label>
 
-          <router-link to="/forget" class="text-sm w-1/2 text-end hover:underline">Forget Password?</router-link>
+          <router-link to="/forget" class="text-sm w-1/2 text-end hover:underline"
+            >Forget Password?</router-link
+          >
         </div>
         <div class="w-full mb-10">
           <button
@@ -85,7 +90,9 @@ const handleLogin = async () => {
           </button>
           <span class="text-extralight text-sm"
             >Don’t have account?
-            <router-link to="/signup" class="text-accent hover:underline">Sign up</router-link></span
+            <router-link to="/signup" class="text-accent hover:underline"
+              >Sign up</router-link
+            ></span
           >
         </div>
       </div>

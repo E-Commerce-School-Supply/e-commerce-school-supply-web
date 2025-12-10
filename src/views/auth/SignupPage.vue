@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { authService } from '@/services/authService'
+import authService from '@/services/authService'
+import { useAuthStore } from '@/stores/authStore'
+import { useToastStore } from '@/stores/toastStore'
 
 const router = useRouter()
+const toast = useToastStore()
 
+const authStore = useAuthStore()
 // 1. Create reactive variables for the form data
 const form = ref({
   username: '',
@@ -39,17 +43,23 @@ const handleRegister = async () => {
     alert('Passwords do not match!')
     return
   }
+  const userData = {
+    username: form.value.username,
+    email: form.value.email,
+    password: form.value.password,
+  }
 
   try {
-    await authService.register({
-      username: form.value.username,
-      email: form.value.email,
-      password: form.value.password,
-    })
-    alert('Account created successfully!')
-    router.push('/')
+    await authStore.register(userData)
+    toast.showToast('Registration successful! Please proceed to log in...', 'success')
+
+    setTimeout(() => {
+      router.push('/signin')
+    }, 1500)
   } catch (error: any) {
-    alert(error.message)
+    const msg = error.message || 'Invalid email or password.'
+
+    toast.showToast(msg, 'error')
   }
 }
 </script>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { initFlowbite } from 'flowbite'
 import { onMounted } from 'vue'
+import Toast from './components/ui/Toast.vue'
 
 onMounted(() => {
   initFlowbite()
@@ -13,8 +14,8 @@ onMounted(() => {
       <component :is="Component" />
     </Transition>
   </router-view>
+  <Toast />
 </template>
-
 
 <style scoped>
 .fade-enter-active,

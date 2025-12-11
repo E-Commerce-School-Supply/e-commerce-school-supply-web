@@ -31,10 +31,14 @@ export const useAuthStore = defineStore('auth', () => {
       }
       token.value = response.data.token
 
+      // Clear guest browsing flag when a real session starts
+      sessionStorage.removeItem('guestMode')
+
       sessionStorage.setItem('user', JSON.stringify(user.value))
       sessionStorage.setItem('accessToken', token.value)
-    } catch (err: any) {
-      error.value = err.message || 'Login Failed'
+    } catch (err: unknown) {
+      const error_message = err instanceof Error ? err.message : 'Login Failed'
+      error.value = error_message
       console.log(err)
       throw err
     } finally {
@@ -47,17 +51,28 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading.value = true
     try {
       await authService.register(userData)
-    } catch (err: any) {
-      error.value = err.message || 'An unknown error occurred. Please try again.'
+    } catch (err: unknown) {
+      const error_message = err instanceof Error ? err.message : 'An unknown error occurred. Please try again.'
+      error.value = error_message
       console.log(err)
     } finally {
       isLoading.value = false
     }
   }
 
+  function logout() {
+    user.value = null
+    token.value = null
+    sessionStorage.removeItem('user')
+    sessionStorage.removeItem('accessToken')
+    sessionStorage.removeItem('guestMode')
+    router.push({ name: 'signin' })
+  }
+
   return {
     user,
     login,
     register,
+    logout,
   }
 })

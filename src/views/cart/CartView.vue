@@ -22,8 +22,20 @@
       <!-- Cart Items -->
       <div class="space-y-6">
         <div
-          v-for="item in items"
-          :key="item.id"
+          v-if="cartStore.items.length === 0"
+          class="text-center py-12"
+        >
+          <p class="text-lg text-gray-500">Your cart is empty</p>
+          <router-link
+            to="/product-list"
+            class="text-blue-600 hover:underline mt-4 inline-block"
+          >
+            Continue Shopping
+          </router-link>
+        </div>
+        <div
+          v-for="item in cartStore.items"
+          :key="item.productId"
           class="border-b border-neutral-black-100 pb-6 last:border-b-0"
         >
           <!-- Each product summery -->
@@ -66,14 +78,14 @@
               <span>
                 <QuantityInput
                   :value="item.quantity"
-                  @update:value="updateQuantity(item.id, $event)"
+                  @update:value="updateQuantity(item.productId, $event)"
                 />
               </span>
               <!-- Total -->
               <span>${{ (item.price * item.quantity).toFixed(2) }}</span>
             </div>
 
-            <button @click="removeItem(item.id)" class="justify-self-end">
+            <button @click="removeItem(item.productId)" class="justify-self-end">
               <svg class="w-5 h-5 text-neutral-black-500" viewBox="0 0 20 20" fill="currentColor">
                 <path
                   fill-rule="evenodd"
@@ -97,26 +109,26 @@
       <ul class="text-[16px] font-semibold">
         <li class="flex justify-between mt-8">
           <span class="text-[#5C5F6A]">Subtotal</span>
-          <span> ${{ subtotal.toFixed(2) }} </span>
+          <span> ${{ cartStore.subtotal.toFixed(2) }} </span>
         </li>
 
         <li class="flex justify-between mt-8">
           <span class="text-[#5C5F6A]">Shipping</span>
           <span>
-            {{ shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}` }}
+            {{ cartStore.shipping === 0 ? 'Free' : `$${cartStore.shipping.toFixed(2)}` }}
           </span>
         </li>
 
         <li class="flex justify-between mt-8 mb-8">
           <span class="text-[#5C5F6A]">Tax</span>
-          <span> ${{ tax.toFixed(2) }} </span>
+          <span> ${{ cartStore.tax.toFixed(2) }} </span>
         </li>
 
         <hr class="border-3 border-black" />
 
         <li class="flex justify-between mt-8 mb-8 text-[20px]">
           <span>Total</span>
-          <span> ${{ total.toFixed(2) }} </span>
+          <span> ${{ cartStore.total.toFixed(2) }} </span>
         </li>
       </ul>
 
@@ -125,11 +137,17 @@
       <!-- Button -->
       <div class="flex flex-col items-center">
         <button
+          @click="handleCheckout"
           class="bg-black text-white w-[296px] text-[14px] font-semibold py-3 mt-6 mb-6 rounded-xl"
         >
           Checkout
         </button>
-        <button class="underline text-[12px] font-semibold">Continue Shopping</button>
+        <router-link
+          to="/product-list"
+          class="underline text-[12px] font-semibold text-gray-900 hover:text-gray-600 cursor-pointer"
+        >
+          Continue Shopping
+        </router-link>
       </div>
     </div>
   </div>
@@ -137,65 +155,55 @@
 
 <script setup lang="ts">
 import QuantityInput from '@/components/QuantityInput.vue'
-import { ref, computed } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
+import { useCartStore } from '@/stores/cartStore'
+import { onMounted, computed } from 'vue'
 
-interface CartItem {
-  id: string
-  name: string
-  itemNo: string
-  brand: string
-  color: string
-  rating: number
-  price: number
-  quantity: number
-  image: string
+const authStore = useAuthStore()
+const cartStore = useCartStore()
+
+const isAuthenticated = computed(() => !!authStore.user)
+
+// Fetch cart when component mounts
+onMounted(async () => {
+  if (isAuthenticated.value) {
+    try {
+      await cartStore.fetchCart()
+    } catch (err) {
+      console.error('Error loading cart:', err)
+    }
+  }
+})
+
+const handleCheckout = () => {
+  if (!isAuthenticated.value) {
+    alert('You cannot checkout as a guest. Please sign in or register to continue.')
+    return
+  }
+
+  if (cartStore.items.length === 0) {
+    alert('Your cart is empty. Add items before checkout.')
+    return
+  }
+
+  alert('Proceeding to checkout...')
 }
 
-const items = ref<CartItem[]>([
-  {
-    id: '1',
-    name: 'SilverEdge Pen',
-    itemNo: 'P100001',
-    brand: 'RegalPen Co.',
-    color: '#0088FF',
-    rating: 4.0,
-    price: 0.5,
-    quantity: 2,
-    image:
-      'https://api.builder.io/api/v1/image/assets/TEMP/69236cf9574e2a9eec18172993f33671e53e89c5?width=160',
-  },
-  {
-    id: '2',
-    name: 'UrbanTrail Classic 25L Backpack',
-    itemNo: 'P200001',
-    brand: 'UrbanPack Co.',
-    color: '#00C0E8',
-    rating: 4.5,
-    price: 29.99,
-    quantity: 1,
-    image:
-      'https://api.builder.io/api/v1/image/assets/TEMP/52e0d5cf1d43449df0ded3ca817df84d455e1839?width=160',
-  },
-])
-
-const updateQuantity = (id: string, newQuantity: number) => {
+const updateQuantity = async (productId: string, newQuantity: number) => {
   if (newQuantity > 0) {
-    const item = items.value.find((i) => i.id === id)
-    if (item) {
-      item.quantity = newQuantity
+    try {
+      await cartStore.updateQuantity(productId, newQuantity)
+    } catch (err) {
+      console.error('Error updating quantity:', err)
     }
   }
 }
-const removeItem = (id: string) => {
-  items.value = items.value.filter((item) => item.id !== id)
+
+const removeItem = async (productId: string) => {
+  try {
+    await cartStore.removeFromCart(productId)
+  } catch (err) {
+    console.error('Error removing item:', err)
+  }
 }
-
-const subtotal = computed(() =>
-  items.value.reduce((sum, item) => sum + item.price * item.quantity, 0),
-)
-
-const shipping = 0
-const tax = 1.0
-
-const total = computed(() => subtotal.value + shipping + tax)
 </script>

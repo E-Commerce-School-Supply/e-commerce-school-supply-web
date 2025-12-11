@@ -1,19 +1,75 @@
 <script setup>
 import { onMounted, ref, computed, nextTick } from 'vue' // Added nextTick
 import { initFlowbite } from 'flowbite'
+import { useAuthStore } from '@/stores/authStore'
+import { useProductStore } from '@/stores/productStore'
+import { useCartStore } from '@/stores/cartStore'
+import { useRouter } from 'vue-router'
+
+// --- AUTH STORE ---
+const authStore = useAuthStore()
+const productStore = useProductStore()
+const cartStore = useCartStore()
+const router = useRouter()
 
 // --- STATE MANAGEMENT ---
 const cartCount = ref(0);
 const wishlistCount = ref(0);
-const activeFilter = ref('All'); 
+const activeFilter = ref('All');
 const searchQuery = ref('');
 const headerEmail = ref('');
 const footerEmail = ref('');
 const isSearchFocused = ref(false);
+const guestMode = ref(sessionStorage.getItem('guestMode') === 'true');
+const showAuthPrompt = ref(false);
+const activeAuthTab = ref('signin');
 
-const addToCart = () => {
-    cartCount.value++;
-    alert("Item added to cart!");
+// --- AUTH HELPERS ---
+const isAuthenticated = computed(() => !!authStore.user)
+const displayName = computed(() => {
+    if (isAuthenticated.value && authStore.user) return authStore.user.username || authStore.user.email || 'User'
+    if (guestMode.value) return 'Guest'
+    return 'Not signed in'
+})
+const displayEmail = computed(() => {
+    if (isAuthenticated.value && authStore.user) return authStore.user.email || 'Signed in'
+    if (guestMode.value) return 'Browsing as guest'
+    return 'Please sign in'
+})
+
+const handleSignOut = () => {
+    authStore.logout()
+    guestMode.value = false
+}
+
+const navigateToCart = () => {
+    router.push({ name: 'cart' })
+}
+
+const addToCart = async (product) => {
+    if (!isAuthenticated.value) {
+        // Prompt sign-in/register for guests and signed-out users
+        activeAuthTab.value = 'signin'
+        showAuthPrompt.value = true
+        return
+    }
+
+    try {
+        await cartStore.addToCart({
+            productId: product.id,
+            name: product.name,
+            itemNo: product.id,
+            brand: product.brand || 'TovRean',
+            color: 'Standard',
+            rating: product.rating || 4.5,
+            price: parseFloat(product.price.replace('$', '')),
+            quantity: 1,
+            image: product.image,
+        });
+        cartCount.value++;
+    } catch (error) {
+        console.error('Error adding to cart:', error);
+    }
 };
 
 const addToWishlist = () => {
@@ -24,32 +80,71 @@ const setFilter = (filterName) => {
     activeFilter.value = filterName;
 };
 
-// --- DATA: SALES PRODUCTS ---
-const salesProducts = [
-    { id: 101, name: "A5 Spiral Notebook (4-Pack)", brand: "Campus", price: "$3.50", oldPrice: null, image: "/Photo/ourproduct.png", type: 'grid' },
-    { id: 102, name: "Pastel Highlighter Set", brand: "Stabilo", price: "$4.00", oldPrice: null, image: "/Photo/ourproduct1.png", type: 'grid' },
-    { id: 103, name: "Smooth Writing Gel Pen (Black)", brand: "Study Essentials", price: "$0.75", oldPrice: "$1.20", desc: "A high-quality 0.5mm gel pen designed for smooth, skip-free writing.", image: "/Photo/ourproduct2.png", type: 'featured' },
-    { id: 104, name: "Geometric Ruler Set", brand: "Deli", price: "$2.50", oldPrice: null, image: "/Photo/ourproduct3.png", type: 'grid' },
-    { id: 105, name: "Canvas Pencil Case", brand: "Angoo", price: "$5.00", oldPrice: null, image: "/Photo/ourproduct4.png", type: 'grid' },
-];
+const goToAuthPage = (tab = 'signin') => {
+    activeAuthTab.value = tab
+    router.push({ name: tab === 'signup' ? 'signup' : 'signin' })
+}
 
-// --- DATA: CAROUSEL PRODUCTS ---
-const carouselProducts = [
-    { id: 1, name: "Badge Lanyard Set", price: "$0.50", image: "/Photo/ourproduct3.png", rating: 5, tags: ['popular'] },
-    { id: 2, name: "Aesthetic Highlighter Kit", price: "$7.00", image: "/Photo/ourproduct4.png", rating: 4, tags: ['latest'] },
-    { id: 3, name: "Black Backpack", price: "$15.00", image: "/Photo/ourproduct.png", rating: 5, tags: ['popular', 'latest'] },
-    { id: 4, name: "Ruler Set", price: "$5.00", image: "/Photo/ourproduct1.png", rating: 4, tags: ['latest'] },
-    { id: 5, name: "Travel Hiking Backpack", price: "$45.00", image: "/Photo/ourproduct2.png", rating: 5, tags: ['popular'] },
-];
+const closeAuthPrompt = () => {
+    showAuthPrompt.value = false
+}
+
+const handleShopNavigation = (event) => {
+    if (!isAuthenticated.value) {
+        event.preventDefault()
+        activeAuthTab.value = 'signin'
+        showAuthPrompt.value = true
+    }
+}
+
+// --- DATA: PRODUCTS FROM BACKEND ---
+const salesProducts = ref([]);
+const carouselProducts = ref([]);
+const loading = ref(false);
+
+const loadProducts = async () => {
+    loading.value = true;
+    try {
+        await productStore.fetchProducts();
+        const backendProducts = productStore.products;
+
+        // Map first 5 products for sales section
+        salesProducts.value = backendProducts.slice(0, 5).map((product, index) => ({
+            id: product.id || (100 + index),
+            name: product.name,
+            brand: product.brandName || 'TovRean',
+            price: `$${product.price.toFixed(2)}`,
+            oldPrice: product.discount ? `$${(product.price / (1 - product.discount / 100)).toFixed(2)}` : null,
+            image: product.imageUrl || '/Photo/ourproduct.png',
+            type: index === 2 ? 'featured' : 'grid',
+            desc: index === 2 ? product.description : undefined
+        }));
+
+        // Map products for carousel section
+        carouselProducts.value = backendProducts.slice(0, 5).map((product, index) => ({
+            id: product.id || (index + 1),
+            name: product.name,
+            price: `$${product.price.toFixed(2)}`,
+            image: product.imageUrl || '/Photo/ourproduct.png',
+            rating: 4 + (index % 2), // Alternating 4 and 5 star ratings
+            tags: index % 2 === 0 ? ['popular', 'latest'] : ['latest']
+        }));
+    } catch (error) {
+        console.error('Failed to load products:', error);
+        // Keep empty arrays if failed
+    } finally {
+        loading.value = false;
+    }
+};
 
 // --- SEARCH & NAVIGATION LOGIC ---
-const allProducts = computed(() => [...salesProducts, ...carouselProducts]);
+const allProducts = computed(() => [...salesProducts.value, ...carouselProducts.value]);
 
 const searchResults = computed(() => {
     if (!searchQuery.value) return [];
     const query = searchQuery.value.toLowerCase();
-    return allProducts.value.filter(product => 
-        product.name.toLowerCase().includes(query) || 
+    return allProducts.value.filter(product =>
+        product.name.toLowerCase().includes(query) ||
         (product.brand && product.brand.toLowerCase().includes(query))
     );
 });
@@ -60,7 +155,7 @@ const goToProduct = async (product) => {
     searchQuery.value = ''; // Optional: Clear text
 
     // 2. If it's a carousel product, ensure filters don't hide it
-    const isCarouselItem = carouselProducts.some(p => p.id === product.id);
+    const isCarouselItem = carouselProducts.value.some(p => p.id === product.id);
     if (isCarouselItem) {
         activeFilter.value = 'All';
         // Wait for Vue to update the DOM (re-render the list)
@@ -73,7 +168,7 @@ const goToProduct = async (product) => {
 
     if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        
+
         // 4. Add a temporary highlight effect (Red ring flash)
         element.classList.add('ring-4', 'ring-[#EF4444]', 'transition-all', 'duration-500');
         setTimeout(() => {
@@ -89,7 +184,7 @@ const handleFooterSubscribe = () => {
         return;
     }
     alert(`Thank you! ${footerEmail.value} has been subscribed to our newsletter.`);
-    footerEmail.value = ''; 
+    footerEmail.value = '';
 };
 
 const handleHeaderSubscribe = () => {
@@ -98,7 +193,7 @@ const handleHeaderSubscribe = () => {
         return;
     }
     alert(`Discount code sent to ${headerEmail.value}!`);
-    headerEmail.value = ''; 
+    headerEmail.value = '';
 };
 
 // --- CAROUSEL SCROLL LOGIC ---
@@ -119,13 +214,13 @@ const scrollRight = () => {
 // --- FILTERING LOGIC ---
 const filteredProducts = computed(() => {
     if (activeFilter.value === 'All') {
-        return carouselProducts;
+        return carouselProducts.value;
     } else if (activeFilter.value === 'Latest') {
-        return carouselProducts.filter(product => product.tags.includes('latest'));
+        return carouselProducts.value.filter(product => product.tags.includes('latest'));
     } else if (activeFilter.value === 'Popular') {
-        return carouselProducts.filter(product => product.tags.includes('popular'));
+        return carouselProducts.value.filter(product => product.tags.includes('popular'));
     }
-    return carouselProducts;
+    return carouselProducts.value;
 });
 
 // --- TEXT CONTENT ---
@@ -157,41 +252,42 @@ const text = {
 
 onMounted(() => {
     initFlowbite();
+    loadProducts();
 })
 </script>
 
 <template>
     <div class="font-sans antialiased text-gray-900 bg-white" @click="isSearchFocused = false">
-        
+
         <header class="sticky top-0 z-50 w-full">
             <div class="bg-[#114B5F] text-white text-[10px] md:text-xs py-2 px-4 relative">
                 <div class="max-w-screen-xl mx-auto flex justify-center items-center">
                     <div class="text-center flex gap-2">
                         <span class="opacity-95 font-light tracking-wide">{{ text.announcement }}</span>
-                        <a href="#" class="font-bold underline hover:text-gray-200">{{ text.shopNow }}</a>
+                        <a href="/product-list" @click="handleShopNavigation" class="font-bold underline hover:text-gray-200 cursor-pointer">{{ text.shopNow }}</a>
                     </div>
                 </div>
             </div>
 
             <nav class="bg-white border-b border-gray-200 w-full shadow-sm">
                 <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4 md:px-6 lg:px-8">
-                    <a href="/" class="flex items-center text-2xl font-bold tracking-tight shrink-0">
+                    <router-link to="/" class="flex items-center text-2xl font-bold tracking-tight shrink-0">
                         <span class="text-[#EF4444]">Tov</span><span class="text-gray-900">Rean</span>
-                    </a>
+                    </router-link>
                     <div class="hidden lg:flex absolute left-1/2 transform -translate-x-1/2 space-x-8 text-gray-600 font-medium text-[16px]">
-                        <a href="#" class="text-[#114B5F] font-bold">{{ text.home }}</a>
-                        <a href="#" class="hover:text-[#114B5F] transition-colors">{{ text.new }}</a>
-                        <a href="#" class="hover:text-[#114B5F] transition-colors">{{ text.promotion }}</a>
-                        <a href="#" class="hover:text-[#114B5F] transition-colors">{{ text.category }}</a>
+                        <router-link to="/" class="text-[#114B5F] font-bold">{{ text.home }}</router-link>
+                        <a href="#carousel-section" class="hover:text-[#114B5F] transition-colors cursor-pointer">{{ text.new }}</a>
+                        <a href="#promotion-section" class="hover:text-[#114B5F] transition-colors">{{ text.promotion }}</a>
+                        <a href="/product-list" @click="handleShopNavigation" class="hover:text-[#114B5F] transition-colors cursor-pointer">{{ text.category }}</a>
                     </div>
                     <div class="flex items-center space-x-4 md:order-2">
-                        
+
                         <div class="hidden md:flex relative" @click.stop>
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 v-model="searchQuery"
                                 @focus="isSearchFocused = true"
-                                :placeholder="text.searchPlaceholder" 
+                                :placeholder="text.searchPlaceholder"
                                 class="bg-gray-100 text-sm rounded-full px-5 py-2.5 w-64 focus:outline-none focus:ring-1 focus:ring-[#114B5F] border-none placeholder-gray-500"
                             >
                             <button class="absolute right-3 top-2.5 text-gray-500 hover:text-[#114B5F]">
@@ -200,10 +296,10 @@ onMounted(() => {
 
                             <div v-if="isSearchFocused && searchQuery" class="absolute top-full left-0 w-full mt-2 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden">
                                 <ul v-if="searchResults.length > 0" class="max-h-60 overflow-y-auto">
-                                    <li 
-                                        v-for="item in searchResults" 
-                                        :key="item.id" 
-                                        @click="goToProduct(item)" 
+                                    <li
+                                        v-for="item in searchResults"
+                                        :key="item.id"
+                                        @click="goToProduct(item)"
                                         class="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center gap-3 border-b border-gray-50 last:border-0"
                                     >
                                         <img :src="item.image" class="w-8 h-8 object-contain">
@@ -225,10 +321,15 @@ onMounted(() => {
                                 <span v-if="wishlistCount > 0" class="absolute -top-1 -right-1 bg-[#EF4444] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center animate-bounce">{{ wishlistCount }}</span>
                             </button>
 
-                            <button @click="addToCart" class="text-gray-800 hover:text-[#114B5F] relative transition">
+                            <button @click="navigateToCart" class="text-gray-800 hover:text-[#114B5F] relative transition">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                                 <span v-if="cartCount > 0" class="absolute -top-1 -right-1 bg-[#EF4444] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center animate-bounce">{{ cartCount }}</span>
                             </button>
+
+                            <div class="hidden md:block text-right leading-tight mr-2">
+                                <p class="text-[11px] text-gray-500">Currently</p>
+                                <p class="text-sm font-semibold text-gray-800">{{ displayName }}</p>
+                            </div>
 
                             <button type="button" class="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
                                 <span class="sr-only">Open user menu</span>
@@ -236,13 +337,19 @@ onMounted(() => {
                             </button>
                             <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-xl w-44" id="user-dropdown">
                                 <div class="px-4 py-3">
-                                    <span class="block text-sm text-gray-900">Joseph McFall</span>
-                                    <span class="block text-sm text-gray-500 truncate">name@flowbite.com</span>
+                                    <span class="block text-sm text-gray-900">{{ displayName }}</span>
+                                    <span class="block text-sm text-gray-500 truncate">{{ displayEmail }}</span>
                                 </div>
                                 <ul class="py-2" aria-labelledby="user-menu-button">
-                                    <li><a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">{{ text.dashboard }}</a></li>
-                                    <li><a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">{{ text.settings }}</a></li>
-                                    <li><a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">{{ text.signOut }}</a></li>
+                                    <template v-if="isAuthenticated">
+                                        <li><router-link to="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">{{ text.dashboard }}</router-link></li>
+                                        <li><router-link to="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">{{ text.settings }}</router-link></li>
+                                        <li><a @click.prevent="handleSignOut" href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">{{ text.signOut }}</a></li>
+                                    </template>
+                                    <template v-else>
+                                        <li><button @click="goToAuthPage('signin')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign in</button></li>
+                                        <li><button @click="goToAuthPage('signup')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Register</button></li>
+                                    </template>
                                 </ul>
                             </div>
                             <button data-collapse-toggle="navbar-user" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200" aria-controls="navbar-user" aria-expanded="false">
@@ -254,10 +361,10 @@ onMounted(() => {
                 </div>
                 <div class="hidden w-full md:hidden border-t border-gray-100" id="navbar-user">
                     <ul class="flex flex-col font-medium p-4 bg-gray-50 space-y-2">
-                        <li><a href="#" class="block py-2 px-3 text-white bg-[#EF4444] rounded" aria-current="page">{{ text.home }}</a></li>
-                        <li><a href="#" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100">{{ text.new }}</a></li>
-                        <li><a href="#" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100">{{ text.promotion }}</a></li>
-                        <li><a href="#" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100">{{ text.category }}</a></li>
+                        <li><router-link to="/" class="block py-2 px-3 text-white bg-[#EF4444] rounded" aria-current="page">{{ text.home }}</router-link></li>
+                        <li><a href="#carousel-section" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 cursor-pointer">{{ text.new }}</a></li>
+                        <li><a href="#promotion-section" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100">{{ text.promotion }}</a></li>
+                        <li><a href="/product-list" @click="handleShopNavigation" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 cursor-pointer">{{ text.category }}</a></li>
                         <li class="mt-2 pt-2 border-t border-gray-200">
                             <input type="text" v-model="searchQuery" :placeholder="text.searchPlaceholder" class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#114B5F] focus:border-[#114B5F] block p-2.5">
                         </li>
@@ -275,31 +382,31 @@ onMounted(() => {
                     <p class="max-w-xl mb-6 font-light text-gray-600 text-sm md:text-base leading-relaxed mx-auto lg:mx-0">
                         {{ text.heroSubtitle }}
                     </p>
-                    <a href="#" class="inline-flex items-center justify-center px-8 py-3 text-sm font-medium text-center text-white rounded-lg bg-[#114B5F] hover:bg-[#0d3a4b] focus:ring-4 focus:ring-blue-100 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                    <a href="/product-list" @click="handleShopNavigation" class="inline-flex items-center justify-center px-8 py-3 text-sm font-medium text-center text-white rounded-lg bg-[#114B5F] hover:bg-[#0d3a4b] focus:ring-4 focus:ring-blue-100 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer">
                         {{ text.heroButton }}
                     </a>
                 </div>
                 <div class="hidden lg:mt-0 lg:col-span-6 lg:flex justify-end relative">
                     <div class="absolute bg-white rounded-full h-[500px] w-[500px] -z-10 top-1/2 right-0 transform -translate-y-1/2 scale-90 opacity-50 shadow-sm"></div>
                     <img src="/Photo/Logo.JPG" alt="School Supplies" class="relative z-10 w-full max-w-lg object-contain drop-shadow-2xl rounded-xl">
-                </div>  
+                </div>
                  <div class="lg:hidden mt-8 flex justify-center relative w-full">
                      <img src="https://images.unsplash.com/photo-1452860606245-08befc0ff44b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="School Supplies" class="relative z-10 w-full max-w-md rounded-lg shadow-lg">
-                </div>      
+                </div>
             </div>
         </section>
 
         <section class="pt-12 pb-8 bg-white">
             <div class="max-w-screen-xl mx-auto px-4 text-center">
                 <h2 class="text-2xl md:text-3xl font-bold text-[#114B5F] mb-3">{{ text.sectionTitle }}</h2>
-                <div class="w-20 h-1 bg-[#EF4444] mx-auto rounded-full"></div> 
+                <div class="w-20 h-1 bg-[#EF4444] mx-auto rounded-full"></div>
             </div>
         </section>
 
         <section class="pb-16 bg-white">
             <div class="max-w-screen-xl mx-auto px-4">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-                    
+
                     <div class="space-y-6 flex flex-col justify-between">
                          <div v-for="product in salesProducts.slice(0, 2)" :key="product.id" :id="'product-'+product.id" class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition border border-gray-100">
                             <div class="bg-gray-100 rounded-lg p-6 mb-4 flex justify-center">
@@ -343,7 +450,7 @@ onMounted(() => {
         <section class="bg-gray-50 py-16 lg:py-20">
             <div class="max-w-screen-xl mx-auto px-4">
                 <div class="bg-[#F9FAFB] rounded-2xl p-8 md:p-12 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-12">
-                    
+
                     <div class="w-full md:w-1/2 flex justify-center relative">
                          <div class="absolute bg-gray-200 rounded-full h-80 w-80 md:h-[450px] md:w-[450px] -z-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
                         <img src="/Photo/afterBestproduct.png" alt="FlexiNote" class="relative z-10 h-80 md:h-[450px] object-contain drop-shadow-xl transform hover:scale-105 transition duration-500">
@@ -353,7 +460,7 @@ onMounted(() => {
                         <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{{ text.featureTitle }}</h2>
                         <p class="text-gray-600 mb-6 text-lg leading-relaxed">{{ text.featureDesc }}</p>
                         <p class="font-medium text-gray-800 mb-2">{{ text.featureBrand }}</p>
-                        
+
                         <div class="flex items-center justify-center md:justify-start gap-3 mb-8">
                             <span class="text-gray-600 font-medium">Color:</span>
                             <div class="w-6 h-6 rounded-full bg-[#C49A6C] hover:ring-2 hover:ring-offset-2 hover:ring-[#C49A6C] cursor-pointer"></div>
@@ -363,7 +470,7 @@ onMounted(() => {
 
                         <div class="flex flex-col md:flex-row items-center gap-6">
                             <span class="text-2xl font-bold text-gray-900">{{ text.featurePrice }}</span>
-                            <a href="#" class="inline-block px-8 py-3 bg-[#114B5F] text-white font-semibold rounded-lg hover:bg-[#0d3a4b] transition shadow-md">
+                            <a href="/product-list" @click="handleShopNavigation" class="inline-block px-8 py-3 bg-[#114B5F] text-white font-semibold rounded-lg hover:bg-[#0d3a4b] transition shadow-md cursor-pointer">
                                 {{ text.featureButton }}
                             </a>
                         </div>
@@ -373,26 +480,26 @@ onMounted(() => {
             </div>
         </section>
 
-        <section class="py-16 bg-white relative">
+        <section class="py-16 bg-white relative" id="carousel-section">
             <div class="max-w-screen-xl mx-auto px-4 text-center">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8">{{ text.ourProductTitle }}</h2>
 
                 <div class="flex justify-center gap-4 mb-10">
-                    <button 
+                    <button
                         @click="setFilter('All')"
                         :class="activeFilter === 'All' ? 'bg-[#114B5F] text-white' : 'border border-gray-300 text-gray-600 hover:border-[#114B5F] hover:text-[#114B5F]'"
                         class="px-6 py-2 rounded-md font-medium transition-colors"
                     >
                         {{ text.filterAll }}
                     </button>
-                    <button 
+                    <button
                         @click="setFilter('Latest')"
                         :class="activeFilter === 'Latest' ? 'bg-[#114B5F] text-white' : 'border border-gray-300 text-gray-600 hover:border-[#114B5F] hover:text-[#114B5F]'"
                         class="px-6 py-2 rounded-md font-medium transition-colors"
                     >
                         {{ text.filterLatest }}
                     </button>
-                    <button 
+                    <button
                         @click="setFilter('Popular')"
                         :class="activeFilter === 'Popular' ? 'bg-[#114B5F] text-white' : 'border border-gray-300 text-gray-600 hover:border-[#114B5F] hover:text-[#114B5F]'"
                         class="px-6 py-2 rounded-md font-medium transition-colors"
@@ -421,7 +528,7 @@ onMounted(() => {
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="font-bold text-lg text-gray-900">{{ product.price }}</span>
-                                    <button @click="addToCart" class="px-3 py-1.5 bg-[#114B5F] text-white text-xs font-bold rounded hover:bg-[#0d3a4b] active:scale-95 transition-transform">Add to Cart</button>
+                                    <button @click="addToCart(product)" class="px-3 py-1.5 bg-[#114B5F] text-white text-xs font-bold rounded hover:bg-[#0d3a4b] active:scale-95 transition-transform">Add to Cart</button>
                                 </div>
                             </div>
                         </div>
@@ -434,19 +541,52 @@ onMounted(() => {
             </div>
         </section>
 
-    </div>
+        <!-- Auth prompt for guests trying to add to cart -->
+        <div v-if="showAuthPrompt" class="fixed inset-0 z-[999] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" @click.self="closeAuthPrompt">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+                <div class="flex border-b">
+                    <button
+                        class="flex-1 py-3 text-sm font-semibold"
+                        :class="activeAuthTab === 'signin' ? 'text-[#114B5F] border-b-2 border-[#114B5F]' : 'text-gray-500'"
+                        @click="activeAuthTab = 'signin'"
+                    >
+                        Sign in
+                    </button>
+                    <button
+                        class="flex-1 py-3 text-sm font-semibold"
+                        :class="activeAuthTab === 'signup' ? 'text-[#114B5F] border-b-2 border-[#114B5F]' : 'text-gray-500'"
+                        @click="activeAuthTab = 'signup'"
+                    >
+                        Register
+                    </button>
+                </div>
+                <div class="p-6 space-y-4 text-center">
+                    <h3 class="text-lg font-bold text-gray-900">Please {{ activeAuthTab === 'signup' ? 'create an account' : 'sign in' }}</h3>
+                    <p class="text-sm text-gray-600">Sign in to add items to your cart and keep your shopping list in sync.</p>
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                        <button @click="goToAuthPage(activeAuthTab)" class="flex-1 px-4 py-2.5 rounded-lg text-white bg-[#114B5F] hover:bg-[#0d3a4b] font-semibold">
+                            Go to {{ activeAuthTab === 'signup' ? 'Register' : 'Sign in' }}
+                        </button>
+                        <button @click="closeAuthPrompt" class="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold">
+                            Maybe later
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     <footer>
             <div class="relative bg-gray-900 py-24 md:py-32 px-4 overflow-hidden">
                 <div class="absolute inset-0 z-0">
                     <img src="/Photo/footerphoto.png" alt="School Supplies Background" class="w-full h-full object-cover opacity-40 mix-blend-overlay">
                 </div>
-                
+
                 <div class="relative z-10 max-w-screen-xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
                     <div class="text-center md:text-left shrink-0">
                         <h2 class="text-3xl md:text-5xl font-bold text-white mb-3">Have any questions?</h2>
                         <h2 class="text-3xl md:text-5xl font-bold text-white">Contact us now.</h2>
                     </div>
-                    
+
                     <div class="flex w-full max-w-xl gap-3">
                         <input type="email" v-model="footerEmail" placeholder="enter your email" class="w-full px-5 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#114B5F] shadow-lg text-sm">
                         <button @click="handleFooterSubscribe" class="bg-[#114B5F] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#0d3a4b] transition shadow-lg whitespace-nowrap text-sm">Submit</button>
@@ -456,11 +596,11 @@ onMounted(() => {
 
             <div class="bg-[#114B5F] text-white pt-10 pb-5 border-t border-[#0d3a4b]">
                 <div class="max-w-screen-xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-                    
+
                     <div class="lg:col-span-1">
-                        <a href="/" class="flex items-center text-2xl font-bold tracking-tight mb-4">
+                        <router-link to="/" class="flex items-center text-2xl font-bold tracking-tight mb-4">
                             <span class="text-[#EF4444]">Tov</span><span class="text-white">Rean</span>
-                        </a>
+                        </router-link>
                         <h3 class="font-semibold text-sm mb-1">Subscribe</h3>
                         <p class="text-[10px] text-gray-300 mb-2">Get 10% off with your first order</p>
                         <div class="relative max-w-[180px]">
@@ -483,21 +623,21 @@ onMounted(() => {
                     <div>
                         <h3 class="font-bold text-base mb-3">Account</h3>
                         <ul class="space-y-2 text-xs text-gray-300 font-light">
-                            <li><a href="#" class="hover:text-white hover:underline transition">My account</a></li>
-                            <li><a href="#" class="hover:text-white hover:underline transition">Login / Sign up</a></li>
-                            <li><a href="#" class="hover:text-white hover:underline transition">Cart</a></li>
-                            <li><a href="#" class="hover:text-white hover:underline transition">Favorite</a></li>
-                            <li><a href="#" class="hover:text-white hover:underline transition">Shop</a></li>
+                            <li><router-link to="/profile" class="hover:text-white hover:underline transition">My account</router-link></li>
+                            <li><router-link to="/signin" class="hover:text-white hover:underline transition">Login / Sign up</router-link></li>
+                            <li><router-link to="/cart" class="hover:text-white hover:underline transition">Cart</router-link></li>
+                            <li><router-link to="/profile" class="hover:text-white hover:underline transition">Favorite</router-link></li>
+                            <li><a href="/product-list" @click="handleShopNavigation" class="hover:text-white hover:underline transition cursor-pointer">Shop</a></li>
                         </ul>
                     </div>
 
                     <div>
                         <h3 class="font-bold text-base mb-3">Quick Link</h3>
                         <ul class="space-y-2 text-xs text-gray-300 font-light">
-                            <li><a href="#" class="hover:text-white hover:underline transition">Privacy policy</a></li>
-                            <li><a href="#" class="hover:text-white hover:underline transition">term of Use</a></li>
-                            <li><a href="#" class="hover:text-white hover:underline transition">FAQ</a></li>
-                            <li><a href="#" class="hover:text-white hover:underline transition">Contact</a></li>
+                            <li><router-link to="/about" class="hover:text-white hover:underline transition">Privacy policy</router-link></li>
+                            <li><router-link to="/about" class="hover:text-white hover:underline transition">term of Use</router-link></li>
+                            <li><router-link to="/about" class="hover:text-white hover:underline transition">FAQ</router-link></li>
+                            <li><router-link to="/about" class="hover:text-white hover:underline transition">Contact</router-link></li>
                         </ul>
                     </div>
 
@@ -535,6 +675,7 @@ onMounted(() => {
                 <div class="border-t border-[#1a5b72] mt-6 pt-4 text-center text-[10px] text-gray-400 font-light tracking-wide">
                     &copy; Copyright e-commerce teams 2025. All right reserved
                 </div>
-            </div>
+                </div>
     </footer>
+    </div>
 </template>

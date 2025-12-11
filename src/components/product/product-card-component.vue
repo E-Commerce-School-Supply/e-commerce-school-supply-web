@@ -3,7 +3,8 @@
   <div
     v-for="(product, index) in products"
     :key="index"
-    class="w-[300px] h-[330px] bg-white rounded-[20px] overflow-hidden border border-gray-400 hover:-translate-y-1 hover:shadow-lg transition"
+    class="w-[300px] h-[330px] bg-white rounded-[20px] overflow-hidden border border-gray-400 hover:-translate-y-1 hover:shadow-lg transition cursor-pointer"
+    @click="goToDetail(product.id)"
   >
     <!-- Image Section -->
     <div class="relative flex justify-center items-center h-40">
@@ -22,7 +23,7 @@
       </div>
 
       <!-- Heart Icon -->
-      <button @click="toggleLike(index)" class="absolute top-4 right-4 bg-white rounded-full p-2">
+      <button @click.stop="toggleLike(index)" class="absolute top-4 right-4 bg-white rounded-full p-2">
         <img v-if="!isLiked[index]" src="/src/assets/images/Heart.png" class="w-[27px] h-6" />
         <img v-else src="/src/assets/images/Heart-fill.png" class="w-[27px] h-6" />
       </button>
@@ -61,7 +62,7 @@
         </div>
 
         <button
-          @click="btnLink(index)"
+          @click.stop="btnLink(index)"
           class="text-white w-20 h-[30px] rounded-md text-[12px] font-semibold"
         >
           <div
@@ -74,7 +75,7 @@
             v-else
             class="bg-[#C3C3C3] w-full h-full flex justify-center items-center rounded-sm"
           >
-            Added
+            Added {{ addedQuantity[index] }}
           </div>
         </button>
       </div>
@@ -84,7 +85,10 @@
 
 <script lang="ts">
 import type { Product } from '@/types/product'
-import { defineComponent, ref, watch } from 'vue'
+import { useCartStore } from '@/stores/cartStore'
+import { useAuthStore } from '@/stores/authStore'
+import { useRouter } from 'vue-router'
+import { defineComponent, ref, watch, computed } from 'vue'
 
 export default defineComponent({
   name: 'product-card-component',
@@ -97,9 +101,15 @@ export default defineComponent({
   },
 
   setup(props) {
+    const router = useRouter()
+    const cartStore = useCartStore()
+    const authStore = useAuthStore()
+    const isAuthenticated = computed(() => !!authStore.user)
+
     // Create reactive arrays to track like and add-to-cart states for each product
     const isLiked = ref<boolean[]>([])
     const linkBtn = ref<boolean[]>([])
+    const addedQuantity = ref<number[]>([])
 
     // Initialize arrays when products prop changes
     watch(
@@ -107,12 +117,13 @@ export default defineComponent({
       (newProducts) => {
         isLiked.value = newProducts.map(() => false)
         linkBtn.value = newProducts.map(() => false)
+        addedQuantity.value = newProducts.map(() => 0)
       },
       { immediate: true },
     )
 
     const getDiscountedPrice = (product: Product) => {
-      const discount = product.discount ?? 0 // handle null
+      const discount = product.discount ?? 0
       const priceAfterDiscount = product.price - (product.price * discount) / 100
       return (Math.floor(priceAfterDiscount * 100) / 100).toFixed(2)
     }
@@ -121,15 +132,46 @@ export default defineComponent({
       isLiked.value[index] = !isLiked.value[index]
     }
 
-    const btnLink = (index: number) => {
-      linkBtn.value[index] = !linkBtn.value[index]
+    const goToDetail = (productId: string | undefined) => {
+      if (productId) {
+        router.push({ name: 'product-detail', params: { id: productId } })
+      }
+    }
+
+    const btnLink = async (index: number) => {
+      if (!isAuthenticated.value) {
+        alert('Please sign in first to add items to your cart')
+        return
+      }
+
+      const product = props.products[index]
+      try {
+        // Add item to cart - map product fields correctly
+        await cartStore.addToCart({
+          productId: product.id || `product-${index}`,
+          name: product.name,
+          itemNo: product.id || `P${index}`,
+          brand: product.brandName || 'TovRean',
+          color: product.color || 'Standard',
+          rating: product.rating || 4.5,
+          price: product.price,
+          quantity: 1,
+          image: product.imageURL || product.imageUrl || '',
+        })
+        linkBtn.value[index] = true
+        addedQuantity.value[index] = (addedQuantity.value[index] || 0) + 1
+      } catch (error) {
+        console.error('Error adding to cart:', error)
+      }
     }
 
     return {
       isLiked,
       linkBtn,
+      addedQuantity,
       toggleLike,
       btnLink,
+      goToDetail,
       getDiscountedPrice,
     }
   },

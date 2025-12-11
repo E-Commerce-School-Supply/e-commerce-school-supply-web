@@ -18,7 +18,10 @@
 
         <div class="flex items-center gap-4">
           <input placeholder="What are you looking for?" class="hidden md:block border rounded px-3 py-2 w-80 text-sm" />
-          <div class="text-sm text-gray-500">Welcome! <span class="text-accent font-medium">Admin</span></div>
+          <div class="flex items-center gap-3">
+            <div class="text-sm text-gray-500">Welcome! <span class="text-accent font-medium">Admin</span></div>
+            <button @click="handleSignOut" class="text-sm bg-accent text-white px-4 py-2 rounded hover:bg-red-600 transition">Sign Out</button>
+          </div>
         </div>
       </div>
     </header>
@@ -203,9 +206,18 @@ import AdminProfile from './AdminProfile.vue'
 import UserManagement from './UserManagement.vue'
 import ProductManagement from './ProductManagement.vue'
 import OrderManagement from './OrderManagement.vue'
+import { useAuthStore } from '@/stores/authStore'
+import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 
 const activeTab = ref<'dashboard' | 'profile' | 'userManagement' | 'productManagement' | 'orderManagement'>('dashboard')
+const authStore = useAuthStore()
+const router = useRouter()
+
+const handleSignOut = () => {
+  authStore.logout()
+  router.push({ name: 'signin' })
+}
 </script>
 
 <style scoped>

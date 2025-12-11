@@ -1,68 +1,38 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { IconDotsVertical } from '@tabler/icons-vue'
+import adminService, { type User } from '@/services/adminService'
 
-interface User {
-  id: number
-  username: string
-  email: string
-  status: 'Active' | 'Inactive'
-  lastLoginDate: string
-  avatar: string
+const users = ref<User[]>([])
+const selectedUsers = ref<string[]>([])
+const loading = ref(true)
+const error = ref<string | null>(null)
+
+// Fetch users from backend
+const fetchUsers = async () => {
+  try {
+    loading.value = true
+    error.value = null
+    const data = await adminService.getAllUsers()
+    users.value = data.map((user) => ({
+      ...user,
+      // Provide fallback avatar using initials or gravatar
+      avatarUrl: user.avatarUrl || `https://i.pravatar.cc/150?u=${user.email}`,
+    }))
+  } catch (err) {
+    console.error('Failed to fetch users:', err)
+    error.value = 'Failed to load users'
+  } finally {
+    loading.value = false
+  }
 }
 
-const users = ref<User[]>([
-  {
-    id: 1,
-    username: 'Kamlado Ayaka',
-    email: 'ayaka@gmail.com',
-    status: 'Active',
-    lastLoginDate: 'Jul 13, 2025',
-    avatar: 'https://i.pravatar.cc/150?img=1',
-  },
-  {
-    id: 2,
-    username: 'Kamlado Ayaka',
-    email: 'ayaka@gmail.com',
-    status: 'Inactive',
-    lastLoginDate: 'Jul 13, 2025',
-    avatar: 'https://i.pravatar.cc/150?img=2',
-  },
-  {
-    id: 3,
-    username: 'Kamlado Ayaka',
-    email: 'ayaka@gmail.com',
-    status: 'Active',
-    lastLoginDate: 'Jul 13, 2025',
-    avatar: 'https://i.pravatar.cc/150?img=3',
-  },
-  {
-    id: 4,
-    username: 'Kamlado Ayaka',
-    email: 'ayaka@gmail.com',
-    status: 'Inactive',
-    lastLoginDate: 'Jul 13, 2025',
-    avatar: 'https://i.pravatar.cc/150?img=4',
-  },
-  {
-    id: 5,
-    username: 'Kamlado Ayaka',
-    email: 'ayaka@gmail.com',
-    status: 'Active',
-    lastLoginDate: 'Jul 13, 2025',
-    avatar: 'https://i.pravatar.cc/150?img=5',
-  },
-  {
-    id: 6,
-    username: 'Kamlado Ayaka',
-    email: 'ayaka@gmail.com',
-    status: 'Inactive',
-    lastLoginDate: 'Jul 13, 2025',
-    avatar: 'https://i.pravatar.cc/150?img=6',
-  },
-])
-
-const selectedUsers = ref<number[]>([])
+// Refresh users every 30 seconds for real-time updates
+onMounted(() => {
+  fetchUsers()
+  const interval = setInterval(fetchUsers, 30000)
+  return () => clearInterval(interval)
+})
 
 const toggleSelectAll = () => {
   if (selectedUsers.value.length === users.value.length) {
@@ -72,7 +42,7 @@ const toggleSelectAll = () => {
   }
 }
 
-const toggleSelectUser = (userId: number) => {
+const toggleSelectUser = (userId: string) => {
   const index = selectedUsers.value.indexOf(userId)
   if (index > -1) {
     selectedUsers.value.splice(index, 1)
@@ -81,7 +51,7 @@ const toggleSelectUser = (userId: number) => {
   }
 }
 
-const isSelected = (userId: number) => {
+const isSelected = (userId: string) => {
   return selectedUsers.value.includes(userId)
 }
 </script>
@@ -92,6 +62,12 @@ const isSelected = (userId: number) => {
     <div class="flex-1 bg-white rounded shadow p-6">
       <h1 class="text-xl font-bold mb-6">User Management</h1>
 
+      <!-- Error Message -->
+      <div v-if="error" class="mb-4 p-4 bg-red-100 text-red-700 rounded">
+        {{ error }}
+        <button @click="fetchUsers" class="ml-2 underline font-semibold">Retry</button>
+      </div>
+
       <!-- Users Table -->
       <div class="border rounded-lg overflow-hidden">
         <!-- Table Header -->
@@ -101,30 +77,45 @@ const isSelected = (userId: number) => {
             <span class="text-sm text-gray-500">{{ users.length }}</span>
           </div>
           <button
+            @click="fetchUsers"
             class="px-4 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50 transition flex items-center gap-2"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              :class="['w-4 h-4', loading ? 'animate-spin' : '']"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
-                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
               />
             </svg>
-            Filter
+            {{ loading ? 'Refreshing...' : 'Refresh' }}
           </button>
         </div>
 
+        <!-- Loading State -->
+        <div v-if="loading && users.length === 0" class="p-8 text-center text-gray-500">
+          <div class="inline-block">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mb-2"></div>
+            Loading users...
+          </div>
+        </div>
+
         <!-- Table -->
-        <table class="w-full">
+        <table v-else class="w-full">
           <thead class="bg-gray-50 border-b text-sm text-gray-600">
             <tr>
               <th class="px-4 py-3 text-left font-medium">
                 <input
                   type="checkbox"
-                  :checked="selectedUsers.length === users.length"
+                  :checked="selectedUsers.length === users.length && users.length > 0"
                   @change="toggleSelectAll"
                   class="rounded border-gray-300 cursor-pointer"
+                  :disabled="users.length === 0"
                 />
               </th>
               <th class="px-4 py-3 text-left font-medium">Username</th>
@@ -146,7 +137,11 @@ const isSelected = (userId: number) => {
               </td>
               <td class="px-4 py-3">
                 <div class="flex items-center gap-3">
-                  <img :src="user.avatar" :alt="user.username" class="w-10 h-10 rounded-full" />
+                  <img
+                    :src="user.avatarUrl"
+                    :alt="user.username"
+                    class="w-10 h-10 rounded-full object-cover"
+                  />
                   <span class="text-sm font-medium">{{ user.username }}</span>
                 </div>
               </td>
@@ -168,6 +163,12 @@ const isSelected = (userId: number) => {
                 <button class="p-1 hover:bg-gray-200 rounded transition">
                   <IconDotsVertical class="w-5 h-5 text-gray-600" />
                 </button>
+              </td>
+            </tr>
+            <!-- Empty State -->
+            <tr v-if="users.length === 0">
+              <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                No users found
               </td>
             </tr>
           </tbody>

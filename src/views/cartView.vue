@@ -118,7 +118,7 @@
                 <li class="flex justify-between mt-8">
                     <span class="text-[#5C5F6A]">Shipping</span>
                     <span>
-                      {{ shipping === 0 ? "Free" : `$${shipping.toFixed(2)}` }}
+                      {{Shipping}}
                     </span></li>
 
                 <li class="flex justify-between mt-8 mb-8">
@@ -209,10 +209,12 @@ const removeItem = (id: string) => {
 const subtotal = computed(() =>
   items.value.reduce((sum, item) => sum + item.price * item.quantity, 0)
 );
-
-const shipping = 0;
+const shipping = ref(0)
+const Shipping = computed(() =>
+  shipping.value === 0 ? 'Free' : `$${shipping.value.toFixed(2)}`
+)
 const tax = 1.0;
 
-const total = computed(() => subtotal.value + shipping + tax);
+const total = computed(() => subtotal.value + shipping.value + tax);
 
 </script>

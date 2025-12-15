@@ -312,7 +312,7 @@ function handleConfirmPayment() {
 
 
 //Address DropDown
-import AddDropdown from '@/components/AddDropDown.vue'
+import AddDropdown from '@/components/AddDropdown.vue'
 
 type Address = {
 id: number
@@ -363,6 +363,8 @@ const savedAddresses: Address[] = [
   },
 ]
 
+
+//Payment Dropdown
 import PayDropdown from '@/components/PayDropdown.vue'
 
 type Card = {

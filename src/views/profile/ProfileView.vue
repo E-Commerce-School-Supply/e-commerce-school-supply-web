@@ -6,6 +6,10 @@ import MyOrders from '@/components/profile/MyOrders.vue'
 import MyProfile from '@/components/profile/MyProfile.vue'
 import type { UserProfile } from '@/types/user'
 import { ref } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
+const authStore = useAuthStore()
+const user = authStore.user
+const selectedTab = ref('profile')
 
 // 2. The fake user data
 // const userData = ref<UserProfile>({
@@ -18,7 +22,8 @@ import { ref } from 'vue'
 </script>
 
 <template>
-  <button
+  <div>
+    <button
     data-drawer-target="separator-sidebar"
     data-drawer-toggle="separator-sidebar"
     aria-controls="separator-sidebar"
@@ -53,58 +58,54 @@ import { ref } from 'vue'
       <h1 class="font-bold mb-5">Manage My Account</h1>
       <ul class="flex-column space-y space-y-4 text-sm font-medium text-body md:me-4 mb-4 md:mb-0">
         <li>
-          <a
-            href="#"
-            class="inline-flex items-center px-4 text-accent rounded-base active w-full"
-            aria-current="page"
-          >
+          <button @click="selectedTab = 'profile'" :class="selectedTab === 'profile' ? 'inline-flex items-center px-4 text-accent rounded-base active w-full' : 'inline-flex items-center px-4 rounded-base hover:text-heading hover:bg-neutral-secondary-soft w-full'">
             My Profile
-          </a>
+          </button>
         </li>
         <li>
-          <a
-            href="#"
-            class="inline-flex items-center px-4 rounded-base hover:text-heading hover:bg-neutral-secondary-soft w-full"
-          >
+          <button @click="selectedTab = 'address'" :class="selectedTab === 'address' ? 'inline-flex items-center px-4 text-accent rounded-base active w-full' : 'inline-flex items-center px-4 rounded-base hover:text-heading hover:bg-neutral-secondary-soft w-full'">
             Address
-          </a>
+          </button>
         </li>
         <li>
-          <a
-            href="#"
-            class="inline-flex items-center px-4 rounded-base hover:text-heading hover:bg-neutral-secondary-soft w-full"
-          >
+          <button @click="selectedTab = 'payment'" :class="selectedTab === 'payment' ? 'inline-flex items-center px-4 text-accent rounded-base active w-full' : 'inline-flex items-center px-4 rounded-base hover:text-heading hover:bg-neutral-secondary-soft w-full'">
             Payment Options
-          </a>
+          </button>
         </li>
       </ul>
 
       <h1 class="font-bold my-5">Shopping Activity</h1>
       <ul class="flex-column space-y space-y-4 text-sm font-medium text-body md:me-4 mb-4 md:mb-0">
         <li>
-          <a
-            href="#"
-            class="inline-flex items-center px-4 rounded-base hover:text-heading hover:bg-neutral-secondary-soft w-full"
-          >
+          <button @click="selectedTab = 'orders'" :class="selectedTab === 'orders' ? 'inline-flex items-center px-4 text-accent rounded-base active w-full' : 'inline-flex items-center px-4 rounded-base hover:text-heading hover:bg-neutral-secondary-soft w-full'">
             My Orders
-          </a>
+          </button>
         </li>
         <li>
-          <a
-            href="#"
-            class="inline-flex items-center px-4 rounded-base hover:text-heading hover:bg-neutral-secondary-soft w-full"
-          >
+          <button @click="selectedTab = 'favorites'" :class="selectedTab === 'favorites' ? 'inline-flex items-center px-4 text-accent rounded-base active w-full' : 'inline-flex items-center px-4 rounded-base hover:text-heading hover:bg-neutral-secondary-soft w-full'">
             My Favorites
-          </a>
+          </button>
         </li>
       </ul>
     </div>
   </aside>
 
   <div class="p-5 sm:ml-64">
-    <!-- <MyAddress /> -->
-    <!-- <MyCard /> -->
-    <!-- <MyOrders /> -->
-    <MyFavorite />
+    <div v-if="selectedTab === 'profile'">
+      <MyProfile :user-detail="user" />
+    </div>
+    <div v-else-if="selectedTab === 'address'">
+      <MyAddress />
+    </div>
+    <div v-else-if="selectedTab === 'payment'">
+      <MyCard />
+    </div>
+    <div v-else-if="selectedTab === 'orders'">
+      <MyOrders />
+    </div>
+    <div v-else-if="selectedTab === 'favorites'">
+      <MyFavorite />
+    </div>
+  </div>
   </div>
 </template>

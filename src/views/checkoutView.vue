@@ -1,6 +1,7 @@
 <template>
+  <div class="min-h-screen">
 
-  <div class="flex justify-around p-10">
+    <div class="flex justify-around p-10">
 
     <!-- Left side -->
 
@@ -14,6 +15,10 @@
           v-model="selectedAddress"
           class="mb-5"
         />
+        <div class="mt-3 mb-5 flex gap-2">
+          <button v-if="selectedAddress && selectedAddress.id" @click="openEdit" class="px-4 py-2 bg-[#1A535C] text-white rounded">Edit Selected Address</button>
+          <button @click="addNewAddress" class="px-4 py-2 border rounded">Add New Address</button>
+        </div>
 
         <!-- Address Detail Section -->
         <h3 class="mb-4 text-2xl font-bold">Address Detail</h3>
@@ -27,7 +32,10 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700">Province/City</label>
-            <input v-model="selectedAddress.province" placeholder="Phnom Penh" type="text" class="mt-1 w-full px-3 py-2 border rounded-md" />
+            <select v-model="selectedAddress.province" class="mt-1 w-full px-3 py-2 border rounded-md">
+              <option value="">Select Province/City</option>
+              <option v-for="p in provinces" :key="p" :value="p">{{ p }}</option>
+            </select>
           </div>
 
           <div>
@@ -68,14 +76,14 @@
           <ShippingOption
             label="Standard Shipping"
             description="2 - 4 Days"
-            :price="0"
+            :price="computeShippingFor('standard')"
             :selected="selectedShipping === 'standard'"
             @select="selectedShipping = 'standard'"/>
 
           <ShippingOption
               label="Priority Shipping"
-              description="1 Days"
-              :price="2.99"
+              description="1 - 2 Days"
+              :price="computeShippingFor('priority')"
               :selected="selectedShipping === 'priority'"
               @select="selectedShipping = 'priority'"/>
 
@@ -166,7 +174,7 @@
               <div class="space-y-6 pb-6">
                 <div
                   v-for="item in orderItems"
-                  :key="item.id"
+                  :key="item.productId"
                   class="flex gap-4"
                 >
                   <!-- Product Image -->
@@ -251,52 +259,175 @@
               <!-- Confirm & Pay Button -->
               <button
                 @click="handleConfirmPayment"
-                class="w-full py-4 bg-[#1A535C] text-white font-bold rounded text-base"
+                :disabled="isProcessing"
+                class="w-full py-4 bg-[#1A535C] text-white font-bold rounded text-base disabled:opacity-60"
               >
-                Confirm & Pay ${{ total.toFixed(2) }}
+                <span v-if="isProcessing">Processing...</span>
+                <span v-else>Confirm & Pay ${{ total.toFixed(2) }}</span>
               </button>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Address Edit Modal -->
+  <div v-if="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div class="bg-white w-full max-w-3xl p-6 rounded-lg">
+      <AddressEdit :address="editingAddress" @save="onAddressSave" @cancel="closeEdit" />
+    </div>
+  </div>
+
+  <!-- QR overlay shown after clicking Confirm & Pay -->
+  <div v-if="showQR" class="fixed inset-0 z-50 flex items-center justify-center" :style="overlayBackground">
+    <div class="bg-white p-12 rounded-3xl w-full max-w-2xl text-center shadow-2xl">
+      <h3 class="text-2xl font-bold mb-6">Scan to Pay</h3>
+      <img :src="QRImage" alt="QR" class="mx-auto mb-6 w-72 h-72 md:w-96 md:h-96 object-contain" />
+      <div class="mt-4 flex justify-center">
+        <button
+          @click="handleDone"
+          :disabled="isDoneProcessing"
+          class="px-10 py-4 bg-[#1A535C] text-white rounded-xl text-lg shadow"
+        >
+          <span v-if="isDoneProcessing">Processing...</span>
+          <span v-else>Done</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success overlay shown after order is placed -->
+  <div v-if="showSuccess" class="fixed inset-0 z-60 flex items-center justify-center" :style="overlayBackground">
+    <div class="bg-white p-8 rounded-3xl w-full max-w-md text-center shadow-2xl">
+      <div class="flex items-center justify-center mb-4">
+        <div class="bg-green-100 text-green-700 rounded-full p-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 10-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+        </div>
+      </div>
+      <h3 class="text-2xl font-bold mb-2">Order placed successfully</h3>
+      <p class="text-gray-600 mb-4">Thank you — your payment was received.</p>
+      <p class="font-semibold mb-6">Total: ${{ successTotal.toFixed(2) }}</p>
+      <div class="flex gap-3 justify-center">
+        <button @click="goToOrders" class="px-6 py-3 bg-[#1A535C] text-white rounded-md font-medium">View Orders</button>
+        <button @click="continueShopping" class="px-6 py-3 bg-gray-100 rounded-md">Continue Shopping</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simple inline error banner -->
+  <div v-if="errorMessage" class="fixed top-6 right-6 z-70">
+    <div class="bg-red-600 text-white px-4 py-2 rounded shadow">{{ errorMessage }}</div>
+  </div>
+
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import ShippingOption from '@/components/ShippingOption.vue'
 import PaymentOption from '@/components/PaymentOption.vue'
+import AddressEdit from '@/components/profile/edit/AddressEdit.vue'
+import { useCartStore } from '@/stores/cartStore'
+import orderService from '@/services/orderService'
+import authService from '@/services/authService'
+import { useAuthStore } from '@/stores/authStore'
+import { useRouter } from 'vue-router'
 
 // photo import
 import aba from '@/assets/images/aba.png'
 import khqr from '@/assets/images/khqr.png'
-import pen from '@/assets/images/pen.png'
+import QRImage from '@/assets/images/QR.jpg'
+import authBackground from '@/assets/images/auth_background.jpg'
 
 
 //shipping and Payment option
 const selectedShipping = ref('standard')
 const selectedCardment = ref('default')
 
+const cartStore = useCartStore()
+const authStore = useAuthStore()
+const router = useRouter()
 
-// Example data
-const orderItems = ref([
-  { id: 1, name: 'Pen', color: 'White', price: 0.5, quantity: 8, image: pen },
-  { id: 2, name: 'Notebook', color: 'Blue', price: 2.0, quantity: 3, image: pen }
+onMounted(async () => {
+  // Ensure cart is loaded from backend
+  try {
+    await cartStore.fetchCart()
+  } catch (err) {
+    console.error('Failed to load cart for checkout', err)
+  }
+  // Load addresses from backend
+  await loadAddresses()
+})
 
-])
+
+// Use cart store items directly for the order summary
+const orderItems = computed(() => cartStore.items)
+
+// Provinces list for dropdown
+const provinces = [
+  'Phnom Penh',
+  'Kandal',
+  'Siem Reap',
+  'Battambang',
+  'Banteay Meanchey',
+  'Kampong Cham',
+  'Kampong Chhnang',
+  'Kampong Speu',
+  'Kampong Thom',
+  'Kampot',
+  'Kep',
+  'Kratie',
+  'Mondulkiri',
+  'Oddar Meanchey',
+  'Pailin',
+  'Preah Sihanouk',
+  'Preah Vihear',
+  'Prey Veng',
+  'Pursat',
+  'Ratanakiri',
+  'Stung Treng',
+  'Svay Rieng',
+  'Tbong Khmum',
+]
+
+// Helper to compute shipping price for a given method based on selected address
+function computeShippingFor(method: 'standard' | 'priority') {
+  const province = (selectedAddress.value?.province || '').toString().toLowerCase()
+  const isPhnomPenh = province.includes('phnom') || province.includes('phnom penh')
+
+  if (isPhnomPenh) {
+    return method === 'priority' ? 2.99 : 0
+  }
+
+  return method === 'priority' ? 4.99 : 2.99
+}
 
 const discountCode = ref('')
 const discount = ref(0)
-const shipping = ref(0)
-const Shipping = computed(() =>
-  shipping.value === 0 ? 'Free' : `$${shipping.value.toFixed(2)}`
-)
+const isProcessing = ref(false)
+const showQR = ref(false)
+const isDoneProcessing = ref(false)
+const showSuccess = ref(false)
+const successTotal = ref(0)
+const errorMessage = ref('')
 
-const subtotal = computed(() =>
-  orderItems.value.reduce((sum, item) => sum + item.price * item.quantity, 0)
-)
+// background for full-screen overlays — use `auth_background.jpg` from assets
+const overlayBackground = {
+  backgroundImage: `url('${authBackground}')`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+}
 
-const total = computed(() => subtotal.value - discount.value + shipping.value)
+// Compute shipping cost based on selected address and selectedShipping option
+const shippingCost = computed(() => computeShippingFor(selectedShipping.value === 'priority' ? 'priority' : 'standard'))
+
+const Shipping = computed(() => (shippingCost.value === 0 ? 'Free' : `$${shippingCost.value.toFixed(2)}`))
+
+const subtotal = computed(() => cartStore.subtotal)
+const tax = computed(() => cartStore.tax)
+const total = computed(() => subtotal.value + tax.value + shippingCost.value - discount.value)
 
 function handleApplyDiscount() {
   if (discountCode.value === 'SAVE10') {
@@ -306,13 +437,64 @@ function handleApplyDiscount() {
   }
 }
 
-function handleConfirmPayment() {
-  alert(`Payment confirmed: $${total.value.toFixed(2)}`)
+async function handleConfirmPayment() {
+  if (cartStore.items.length === 0) {
+    alert('Your cart is empty.')
+    return
+  }
+
+  if (!selectedAddress.value || !selectedAddress.value.setName) {
+    alert('Please select or enter a delivery address before confirming.')
+    return
+  }
+
+  // Show QR and wait for user to click "Done" to finalize order
+  showQR.value = true
 }
 
+async function handleDone() {
+  if (isDoneProcessing.value) return
+  isDoneProcessing.value = true
+
+  try {
+    const payload = {
+      cartId: cartStore.cartId,
+      address: selectedAddress.value,
+      payment: selectedCard.value || null,
+      shipping: selectedShipping.value,
+    }
+
+    await orderService.createOrder(payload)
+
+    // Clear cart locally (server already cleared it)
+    try {
+      await cartStore.clearCart()
+    } catch (e) {
+      console.warn('Failed to clear cart after order:', e)
+    }
+
+    // show success UI instead of alert
+    successTotal.value = total.value
+    showQR.value = false
+    showSuccess.value = true
+  } catch (err) {
+    console.error('Failed to create order:', err)
+    let message = 'Failed to place order. Please try again.'
+    if (err && (err as Error).message) {
+      message = (err as Error).message || message
+    }
+    // show a simple inline error notification by toggling QR off and logging
+    // we can extend with an error modal if desired
+    showQR.value = false
+    // reuse isDoneProcessing to show a toast would be better; for now use console and a short local banner
+    errorMessage.value = message
+  } finally {
+    isDoneProcessing.value = false
+  }
+}
 
 //Address DropDown
-import AddDropdown from '@/components/AddDropDown.vue'
+import AddDropdown from '@/components/AddDropdown.vue'
 
 type Address = {
 id: number
@@ -338,30 +520,101 @@ const selectedAddress = ref<Address>({
   zipCode: '',
 })
 
-const savedAddresses: Address[] = [
-  {
-    id: 1,
-    setName: 'La Vireak',
-    country: 'Cambodia',
-    province: 'Phnom Penh',
-    houseNumber: '#123',
-    street: 'St. 123',
-    addressLine1: '123 Monivong Boulevard',
+const savedAddresses = ref<Address[]>([])
+
+// Load addresses from backend
+async function loadAddresses() {
+  try {
+    const res = await authService.getProfile()
+    const profile = res.data
+    if (profile && Array.isArray(profile.addresses) && profile.addresses.length) {
+      savedAddresses.value = profile.addresses.map((a: any, idx: number) => ({
+        id: a.id || Date.now() + idx,
+        setName: a.label || a.setName || `Address ${idx + 1}`,
+        country: a.country || '',
+        province: a.city || a.province || '',
+        houseNumber: a.houseNumber || '',
+        street: a.street || '',
+        addressLine1: a.addressLine || a.addressLine1 || '',
+        addressLine2: a.addressLine2 || '',
+        zipCode: a.zipCode || '',
+      }))
+    }
+  } catch (err) {
+    console.debug('Failed to load addresses:', err)
+  }
+}
+
+// Edit modal state and helpers
+import { reactive } from 'vue'
+const showEditModal = ref(false)
+const editingAddress = reactive({ ...(savedAddresses.value[0] ?? {}) })
+
+function openEdit() {
+  if (!selectedAddress.value) return
+  Object.assign(editingAddress, { ...selectedAddress.value })
+  showEditModal.value = true
+}
+
+function closeEdit() {
+  showEditModal.value = false
+}
+
+function addNewAddress() {
+  // open empty form for new address
+  Object.assign(editingAddress, {
+    id: Date.now(),
+    setName: '',
+    country: '',
+    province: '',
+    houseNumber: '',
+    street: '',
+    addressLine1: '',
     addressLine2: '',
-    zipCode: '012345678',
-  },
-  {
-    id: 2,
-    setName: 'Office',
-    country: 'Cambodia',
-    province: 'Phnom Penh',
-    houseNumber: '#456',
-    street: 'St. 456',
-    addressLine1: '456 Norodom Blvd',
-    addressLine2: '',
-    zipCode: '987654321',
-  },
-]
+    zipCode: '',
+  })
+  showEditModal.value = true
+}
+
+async function onAddressSave(addr: any) {
+  // update or insert into savedAddresses
+  const idx = savedAddresses.value.findIndex(a => a.id === addr.id)
+  if (idx >= 0) {
+    savedAddresses.value[idx] = { ...addr }
+  } else {
+    savedAddresses.value.push({ ...addr })
+  }
+  // set selectedAddress to updated address
+  selectedAddress.value = { ...addr }
+  showEditModal.value = false
+
+  // Save to backend
+  try {
+    const toServer = savedAddresses.value.map(a => ({
+      id: a.id,
+      label: a.setName,
+      country: a.country,
+      city: a.province,
+      houseNumber: a.houseNumber,
+      street: a.street,
+      addressLine: a.addressLine1,
+      addressLine2: a.addressLine2,
+      zipCode: a.zipCode,
+      isDefault: false,
+    }))
+    await authStore.updateProfile({ addresses: toServer })
+    // Refetch profile to update authStore user with latest addresses
+    const res = await authService.getProfile()
+    if (res.data) {
+      authStore.user = { ...authStore.user, ...res.data }
+    }
+    // Reload addresses from backend to ensure sync
+    await loadAddresses()
+  } catch (err) {
+    console.error('Failed to save address:', err)
+    errorMessage.value = 'Failed to save address. Please try again.'
+  }
+}
 
 import PayDropdown from '@/components/PayDropdown.vue'
 
@@ -401,5 +654,16 @@ const savedCards: Card[] = [
     cvv: '456',
   },
 ]
+
+// navigation helpers for success overlay
+function goToOrders() {
+  showSuccess.value = false
+  router.push({ name: 'profile' })
+}
+
+function continueShopping() {
+  showSuccess.value = false
+  router.push({ name: 'home' })
+}
 
 </script>

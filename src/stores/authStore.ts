@@ -69,10 +69,56 @@ export const useAuthStore = defineStore('auth', () => {
     router.push({ name: 'signin' })
   }
 
+  async function updateProfile(partial: Partial<UserProfile>) {
+    if (!user.value) return
+    try {
+      await authService.updateProfile(partial)
+      // Refetch profile from server to get the updated data in correct format
+      const res = await authService.getProfile()
+      if (res.data) {
+        user.value = res.data
+        sessionStorage.setItem('user', JSON.stringify(user.value))
+      } else {
+        user.value = { ...user.value, ...partial }
+        sessionStorage.setItem('user', JSON.stringify(user.value))
+      }
+    } catch (err) {
+      console.error('Failed to update profile on server', err)
+      throw err
+    }
+  }
+
+  async function uploadAvatar(file: File) {
+    if (!user.value) throw new Error('Not authenticated')
+    try {
+      const res = await authService.uploadAvatar(file)
+      const avatarUrl = res.data.avatarUrl
+      user.value = { ...user.value, avatarUrl }
+      sessionStorage.setItem('user', JSON.stringify(user.value))
+      return avatarUrl
+    } catch (err) {
+      console.error('Failed to upload avatar', err)
+      throw err
+    }
+  }
+
+  async function changePassword(oldPassword: string, newPassword: string) {
+    try {
+      const res = await authService.changePassword(oldPassword, newPassword)
+      return res.data
+    } catch (err) {
+      console.error('Failed to change password', err)
+      throw err
+    }
+  }
+
   return {
     user,
     login,
     register,
     logout,
+    updateProfile,
+    changePassword,
+    uploadAvatar,
   }
 })

@@ -11,11 +11,11 @@ const props = defineProps<{
   <div>
     <h1 class="font-bold mb-5">My Profile</h1>
     <ProfileInfo
-      :name="props.userDetail.name"
+      :name="props.userDetail.username ?? props.userDetail.name ?? ''"
       :role="props.userDetail.role"
       :email="props.userDetail.email"
-      :phone-number="props.userDetail.phoneNumber"
-      :avatar="props.userDetail.avatar"
+      :phone-number="props.userDetail.phoneNumber ?? props.userDetail.phone"
+      :avatar="props.userDetail.avatarUrl ?? props.userDetail.avatar ?? ''"
     />
   </div>
 </template>

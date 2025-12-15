@@ -158,9 +158,11 @@ import QuantityInput from '@/components/QuantityInput.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useCartStore } from '@/stores/cartStore'
 import { onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()
+const router = useRouter()
 
 const isAuthenticated = computed(() => !!authStore.user)
 
@@ -186,7 +188,8 @@ const handleCheckout = () => {
     return
   }
 
-  alert('Proceeding to checkout...')
+  // Navigate to checkout route
+  router.push({ name: 'checkout' })
 }
 
 const updateQuantity = async (productId: string, newQuantity: number) => {

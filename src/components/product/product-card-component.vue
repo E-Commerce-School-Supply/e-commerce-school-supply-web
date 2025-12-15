@@ -22,6 +22,12 @@
         -{{ product.discount }}%
       </div>
 
+      <!-- Out of stock badge -->
+      <div v-if="(product.stockQuantity ?? 0) <= 0"
+           class="absolute bottom-4 left-4 bg-red-600 text-white text-[12px] px-2 py-1 rounded">
+        Out of stock
+      </div>
+
       <!-- Heart Icon -->
       <button @click.stop="toggleLike(index)" class="absolute top-4 right-4 bg-white rounded-full p-2">
         <img v-if="!isLiked[index]" src="/src/assets/images/Heart.png" class="w-[27px] h-6" />
@@ -63,11 +69,18 @@
 
         <button
           @click.stop="btnLink(index)"
-          class="text-white w-20 h-[30px] rounded-md text-[12px] font-semibold"
+          :disabled="(product.stockQuantity ?? 0) <= 0"
+          class="text-white w-28 h-[36px] rounded-md text-[12px] font-semibold"
         >
           <div
-            v-if="!linkBtn[index]"
-            class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm"
+            v-if="(product.stockQuantity ?? 0) <= 0"
+            class="w-full h-full flex justify-center items-center rounded-sm bg-gray-400 opacity-60 cursor-not-allowed"
+          >
+            Out of stock
+          </div>
+          <div
+            v-else-if="!linkBtn[index]"
+            class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm hover:bg-[#15444a] transition"
           >
             Add to Cart
           </div>
@@ -89,6 +102,7 @@ import { useCartStore } from '@/stores/cartStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useRouter } from 'vue-router'
 import { defineComponent, ref, watch, computed } from 'vue'
+import { useFavoriteStore } from '@/stores/favoriteStore'
 
 export default defineComponent({
   name: 'product-card-component',
@@ -107,6 +121,7 @@ export default defineComponent({
     const isAuthenticated = computed(() => !!authStore.user)
 
     // Create reactive arrays to track like and add-to-cart states for each product
+    const favStore = useFavoriteStore()
     const isLiked = ref<boolean[]>([])
     const linkBtn = ref<boolean[]>([])
     const addedQuantity = ref<number[]>([])
@@ -115,7 +130,7 @@ export default defineComponent({
     watch(
       () => props.products,
       (newProducts) => {
-        isLiked.value = newProducts.map(() => false)
+        isLiked.value = newProducts.map(p => favStore.isFavorited(p.id))
         linkBtn.value = newProducts.map(() => false)
         addedQuantity.value = newProducts.map(() => 0)
       },
@@ -129,7 +144,9 @@ export default defineComponent({
     }
 
     const toggleLike = (index: number) => {
-      isLiked.value[index] = !isLiked.value[index]
+      const product = props.products[index]
+      favStore.toggleFavorite(product)
+      isLiked.value[index] = favStore.isFavorited(product.id)
     }
 
     const goToDetail = (productId: string | undefined) => {

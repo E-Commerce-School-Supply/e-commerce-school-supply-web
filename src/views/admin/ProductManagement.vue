@@ -397,7 +397,7 @@ const isDropdownOpen = (productId: string) => {
             <td class="py-3 px-4 font-medium">${{ product.price?.toFixed(2) || '0.00' }}</td>
             <td class="py-3 px-4">
               <span
-                v-if="product.status === 'In Stock'"
+                v-if="(product.stockQuantity ?? 0) > 0"
                 class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium"
               >
                 In Stock

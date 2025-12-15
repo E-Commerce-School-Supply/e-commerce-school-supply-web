@@ -1,49 +1,6 @@
 <template>
   <div class="product-detail-view">
-    <!-- Header -->
-    <header class="sticky top-0 z-50 w-full">
-      <div class="bg-[#114B5F] text-white text-2xs py-2 px-4">
-        <div class="max-w-screen-xl mx-auto flex justify-center">
-          <div class="text-center flex gap-2">
-            <span class="opacity-95 font-light">Black Friday Sale For All Pen and Book - OFF 50%!</span>
-            <router-link to="/product-list" class="font-bold underline">ShopNow</router-link>
-          </div>
-        </div>
-      </div>
-
-      <nav class="bg-white border-b border-gray-200 w-full shadow-sm">
-        <div class="max-w-screen-xl flex items-center justify-between mx-auto p-4">
-          <router-link to="/" class="flex items-center text-2xl font-bold">
-            <span class="text-[#EF4444]">Tov</span><span class="text-gray-900">Rean</span>
-          </router-link>
-          <div class="flex items-center space-x-4">
-            <router-link to="/" class="hover:text-[#114B5F]">Home</router-link>
-            <router-link to="/product-list" class="text-[#114B5F] font-bold">Products</router-link>
-            <a href="#" class="hover:text-[#114B5F]">Promotion</a>
-            <router-link to="/product-list" class="hover:text-[#114B5F]">Category</router-link>
-          </div>
-          <div class="flex items-center space-x-4">
-            <router-link to="/cart" class="text-gray-800 hover:text-[#114B5F]">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-            </router-link>
-            <button type="button" class="flex text-sm bg-gray-800 rounded-full" id="user-menu-button" data-dropdown-toggle="user-dropdown">
-              <img class="w-9 h-9 rounded-full object-cover" src="/Photo/MyProfile.JPG" alt="user">
-            </button>
-            <div class="z-50 hidden text-base bg-white rounded-lg shadow-xl w-44" id="user-dropdown">
-              <div class="px-4 py-3">
-                <span class="block text-sm font-semibold">{{ displayName }}</span>
-                <span class="block text-sm text-gray-500">{{ displayEmail }}</span>
-              </div>
-              <ul class="py-2">
-                <li><router-link to="/profile" class="block px-4 py-2 hover:bg-gray-100">Dashboard</router-link></li>
-                <li><router-link to="/profile" class="block px-4 py-2 hover:bg-gray-100">Settings</router-link></li>
-                <li><a @click.prevent="handleSignOut" class="block px-4 py-2 hover:bg-gray-100 cursor-pointer">Sign out</a></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </nav>
-    </header>
+    <Header />
 
     <!-- Breadcrumb -->
     <div class="max-w-screen-xl mx-auto px-4 py-6 mt-10">
@@ -125,25 +82,25 @@
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Stock:</span>
-              <span :class="product.stockQuantity > 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'">
-                {{ product.stockQuantity > 0 ? `${product.stockQuantity} Available` : 'Out of Stock' }}
+              <span :class="(product.stockQuantity ?? 0) > 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'">
+                {{ (product.stockQuantity ?? 0) > 0 ? `${product.stockQuantity} Available` : 'Out of Stock' }}
               </span>
             </div>
           </div>
 
           <!-- Quantity and Add to Cart -->
-          <div class="flex gap-4 mb-8">
+            <div class="flex gap-4 mb-8">
             <div class="flex items-center border border-gray-300 rounded-lg">
               <button @click="quantity > 1 && quantity--" class="px-4 py-2 hover:bg-gray-100">-</button>
               <span class="px-6 py-2 font-semibold">{{ quantity }}</span>
-              <button @click="quantity++" :disabled="quantity >= product.stockQuantity" class="px-4 py-2 hover:bg-gray-100 disabled:opacity-50">+</button>
+              <button @click="quantity++" :disabled="quantity >= (product.stockQuantity ?? 0)" class="px-4 py-2 hover:bg-gray-100 disabled:opacity-50">+</button>
             </div>
             <button
               @click="addToCart"
-              :disabled="product.stockQuantity === 0"
+              :disabled="(product.stockQuantity ?? 0) === 0"
               class="flex-1 bg-[#1A535C] text-white font-bold py-3 rounded-lg hover:bg-[#154B5F] disabled:bg-gray-400 transition"
             >
-              {{ product.stockQuantity === 0 ? 'Out of Stock' : 'Add to Cart' }}
+              {{ (product.stockQuantity ?? 0) === 0 ? 'Out of Stock' : 'Add to Cart' }}
             </button>
           </div>
 
@@ -166,6 +123,7 @@
 </template>
 
 <script lang="ts">
+import Header from '@/components/layout/Header.vue'
 import Footer from '@/components/Footer.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useProductStore } from '@/stores/productStore'
@@ -176,7 +134,7 @@ import { initFlowbite } from 'flowbite'
 
 export default {
   name: 'product-detail-view',
-  components: { Footer },
+  components: { Header, Footer },
   data() {
     return {
       authStore: useAuthStore(),
@@ -184,20 +142,8 @@ export default {
       quantity: 1,
     }
   },
-  computed: {
-    displayName() {
-      if (this.authStore.user) return this.authStore.user.username || this.authStore.user.email || 'User'
-      return 'Not signed in'
-    },
-    displayEmail() {
-      if (this.authStore.user) return this.authStore.user.email || 'Signed in'
-      return 'Please sign in'
-    },
-  },
+  computed: {},
   methods: {
-    handleSignOut() {
-      this.authStore.logout()
-    },
     getDiscountedPrice(product: any) {
       const discount = product.discount ?? 0
       const priceAfterDiscount = product.price - (product.price * discount) / 100

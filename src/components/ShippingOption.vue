@@ -33,6 +33,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 
 const props = defineProps<{
   label: string
@@ -45,5 +46,5 @@ const emitShip = defineEmits<{
   (e: 'select'): void
 }>()
 
-const displayPrice = props.price === 0 ? 'Free' : `$${props.price.toFixed(2)}`
+const displayPrice = computed(() => (props.price === 0 ? 'Free' : `$${props.price.toFixed(2)}`))
 </script>

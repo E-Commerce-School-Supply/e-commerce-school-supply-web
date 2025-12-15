@@ -109,25 +109,31 @@ const loadProducts = async () => {
         const backendProducts = productStore.products;
 
         // Map first 5 products for sales section
-        salesProducts.value = backendProducts.slice(0, 5).map((product, index) => ({
+                salesProducts.value = backendProducts.slice(0, 5).map((product, index) => ({
             id: product.id || (100 + index),
             name: product.name,
             brand: product.brandName || 'TovRean',
-            price: `$${product.price.toFixed(2)}`,
+                    price: `$${product.price.toFixed(2)}`,
             oldPrice: product.discount ? `$${(product.price / (1 - product.discount / 100)).toFixed(2)}` : null,
             image: product.imageUrl || '/Photo/ourproduct.png',
             type: index === 2 ? 'featured' : 'grid',
             desc: index === 2 ? product.description : undefined
+                    ,
+                    stockQuantity: product.stockQuantity ?? 0,
+                    status: product.status || (product.stockQuantity && product.stockQuantity > 0 ? 'In Stock' : 'Out of stock')
         }));
 
         // Map products for carousel section
-        carouselProducts.value = backendProducts.slice(0, 5).map((product, index) => ({
+                carouselProducts.value = backendProducts.slice(0, 5).map((product, index) => ({
             id: product.id || (index + 1),
             name: product.name,
-            price: `$${product.price.toFixed(2)}`,
+                    price: `$${product.price.toFixed(2)}`,
             image: product.imageUrl || '/Photo/ourproduct.png',
             rating: 4 + (index % 2), // Alternating 4 and 5 star ratings
             tags: index % 2 === 0 ? ['popular', 'latest'] : ['latest']
+                    ,
+                    stockQuantity: product.stockQuantity ?? 0,
+                    status: product.status || (product.stockQuantity && product.stockQuantity > 0 ? 'In Stock' : 'Out of stock')
         }));
     } catch (error) {
         console.error('Failed to load products:', error);
@@ -408,7 +414,8 @@ onMounted(() => {
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
 
                     <div class="space-y-6 flex flex-col justify-between">
-                         <div v-for="product in salesProducts.slice(0, 2)" :key="product.id" :id="'product-'+product.id" class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition border border-gray-100">
+                        <div v-for="product in salesProducts.slice(0, 2)" :key="product.id" :id="'product-'+product.id" class="relative bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition border border-gray-100">
+                            <div v-if="(product.stockQuantity ?? 0) <= 0" class="absolute top-3 left-3 bg-red-600 text-white text-[12px] px-2 py-1 rounded">Out of stock</div>
                             <div class="bg-gray-100 rounded-lg p-6 mb-4 flex justify-center">
                                 <img :src="product.image" :alt="product.name" class="h-32 object-contain mix-blend-multiply">
                             </div>
@@ -419,6 +426,7 @@ onMounted(() => {
                     </div>
 
                     <div v-if="salesProducts[2]" :id="'product-'+salesProducts[2].id" class="relative bg-white rounded-xl p-6 shadow-lg border-2 border-blue-400 flex flex-col h-full">
+                        <div v-if="(salesProducts[2].stockQuantity ?? 0) <= 0" class="absolute top-4 left-4 bg-red-600 text-white text-[12px] px-3 py-1 rounded">Out of stock</div>
                         <div class="bg-gray-100 rounded-lg p-8 mb-6 flex-grow flex items-center justify-center">
                             <img :src="salesProducts[2].image" :alt="salesProducts[2].name" class="h-64 object-contain mix-blend-multiply transform -rotate-12">
                         </div>
@@ -434,7 +442,8 @@ onMounted(() => {
                     </div>
 
                     <div class="space-y-6 flex flex-col justify-between">
-                        <div v-for="product in salesProducts.slice(3, 5)" :key="product.id" :id="'product-'+product.id" class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition border border-gray-100">
+                        <div v-for="product in salesProducts.slice(3, 5)" :key="product.id" :id="'product-'+product.id" class="relative bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition border border-gray-100">
+                            <div v-if="(product.stockQuantity ?? 0) <= 0" class="absolute top-3 left-3 bg-red-600 text-white text-[12px] px-2 py-1 rounded">Out of stock</div>
                             <div class="bg-gray-100 rounded-lg p-6 mb-4 flex justify-center">
                                 <img :src="product.image" :alt="product.name" class="h-32 object-contain mix-blend-multiply">
                             </div>
@@ -514,8 +523,9 @@ onMounted(() => {
                     </button>
 
                     <div ref="productScrollContainer" class="flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 px-2" style="scrollbar-width: none; -ms-overflow-style: none;">
-                        <div v-for="product in filteredProducts" :key="product.id" :id="'product-'+product.id" class="min-w-[280px] md:min-w-[300px] snap-center bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition">
+                        <div v-for="product in filteredProducts" :key="product.id" :id="'product-'+product.id" class="min-w-[280px] md:min-w-[300px] snap-center bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition relative">
                             <div class="relative bg-gray-50 rounded-lg p-6 mb-4 h-64 flex items-center justify-center">
+                                <div v-if="(product.stockQuantity ?? 0) <= 0" class="absolute top-3 left-3 bg-red-600 text-white text-[12px] px-2 py-1 rounded">Out of stock</div>
                                 <button @click="addToWishlist" class="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition-colors">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                                 </button>
@@ -528,7 +538,20 @@ onMounted(() => {
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="font-bold text-lg text-gray-900">{{ product.price }}</span>
-                                    <button @click="addToCart(product)" class="px-3 py-1.5 bg-[#114B5F] text-white text-xs font-bold rounded hover:bg-[#0d3a4b] active:scale-95 transition-transform">Add to Cart</button>
+                                    <button
+                                        v-if="(product.stockQuantity ?? 0) > 0"
+                                        @click="addToCart(product)"
+                                        class="px-3 py-1.5 bg-[#114B5F] text-white text-xs font-bold rounded hover:bg-[#0d3a4b] active:scale-95 transition-transform"
+                                    >
+                                        Add to Cart
+                                    </button>
+                                    <button
+                                        v-else
+                                        disabled
+                                        class="px-3 py-1.5 bg-gray-400 text-white text-xs font-bold rounded opacity-60 cursor-not-allowed"
+                                    >
+                                        Out of stock
+                                    </button>
                                 </div>
                             </div>
                         </div>

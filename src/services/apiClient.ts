@@ -14,18 +14,27 @@ apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token: string | null = sessionStorage.getItem('accessToken')
 
+    // Normalize headers to a plain object and set Authorization header
+    // Some Axios versions expose AxiosHeaders which implement .set/.delete,
+    // but using plain property assignment is more robust across versions.
+    if (!config.headers) config.headers = {}
     if (token) {
-      // Use the .set() method for AxiosHeaders
-      config.headers.set('Authorization', `Bearer ${token}`)
+      // @ts-ignore
+      config.headers['Authorization'] = `Bearer ${token}`
     }
 
-    // If the request data is FormData (a file upload),
-    // delete the Content-Type header.
-    if (config.data instanceof FormData) {
-      console.log('Content-Type is deleted!')
+    // DEBUG: log token and Authorization header for troubleshooting 403s
+    try {
+      // eslint-disable-next-line no-console
+      console.debug('[apiClient] request', { url: config.url, tokenPreview: token ? `${token.slice(0, 8)}...` : null, authorizationHeader: config.headers['Authorization'] })
+    } catch (e) {
+      // ignore
+    }
 
-      // In axios v1+, you MUST use the .delete() method.
-      config.headers.delete('Content-Type')
+    // If the request data is FormData (a file upload), remove Content-Type so browser sets the multipart boundary
+    if (config.data instanceof FormData) {
+      // @ts-ignore
+      delete config.headers['Content-Type']
     }
     // ===================================
 

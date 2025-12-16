@@ -50,13 +50,13 @@
                 <!-- right side review -->
                 <div class="col-start-3 col-end-7 grid gap-4 ...">
                     <!-- TOP: Write a Review -->
-                    <div class="bg-[#F5F5F5] w-full rounded-md p-6 space-y-5">
-<write-review-component
-  :userReview="userReview"
-  :currentUserName="currentUser.name"
-  @submit-review="handleSubmitReview"
-  @delete-review="handleDeleteReview"
-/>
+                    <div v-if="currentUser.VerifiedBuyer" class="bg-[#F5F5F5] w-full rounded-md p-6 space-y-5">
+                        <write-review-component
+                            :userReview="userReview"
+                            :currentUserName="currentUser.name"
+                            @submit-review="handleSubmitReview"
+                            @delete-review="handleDeleteReview"
+                        />
                     </div>
 
                     <!-- User comment-->
@@ -429,7 +429,8 @@
             ]);
 
             const currentUser = {
-                name: "Yagami"
+                name: "Yagami",
+                VerifiedBuyer: false,
             };
 
             const userReview = ref<Review | null>(null);

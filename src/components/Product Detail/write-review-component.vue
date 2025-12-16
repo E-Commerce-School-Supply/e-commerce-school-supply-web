@@ -23,7 +23,7 @@
             type="text"
             placeholder="Review Title"
             v-model="title"
-            class="w-full h-[40px] px-3 rounded-sm focus:outline-none bg-white"
+            class="w-full h-10 px-3 rounded-sm focus:outline-none bg-white"
           />
           <textarea
             placeholder="Write your comments..."
@@ -61,15 +61,15 @@ import DropDownComponent from "./drop-down-component.vue";
 import ReviewCardComponent from "./review-card-component.vue";
 
 interface Review {
-    id: number;
-    profile: string;
-    name: string;
-    title: string;
-    body: string;
-    rating: number;
-    recommend: boolean;
-    verified: boolean;
-    date: string;
+  id: number;
+  profile: string;
+  name: string;
+  title: string;
+  body: string;
+  rating: number;
+  recommend: boolean;
+  verified: boolean;
+  date: string;
 }
 
 export default defineComponent({

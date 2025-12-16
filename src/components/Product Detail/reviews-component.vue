@@ -10,8 +10,9 @@
   </div>
 
   <!-- Review List -->
-  <div class="bg-[#F5F5F5] w-full rounded-sm p-10 space-y-6">
+  <div  class="bg-[#F5F5F5] w-full rounded-sm p-10 space-y-6">
     <review-card-component
+      v-if="reviews.length > 0"
       v-for="(review, index) in visibleReviews"
       :key="review.id"
       :review="review"
@@ -35,7 +36,11 @@
         Show Less
       </button>
     </div>
+    <div v-if="reviews.length === 0" class="w-full justify-center flex text-[24px]  text-red-500">
+        <h1>There are no comment here!!</h1>
+    </div>    
   </div>
+
 </template>
 
 <script lang="ts">

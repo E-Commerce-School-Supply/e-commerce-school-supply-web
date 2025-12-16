@@ -14,6 +14,6 @@ export interface Product {
   discount?: number | null
   imageUrl?: string
   status?: 'In Stock' | 'Out of stock'
-  rating?: number
+  rating: number | 0
   imageURL?: string // For backward compatibility
 }

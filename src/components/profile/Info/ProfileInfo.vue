@@ -51,7 +51,7 @@ function onFileChange(e: Event) {
     selectedFile.value = null
     return
   }
-  selectedFile.value = el.files[0]
+  selectedFile.value = el.files[0] || null;
 }
 
 async function uploadSelectedFile() {
@@ -78,6 +78,7 @@ const userDetail = ref<InfoItem[]>([
 
 function startEdit() {
   isEditing.value = true
+  showPasswordForm.value = false;
 }
 
 function cancelEdit() {
@@ -87,6 +88,11 @@ function cancelEdit() {
   form.email = props.email || ''
   form.phoneNumber = props.phoneNumber || ''
   form.avatar = props.avatar || DEFAULT_AVATAR
+}
+
+function startEditPassword() {
+  showPasswordForm.value = true;
+  isEditing.value = false;
 }
 
 async function saveEdit() {
@@ -135,30 +141,22 @@ async function submitPasswordChange() {
       <img
         :src="form.avatar || DEFAULT_AVATAR"
         alt="profile"
-        class="absolute -bottom-14 left-10 w-36 h-auto rounded-circle rounded-full border-5 border-white"
+        class="absolute -bottom-14 left-10 w-36 h-36 rounded-circle rounded-full border-5 border-white object-cover"
       />
       <div class="absolute top-4 right-4 flex gap-2">
-        <button @click="startEdit" class="text-heading bg-neutral-primary box-border border border-transparent hover:bg-neutral-secondary-medium focus:ring-4 focus:ring-neutral-tertiary font-medium leading-5 rounded-base text-sm p-2 focus:outline-none">
+        <button @click="startEdit" class="text-heading px-4 py-2 bg-neutral-primary box-border border border-transparent focus:ring-4 focus:ring-neutral-tertiary font-medium rounded-base text-sm focus:outline-none hover:bg-accent/70 hover:text-white transition">
           Edit
         </button>
-        <button @click="showPasswordForm = !showPasswordForm" class="text-heading bg-neutral-primary box-border border border-transparent hover:bg-neutral-secondary-medium focus:ring-4 focus:ring-neutral-tertiary font-medium leading-5 rounded-base text-sm p-2 focus:outline-none">
+        <button @click="startEditPassword" class="text-heading px-4 py-2 bg-neutral-primary box-border border border-transparent focus:ring-4 focus:ring-neutral-tertiary font-medium rounded-base text-sm focus:outline-none hover:bg-accent/70 hover:text-white  transition">
           Change Password
         </button>
       </div>
     </div>
     <div class="w-full mt-20 px-16 pb-10">
       <h1 class="font-bold mt-5 text-xl">Account Information</h1>
-      <div v-if="!isEditing" class="flex flex-wrap gap-5 w-full justify-between items-center mt-5">
-        <InfoCard
-          v-for="detail in userDetail"
-          :key="detail.label"
-          :label="detail.label"
-          :value="detail.value"
-          :icon="detail.icon"
-        />
-      </div>
 
-      <div v-else class="mt-5 max-w-3xl">
+
+      <div v-if="isEditing" class="mt-5 max-w-3xl">
         <form @submit.prevent="saveEdit" class="space-y-4">
           <div>
             <label class="block text-sm text-body mb-1">Name</label>
@@ -192,7 +190,7 @@ async function submitPasswordChange() {
         </form>
       </div>
 
-      <div v-if="showPasswordForm" class="mt-6 max-w-md">
+      <div v-else-if="showPasswordForm" class="mt-6 max-w-md">
         <h3 class="font-semibold mb-3">Change Password</h3>
         <form @submit.prevent="submitPasswordChange" class="space-y-3">
           <div>
@@ -212,6 +210,16 @@ async function submitPasswordChange() {
             <button type="submit" class="px-4 py-2 bg-[#1A535C] text-white rounded">Change</button>
           </div>
         </form>
+      </div>
+
+      <div v-else="!isEditing" class="flex flex-wrap gap-5 w-full justify-between items-center mt-5">
+        <InfoCard
+          v-for="detail in userDetail"
+          :key="detail.label"
+          :label="detail.label"
+          :value="detail.value"
+          :icon="detail.icon"
+        />
       </div>
     </div>
   </div>

@@ -2,10 +2,15 @@
 import ProductCardComponent from '@/components/product/product-card-component.vue'
 import SearchInput from '@/components/ui/SearchInput.vue'
 import { useFavoriteStore } from '@/stores/favoriteStore'
+import type{ Product } from '@/types/product'
 import { computed } from 'vue'
 
 const favStore = useFavoriteStore()
-const products = computed(() => favStore.favorites)
+
+const props = defineProps<{
+  products: Product[]
+}>();
+
 </script>
 
 <template>

@@ -1,9 +1,8 @@
 <template>
   <div class="product-detail-view">
-    <Header />
 
     <!-- Breadcrumb -->
-    <div class="max-w-screen-xl mx-auto px-4 py-6 mt-10">
+    <div class="max-w-7xl mx-auto px-4 py-6 mt-10">
       <div class="flex items-center space-x-2 text-gray-600">
         <router-link to="/">Home</router-link>
         <span>/</span>
@@ -14,7 +13,7 @@
     </div>
 
     <!-- Product Detail -->
-    <div v-if="product" class="max-w-screen-xl mx-auto px-4 pb-20">
+    <div v-if="product" class="max-w-7xl mx-auto px-4 pb-20">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
         <!-- Left: Image -->
         <div class="flex flex-col items-center justify-center">
@@ -124,7 +123,7 @@
 
 <script lang="ts">
 import Header from '@/components/layout/Header.vue'
-import Footer from '@/components/Footer.vue'
+import Footer from '@/components/layout/Footer.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useProductStore } from '@/stores/productStore'
 import { useCartStore } from '@/stores/cartStore'

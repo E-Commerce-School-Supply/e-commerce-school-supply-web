@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useCartStore } from '@/stores/cartStore'
 import { useProductStore } from '@/stores/productStore'
 import { useRoute, useRouter } from 'vue-router'
-
+import  BlankProfile  from '@/assets/images/pfp_blank.jpeg'
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const productStore = useProductStore()
@@ -33,6 +33,8 @@ const displayEmail = computed(() => {
 
 const isHome = computed(() => route.name === 'home')
 const isProducts = computed(() => route.name === 'Product List' || route.name === 'product-detail')
+const isContact = computed(() => route.name === 'Contact us')
+const isAbout = computed(() => route.name === 'About us')
 
 const searchResults = computed(() => {
 	const query = searchQuery.value.trim().toLowerCase()
@@ -102,8 +104,8 @@ onBeforeUnmount(() => {
 
 <template>
 	<header class="sticky top-0 z-50 w-full">
-		<div class="bg-[#114B5F] text-white text-[10px] md:text-xs py-2 px-4 relative">
-			<div class="max-w-screen-xl mx-auto flex justify-center items-center">
+		<div class="bg-[#114B5F] text-white text-2xs md:text-xs py-2 px-4 relative">
+			<div class="max-w-7xl mx-auto flex justify-center items-center">
 				<div class="text-center flex gap-2">
 					<span class="opacity-95 font-light tracking-wide">Black Friday Sale For All Pen and Book - OFF 50%!</span>
 					<router-link to="/product-list" class="font-bold underline hover:text-gray-200 cursor-pointer">ShopNow</router-link>
@@ -112,31 +114,38 @@ onBeforeUnmount(() => {
 		</div>
 
 		<nav class="bg-white border-b border-gray-200 w-full shadow-sm">
-			<div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4 md:px-6 lg:px-8">
+			<div class="max-w-7xl flex flex-wrap items-center justify-between mx-auto p-4 md:px-6 lg:px-8">
 				<router-link to="/" class="flex items-center text-2xl font-bold tracking-tight shrink-0">
 					<span class="text-[#EF4444]">Tov</span><span class="text-gray-900">Rean</span>
 				</router-link>
 
 				<div
-					class="hidden lg:flex absolute left-1/2 transform -translate-x-1/2 space-x-8 text-gray-600 font-medium text-[16px]"
+					class="hidden lg:flex items-center transform space-x-8 text-gray-600 font-medium text-[16px]"
 				>
 					<router-link to="/" :class="isHome ? 'text-[#114B5F] font-bold' : 'hover:text-[#114B5F] transition-colors'">
 						Home
 					</router-link>
 					<router-link
-						:to="{ path: '/', hash: '#carousel-section' }"
-						class="hover:text-[#114B5F] transition-colors cursor-pointer"
-					>
-						New
-					</router-link>
-					<router-link :to="{ path: '/', hash: '#promotion-section' }" class="hover:text-[#114B5F] transition-colors">
-						Promotion
-					</router-link>
-					<router-link
 						to="/product-list"
+						class="block py-2 px-3 rounded"
 						:class="isProducts ? 'text-[#114B5F] font-bold' : 'hover:text-[#114B5F] transition-colors'"
 					>
-						Category
+						Products
+					</router-link>
+					<!-- <router-link :to="{ path: '/', hash: '#promotion-section' }" class="hover:text-[#114B5F] transition-colors">
+						Promotion
+					</router-link> -->
+					<router-link
+						to="/contact"
+						:class="isContact ? 'text-[#114B5F] font-bold' : 'hover:text-[#114B5F] transition-colors'"
+					>
+						Contact us
+					</router-link>
+					<router-link
+						to="/about"
+						:class="isAbout ? 'text-[#114B5F] font-bold' : 'hover:text-[#114B5F] transition-colors'"
+					>
+						About us
 					</router-link>
 				</div>
 
@@ -182,7 +191,7 @@ onBeforeUnmount(() => {
 						</div>
 					</div>
 
-					<div class="flex items-center space-x-3">
+					<div class="flex items-center space-x-5">
 						<button @click="addToWishlist" class="text-gray-800 hover:text-[#EF4444] transition hidden sm:block relative">
 							<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
@@ -194,7 +203,7 @@ onBeforeUnmount(() => {
 							</svg>
 							<span
 								v-if="wishlistCount > 0"
-								class="absolute -top-1 -right-1 bg-[#EF4444] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center"
+								class="absolute -top-1 -right-1 bg-[#EF4444] text-white text-2xs font-bold rounded-full w-4 h-4 flex items-center justify-center"
 							>
 								{{ wishlistCount }}
 							</span>
@@ -211,7 +220,7 @@ onBeforeUnmount(() => {
 							</svg>
 							<span
 								v-if="cartStore.totalItems > 0"
-								class="absolute -top-1 -right-1 bg-[#EF4444] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center"
+								class="absolute -top-1 -right-1 bg-[#EF4444] text-white text-2xs font-bold rounded-full w-4 h-4 flex items-center justify-center"
 							>
 								{{ cartStore.totalItems }}
 							</span>
@@ -231,7 +240,8 @@ onBeforeUnmount(() => {
 							data-dropdown-placement="bottom"
 						>
 							<span class="sr-only">Open user menu</span>
-							<img class="w-9 h-9 rounded-full object-cover border border-gray-200" src="/Photo/MyProfile.JPG" alt="user photo">
+							<img v-if="guestMode" class="w-12 h-12 rounded-full object-cover" :src="BlankProfile" alt="user photo">
+							<img v-else class="w-9 h-9 rounded-full object-cover border border-gray-200" :src="authStore.user?.avatarUrl" alt="user photo">
 						</button>
 						<div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-xl w-44" id="user-dropdown">
 							<div class="px-4 py-3">
@@ -317,13 +327,18 @@ onBeforeUnmount(() => {
 							Products
 						</router-link>
 					</li>
-					<li>
+					<!-- <li>
 						<router-link :to="{ path: '/', hash: '#promotion-section' }" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100">
-							Promotion
+							Promotions
+						</router-link>
+					</li> -->
+					<li>
+						<router-link to="/contact" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100">
+							Contact us
 						</router-link>
 					</li>
 					<li>
-						<router-link to="/product-list" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100">Category</router-link>
+						<router-link to="/about" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100">About us</router-link>
 					</li>
 					<li class="mt-2 pt-2 border-t border-gray-200" @click.stop>
 						<input

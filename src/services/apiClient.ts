@@ -14,29 +14,23 @@ apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token: string | null = sessionStorage.getItem('accessToken')
 
-    // Normalize headers to a plain object and set Authorization header
-    // Some Axios versions expose AxiosHeaders which implement .set/.delete,
-    // but using plain property assignment is more robust across versions.
-    if (!config.headers) config.headers = {}
-    if (token) {
-      // @ts-ignore
-      config.headers['Authorization'] = `Bearer ${token}`
+  if (token && config.headers) {
+      config.headers.set('Authorization', `Bearer ${token}`)
     }
 
-    // DEBUG: log token and Authorization header for troubleshooting 403s
+    // DEBUG: log token troubleshooting
     try {
-      // eslint-disable-next-line no-console
-      console.debug('[apiClient] request', { url: config.url, tokenPreview: token ? `${token.slice(0, 8)}...` : null, authorizationHeader: config.headers['Authorization'] })
-    } catch (e) {
-      // ignore
-    }
+      console.debug('[apiClient] request', { 
+        url: config.url, 
+        tokenPreview: token ? `${token.slice(0, 8)}...` : null, 
+        authorizationHeader: config.headers?.get('Authorization') 
+      })
+    } catch (e) { /* ignore */ }
 
-    // If the request data is FormData (a file upload), remove Content-Type so browser sets the multipart boundary
-    if (config.data instanceof FormData) {
-      // @ts-ignore
-      delete config.headers['Content-Type']
+    // ✅ FIX: Use the .delete() method if the data is FormData
+    if (config.data instanceof FormData && config.headers) {
+      config.headers.delete('Content-Type')
     }
-    // ===================================
 
     return config
   },

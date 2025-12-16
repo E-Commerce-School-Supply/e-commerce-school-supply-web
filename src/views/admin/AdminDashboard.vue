@@ -32,49 +32,7 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- Sidebar -->
-        <aside class="col-span-1">
-          <div class="bg-white rounded shadow p-4 mb-6">
-            <h4 class="font-semibold mb-3">Manage My Account</h4>
-            <ul class="text-sm space-y-2">
-              <li
-                @click="activeTab = 'dashboard'"
-                :class="activeTab === 'dashboard' ? 'text-accent font-medium' : 'text-gray-600 hover:text-accent cursor-pointer'"
-              >
-                Dashboard
-              </li>
-              <li
-                @click="activeTab = 'profile'"
-                :class="activeTab === 'profile' ? 'text-accent font-medium' : 'text-gray-600 hover:text-accent cursor-pointer'"
-              >
-                My Profile
-              </li>
-            </ul>
-          </div>
-
-          <div class="bg-white rounded shadow p-4">
-            <h4 class="font-semibold mb-3">Management</h4>
-            <ul class="text-sm space-y-2">
-              <li
-                @click="activeTab = 'userManagement'"
-                :class="activeTab === 'userManagement' ? 'text-accent font-medium cursor-pointer' : 'text-gray-600 hover:text-accent cursor-pointer'"
-              >
-                User Management
-              </li>
-              <li
-                @click="activeTab = 'productManagement'"
-                :class="activeTab === 'productManagement' ? 'text-accent font-medium cursor-pointer' : 'text-gray-600 hover:text-accent cursor-pointer'"
-              >
-                Product Management
-              </li>
-              <li
-                @click="activeTab = 'orderManagement'"
-                :class="activeTab === 'orderManagement' ? 'text-accent font-medium cursor-pointer' : 'text-gray-600 hover:text-accent cursor-pointer'"
-              >
-                Order Management
-              </li>
-            </ul>
-          </div>
-        </aside>
+        <Sidebar v-model="currentTab"/>
 
         <!-- Main content -->
         <main class="col-span-3 space-y-6">
@@ -201,7 +159,7 @@
 </template>
 
 <script setup lang="ts">
-import Footer from '@/components/Footer.vue'
+import Footer from '@/components/layout/Footer.vue'
 import AdminProfile from './AdminProfile.vue'
 import UserManagement from './UserManagement.vue'
 import ProductManagement from './ProductManagement.vue'
@@ -209,8 +167,9 @@ import OrderManagement from './OrderManagement.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useRouter } from 'vue-router'
 import { ref } from 'vue'
+import Sidebar from '@/components/layout/Sidebar.vue'
 
-const activeTab = ref<'dashboard' | 'profile' | 'userManagement' | 'productManagement' | 'orderManagement'>('dashboard')
+const currentTab = ref('dashboard');
 const authStore = useAuthStore()
 const router = useRouter()
 

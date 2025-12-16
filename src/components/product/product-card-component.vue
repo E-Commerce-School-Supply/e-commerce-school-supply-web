@@ -9,7 +9,7 @@
     <!-- Image Section -->
     <div class="relative flex justify-center items-center h-40">
       <img
-        :src="product.imageURL"
+        :src="product.imageUrl"
         :alt="product.name"
         class="max-w-[250px] max-h-40 object-contain"
       />
@@ -29,8 +29,8 @@
       </div>
 
       <!-- Heart Icon -->
-      <button @click.stop="toggleLike(index)" class="absolute top-4 right-4 bg-white rounded-full p-2">
-        <img v-if="!isLiked[index]" src="/src/assets/images/Heart.png" class="w-[27px] h-6" />
+      <button @click.stop="toggleLike(product)" class="absolute top-4 right-4 bg-white rounded-full p-2">
+        <img v-if="!isFavorited(product.id)" src="/src/assets/images/Heart.png" class="w-[27px] h-6" />
         <img v-else src="/src/assets/images/Heart-fill.png" class="w-[27px] h-6" />
       </button>
     </div>
@@ -42,7 +42,7 @@
 
       <!-- Rating -->
       <div class="flex items-center mb-3 text-[#FF6B6B]">
-        <span class="mr-2 font-semibold text-gray-800">{{ product.rating.toFixed(1) }}</span>
+        <span class="mr-2 font-semibold text-gray-800">{{ product.rating?.toFixed(1) }}</span>
         <span class="text-[20px]">
           <template v-for="n in 5" :key="n">
             <span v-if="n <= Math.floor(product.rating)">★</span>
@@ -70,7 +70,7 @@
         <button
           @click.stop="btnLink(index)"
           :disabled="(product.stockQuantity ?? 0) <= 0"
-          class="text-white w-28 h-[36px] rounded-md text-[12px] font-semibold"
+          class="text-white w-28 h-9 rounded-md text-[12px] font-semibold"
         >
           <div
             v-if="(product.stockQuantity ?? 0) <= 0"
@@ -101,8 +101,9 @@ import type { Product } from '@/types/product'
 import { useCartStore } from '@/stores/cartStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useRouter } from 'vue-router'
-import { defineComponent, ref, watch, computed } from 'vue'
+import { defineComponent, ref, watch, computed, onMounted } from 'vue'
 import { useFavoriteStore } from '@/stores/favoriteStore'
+import { useToastStore } from '@/stores/toastStore'
 
 export default defineComponent({
   name: 'product-card-component',
@@ -118,19 +119,40 @@ export default defineComponent({
     const router = useRouter()
     const cartStore = useCartStore()
     const authStore = useAuthStore()
+    const favStore = useFavoriteStore()
+    const toast = useToastStore();
     const isAuthenticated = computed(() => !!authStore.user)
 
     // Create reactive arrays to track like and add-to-cart states for each product
-    const favStore = useFavoriteStore()
-    const isLiked = ref<boolean[]>([])
     const linkBtn = ref<boolean[]>([])
     const addedQuantity = ref<number[]>([])
 
+    const isFavorited = (productId: string | undefined) => {
+      if (!productId) return false
+      // If your store uses 'favorites' instead of 'favProduct', change this line
+      return favStore.favProduct.some((p: Product) => p.id === productId)
+    }
+
+    const toggleLike = async (product: Product) => {
+      if (!isAuthenticated.value) {
+        alert('Please sign in to add favorites')
+        return
+      }
+      
+      if (!product.id) return
+
+      if (isFavorited(product.id)) {
+        toast.showToast('Item deleted from your favorites list.', 'error')
+        await favStore.deleteFavorite(product.id)
+      } else {
+        await favStore.addFavorite(product) // Ensure backend expects ID
+        toast.showToast('Item saved to your favorites list.', 'success')
+      }
+    }
     // Initialize arrays when products prop changes
     watch(
       () => props.products,
       (newProducts) => {
-        isLiked.value = newProducts.map(p => favStore.isFavorited(p.id))
         linkBtn.value = newProducts.map(() => false)
         addedQuantity.value = newProducts.map(() => 0)
       },
@@ -143,11 +165,7 @@ export default defineComponent({
       return (Math.floor(priceAfterDiscount * 100) / 100).toFixed(2)
     }
 
-    const toggleLike = (index: number) => {
-      const product = props.products[index]
-      favStore.toggleFavorite(product)
-      isLiked.value[index] = favStore.isFavorited(product.id)
-    }
+
 
     const goToDetail = (productId: string | undefined) => {
       if (productId) {
@@ -165,15 +183,15 @@ export default defineComponent({
       try {
         // Add item to cart - map product fields correctly
         await cartStore.addToCart({
-          productId: product.id || `product-${index}`,
-          name: product.name,
-          itemNo: product.id || `P${index}`,
-          brand: product.brandName || 'TovRean',
-          color: product.color || 'Standard',
-          rating: product.rating || 4.5,
+          productId: product?.id || `product-${index}`,
+          name: product?.name,
+          itemNo: product?.id || `P${index}`,
+          brand: product?.brandName || 'TovRean',
+          color: product?.color || 'Standard',
+          rating: product?.rating || 4.5,
           price: product.price,
           quantity: 1,
-          image: product.imageURL || product.imageUrl || '',
+          image: product?.imageUrl || '',
         })
         linkBtn.value[index] = true
         addedQuantity.value[index] = (addedQuantity.value[index] || 0) + 1
@@ -181,12 +199,17 @@ export default defineComponent({
         console.error('Error adding to cart:', error)
       }
     }
+    onMounted(() => {
+      if (isAuthenticated.value) {
+        favStore.fetchFavorite()
+      }
+    })
 
     return {
-      isLiked,
       linkBtn,
       addedQuantity,
       toggleLike,
+      isFavorited,
       btnLink,
       goToDetail,
       getDiscountedPrice,

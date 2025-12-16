@@ -1,52 +1,94 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Product } from '@/types/product'
+import { favoriteService } from '@/services/favoriteService'
+import { useAuthStore } from './authStore'
 
-const STORAGE_KEY = 'favorites'
+
 
 export const useFavoriteStore = defineStore('favorite', () => {
-  const favorites = ref<Product[]>([])
+  const favProduct = ref<Product[]>([]);
+  const isLoading = ref(false)
+  const error = ref<string | null>(null);
+  const authStore = useAuthStore()
 
-  function load() {
-    try {
-      const raw = sessionStorage.getItem(STORAGE_KEY)
-      if (raw) favorites.value = JSON.parse(raw)
-      else favorites.value = []
-    } catch (e) {
-      favorites.value = []
+  const count = computed(() => favProduct.value.length)
+
+  // Helper to check if a product is already liked
+  function isFavorited(productId: string | undefined): boolean {
+    if (!productId) return false
+    return favProduct.value.some(p => p.id === productId)
+  }
+  // ACTION
+  async function fetchFavorite() {
+    if (!authStore.user) {
+      favProduct.value = []
+      return
+    }
+    
+    isLoading.value = true
+    try{
+      const res = await favoriteService.getAllFavorite()
+      favProduct.value = res || []
+    } catch (err) {
+      console.log(err);
+      error.value = 'Failed to load favorites'
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  function save() {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(favorites.value))
-  }
+  // Unified Toggle Action (Easier for UI)
+  async function toggleFavorite(product: Product) {
+    if (!authStore.user) {
+      alert("Please login to manage favorites")
+      return
+    }
 
-  function isFavorited(id?: string) {
-    if (!id) return false
-    return favorites.value.some(f => f.id === id)
-  }
+    const productId = product.id
+    if (!productId) return
 
-  function toggleFavorite(product: Product) {
-    const id = product.id || product.name
-    const idx = favorites.value.findIndex(p => (p.id || p.name) === id)
-    if (idx === -1) {
-      favorites.value.unshift(product)
+    if (isFavorited(productId)) {
+      await deleteFavorite(productId)
     } else {
-      favorites.value.splice(idx, 1)
+      await addFavorite(product)
     }
-    save()
   }
 
-  function removeById(id?: string) {
-    if (!id) return
-    const idx = favorites.value.findIndex(p => p.id === id)
-    if (idx !== -1) favorites.value.splice(idx, 1)
-    save()
+  async function addFavorite(product: Product) {
+    favProduct.value.push(product)
+
+    try{
+      await favoriteService.addToFavorite(product.id!);
+    } catch (err: any) {
+        console.error(err)
+        error.value = err.message || 'Failed to add favorite'
+        // Remove the item we just added
+        favProduct.value = favProduct.value.filter(p => p.id !== product.id)
+    }
   }
 
-  load()
+  async function deleteFavorite(productId: string) {
+    // 1. Find item to revert later if needed
+    const itemToRemove = favProduct.value.find(p => p.id === productId)
+    
+    // 2. Optimistic Update
+    favProduct.value = favProduct.value.filter(p => p.id !== productId)
+    
+    // 3. Call API
+    try {
+      await favoriteService.deleteFavorite(productId)
+    } catch (err: any) {
+      // 4. Revert on failure
+      console.error(err)
+      error.value = err.message || 'Failed to remove favorite'
+      if (itemToRemove) favProduct.value.push(itemToRemove)
+    }
+  }
 
-  const count = computed(() => favorites.value.length)
-
-  return { favorites, load, save, toggleFavorite, isFavorited, removeById, count }
+  return {
+    favProduct, isLoading, error, count,
+    isFavorited, toggleFavorite,
+    fetchFavorite, addFavorite, deleteFavorite,
+  }
 })

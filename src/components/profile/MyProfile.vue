@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import ProfileInfo from '@/components/profile/Info/ProfileInfo.vue'
-import type { User } from '@/types/user'
+import type { UserProfile } from '@/types/user'
 
 const props = defineProps<{
-  userDetail: User
+  userDetail: UserProfile
 }>()
 </script>
 
@@ -11,11 +11,11 @@ const props = defineProps<{
   <div>
     <h1 class="font-bold mb-5">My Profile</h1>
     <ProfileInfo
-      :name="props.userDetail.username ?? props.userDetail.name ?? ''"
+      :name="props.userDetail.username ?? props.userDetail.username ?? ''"
       :role="props.userDetail.role"
       :email="props.userDetail.email"
-      :phone-number="props.userDetail.phoneNumber ?? props.userDetail.phone"
-      :avatar="props.userDetail.avatarUrl ?? props.userDetail.avatar ?? ''"
+      :phone-number="props.userDetail.phoneNumber ?? props.userDetail.phoneNumber"
+      :avatar="props.userDetail.avatarUrl ?? props.userDetail.avatarUrl ?? ''"
     />
   </div>
 </template>

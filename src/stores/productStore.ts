@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { productService } from '@/services/productService'
 import type { Product } from '@/types/product'
@@ -8,6 +8,17 @@ export const useProductStore = defineStore('product', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
+
+// GETTER
+  const getPopularProducts = computed(() => {
+    return products.value.filter(product => product.rating >= 4.5)
+  })
+
+  const getAllProducts = computed(() => {
+    return products.value;
+  })
+
+// ACTION
   async function fetchProducts() {
     loading.value = true
     error.value = null
@@ -63,6 +74,8 @@ export const useProductStore = defineStore('product', () => {
     products,
     loading,
     error,
+    getPopularProducts,
+    getAllProducts,
     fetchProducts,
     addProduct,
     removeProduct,

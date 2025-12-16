@@ -1,12 +1,5 @@
 <template>
-  <div class="product-list-view">
-    <Header />
-
-    <!-- Body -->
-    <div class="flex ... pt-40">
-    <!-- ✨ Added pt-40 so the header won’t cover content -->
-
-    <div class="w-1/20"></div>
+  <div class="product-list-view w-full flex justify-center items-center">
 
     <div class="w-18/20 relative ...">
       <div>
@@ -16,7 +9,7 @@
       <div class="grid grid-cols-5 gap-4 ...">
         <!-- Category -->
         <div class="col-span-1 mb-20 ...">
-          <div class="sticky top-50">
+          <div class="sticky top-32">
             <h1 class="text-[20px] font-semibold mb-5">Category</h1>
 
             <div class="text-base/8 text-[15px]">
@@ -123,7 +116,10 @@
             <h1 class="text-[20px]">School Products</h1>
             <p class="text-[16px] font-light">{{ allProducts.length }} items</p>
           </div>
-          <div class="flex flex-wrap gap-5 justify-between">
+          <div v-if="loading">
+            <Spinner/>
+          </div>
+          <div v-else class="flex flex-wrap gap-5 justify-between">
             <product-card-component :products="products" />
           </div>
 
@@ -167,20 +163,18 @@
 
     <div class="w-1/20"></div>
   </div>
-
-  <!-- Footer -->
-  <Footer />
-</div>
 </template>
 
 <script lang="ts">
 import Header from '@/components/layout/Header.vue'
 import ProductCardComponent from '@/components/product/product-card-component.vue'
-import Footer from '@/components/Footer.vue'
+import Footer from '@/components/layout/Footer.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useProductStore } from '@/stores/productStore'
 import { onMounted, ref, computed } from 'vue'
 import { initFlowbite } from 'flowbite'
+import Spinner from '@/components/ui/Spinner.vue'
+import { storeToRefs } from 'pinia'
 
 export default {
   name: 'product-list-view',
@@ -189,6 +183,7 @@ export default {
     Header,
     ProductCardComponent,
     Footer,
+    Spinner,
   },
 
   data() {
@@ -204,18 +199,18 @@ export default {
     const productStore = useProductStore()
     const allProducts = ref<any[]>([])
     const products = ref<any[]>([])
-    const loading = ref(false)
     const currentPage = ref(1)
-    const itemsPerPage = 5
+    const itemsPerPage = 10
 
+    const {loading, error} = storeToRefs(productStore);
     const loadProducts = async () => {
-      loading.value = true
+      productStore.loading = true
       try {
         await productStore.fetchProducts()
         // Map backend products to match the component's expected format
         allProducts.value = productStore.products.map((product) => ({
           id: product.id,
-          imageURL: product.imageUrl || 'https://via.placeholder.com/300x300?text=No+Image',
+          imageUrl: product.imageUrl || 'https://via.placeholder.com/300x300?text=No+Image',
           name: product.name,
           price: product.price,
           rating: 4.5,
@@ -224,10 +219,11 @@ export default {
           status: product.status || (product.stockQuantity && product.stockQuantity > 0 ? 'In Stock' : 'Out of stock'),
         }))
         updatePaginatedProducts()
-      } catch (error) {
-        console.error('Failed to load products:', error)
+      } catch (err: any) {
+        console.error('Failed to load products:', err)
+        productStore.error = err.message || 'Failed to Fetch Data.'
       } finally {
-        loading.value = false
+        productStore.loading = false;
       }
     }
 
@@ -269,6 +265,7 @@ export default {
     return {
       products,
       loading,
+      error,
       currentPage,
       totalPages,
       goToPage,

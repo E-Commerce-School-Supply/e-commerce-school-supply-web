@@ -3,67 +3,51 @@
 
         <!-- Product Name -->
         <h1 class="text-[36px] font-bold leading-tight">
-            Pen that make you come to buy
+            {{ product.name }}
         </h1>
 
         <!-- Rating + Reviews + Stock -->
         <div class="flex items-center gap-2 text-gray-600 text-sm">
-            <!-- Stars -->
-            <div class="flex text-[20px] text-[#FF6B6B]">
-                ★ ★ ★ ★ ★
+            <div class="flex items-center mb-3 text-[#FF6B6B]">
+                <span class="mr-2 font-semibold text-gray-800">{{ product.rating.toFixed(1) }}</span>
+                <span class="text-[20px]">
+                    <template v-for="n in 5" :key="n">
+                        <span v-if="n <= Math.floor(product.rating)">★</span>
+                        <span v-else-if="n - product.rating <= 0.9">⯪</span>
+                        <span v-else>☆</span>
+                    </template>
+                </span>
+                <span class="text-black">({{ product.reviews }} reviews)</span>
+                <span class="mx-1 text-black">|</span>
+                <span v-if="product.stock > 0" class="text-green-500 font-medium">{{product.stock}} In Stock</span>
+                <span v-else class="text-red-500 font-medium">Out Of Stock</span> 
             </div>
-
-            <span>(150 reviews)</span>
-            <span class="mx-1">|</span>
-            <span class="text-green-500 font-medium">In Stock</span>
         </div>
 
         <!-- Price Section -->
         <div class="flex items-stretch ...">
             <div class="text-[48px] text-[#FF383C] leading-none">
-                $12.99
+                ${{ getDiscountedPrice(product) }}
             </div>
-
             <div class="flex items-center gap-2 text-gray-500 text-[14px] self-end ml-4 ">
-                <span class="line-through">$25.99</span>
-                <span class="text-[#FF383C] font-medium">(-50%)</span>
+                <span v-if="product.discount !== null && product.discount > 0" class="line-through">${{ product.price.toFixed(2) }}</span>
+                <span v-if="product.discount !== null && product.discount > 0" class="text-[#FF383C] font-medium">(-{{product.discount}}%)</span>
             </div>
         </div>
 
-        <!-- Divider Line -->
         <div class="w-[90%] h-[1.5px] bg-gray-300"></div>
 
         <!-- Product Info -->
-        <div class="space-y-2 text-[16px] leading-tight">
-            <h2 class="text-[32px]">Product Info</h2>
-            <div class="flex">
-                <span class="font-semibold w-32">Pen type:</span>
-                <span>Ballpoint</span>
-            </div>
-            <div class="flex">
-                <span class="font-semibold w-32">Tip size:</span>
-                <span>0.5 mm</span>
-            </div>
-            <div class="flex">
-                <span class="font-semibold w-32">Ink type:</span>
-                <span>Gel Ink</span>
-            </div>
-        </div>
+        <ProductInfoComponent :info="productInfo" />
 
         <!-- Product Description -->
         <div class="space-y-1">
             <h2 class="text-[32px]">Description</h2>
             <p class="text-[#5E5B5B] text-[20px] leading-relaxed text-balance break-normal">
-                This high-quality ballpoint pen features smooth,
-                consistent ink flow and a comfortable grip,
-                making it perfect for everyday writing.
-                Designed with a durable tip and quick-dry ink,
-                it helps prevent smudging and ensures clean, neat handwriting.
-                Ideal for students, office workers, and anyone who writes regularly.
+                {{ product.description }}
             </p>
         </div>
 
-        <!-- Divider Line -->
         <div class="w-[90%] h-[1.5px] bg-gray-300"></div>
 
         <!-- Colour Picker -->
@@ -73,86 +57,105 @@
 
         <!-- Quantity + Favorite -->
         <div class="flex items-center w-[90%]">
-
-            <!-- Amount Selector -->
-    <div class="flex items-center">
-        <!-- Minus Button -->
-        <button
-            class="w-9 h-10 flex justify-center items-center border rounded-l-sm text-lg font-bold hover:bg-[#1A535C] hover:text-white hover:border-[#1A535C]"
-            @click="decrease"
-        >
-            -
-        </button>
-
-        <!-- Number Display -->
-        <span
-            class="h-10 w-15 flex justify-center items-center border-y-1 text-lg font-semibold"
-        >
-            {{ quantity }}
-        </span>
-
-        <!-- Plus Button -->
-        <button
-            class="w-9 h-10 flex justify-center items-center border rounded-r-sm text-lg font-bold hover:bg-[#1A535C] hover:text-white hover:border-[#1A535C]"
-            @click="increase"
-        >
-            +
-        </button>
-    </div>
+            <div class="flex items-center">
+                    <button
+                    class="w-9 h-10 flex justify-center items-center border rounded-l-sm text-lg font-bold hover:bg-[#1A535C] hover:text-white hover:border-[#1A535C]"
+                    @click="decrease"
+                    >-</button>
+                    <span class="h-10 w-15 flex justify-center items-center border-y text-lg font-semibold">{{ quantity }}</span>
+                    <button
+                    class="w-9 h-10 flex justify-center items-center border rounded-r-sm text-lg font-bold hover:bg-[#1A535C] hover:text-white hover:border-[#1A535C]"
+                    @click="increase"
+                    >+</button>
+            </div>
 
             <!-- Favorite Button -->
-            <button class="w-10 h-10 ml-5">
-                <img src="/src/assets/images/add to favorite.png" alt="">
+            <button 
+                class="w-10 h-10 ml-5 border p-1 rounded-md flex justify-center items-center"
+                @click="toggleFavorite"
+            >
+                <img v-if="!isFavorite" src="/src/assets/images/Heart.png" alt="Favorite" />
+                <img v-else src="/src/assets/images/Heart-fill.png" alt="Favorite" />
             </button>
         </div>
 
         <!-- Add to Cart -->
-        <button class="w-full py-3 bg-[#1A535C] text-white font-semibold rounded-lg text-lg">
-            Add to Cart
+        <button
+            v-if="product.stock > 0"
+            @click="addToCart"
+            class="w-full h-15 text-white font-semibold rounded-lg text-lg"
+            >
+            <div v-if="!isInCart" class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm">Add to Cart</div>
+            <div v-else class="bg-[#df6868] w-full h-full flex justify-center items-center rounded-sm">Add another cart</div>
         </button>
 
         <!-- Buy Now -->
-        <button class="w-full py-3 bg-[#1A535C] text-white font-semibold rounded-lg text-lg">
-            Buy Now
+        <button v-if="product.stock > 0" class="w-full h-15 text-white font-semibold rounded-lg text-lg">
+            <div class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm">Buy Now</div>
         </button>
 
+        <div v-if="product.stock === 0" class="w-full justify-center flex text-[24px] mt-10 text-red-500">
+            <h1>This product is out of our stock!!</h1>
+        </div>
     </div>
 </template>
 
 <script lang="ts">
-    
-    import { ref } from 'vue';
-    import ColourPickerComponent from './colour-picker-component.vue';
+    import { defineComponent, ref } from 'vue'
+    import ColourPickerComponent from './colour-picker-component.vue'
+    import ProductInfoComponent from './product-info-component.vue'
 
-    export default{
-        name: "product-info-component",
-        components: {
-            ColourPickerComponent
-        },
-        data() {
-            return{
-                productColors: ["#1E90FF", "#FF0000", "#000000"]
-            }
+    export interface Product {
+        name: string
+        price: number
+        rating: number
+        reviews: number
+        description: string
+        discount: number | null
+        stock: number
+    }
+
+    export default defineComponent({
+        name: 'product-detail-card-component',
+        components: { ColourPickerComponent, ProductInfoComponent },
+
+        props: {
+            product: { type: Object as () => Product, required: true },
+            productInfo: { type: Array as () => { label: string; value: string }[], required: true },
+            productColors: { type: Array as () => string[], required: true }
         },
 
-        setup() {
-            const quantity = ref(1);
+        setup(props) {
+            const quantity = ref(0)
+            const isInCart = ref(false)
+            const isFavorite = ref(false)
 
             const increase = () => {
-                quantity.value++;
-            };
+                if (quantity.value < props.product.stock) quantity.value++
+            }
 
             const decrease = () => {
-                if (quantity.value > 1) {
-                    quantity.value--;
-                }
-            };
+                if (quantity.value > 0) quantity.value--
+            }
+
+            const getDiscountedPrice = (p: Product) => {
+                if (!p.discount || p.discount <= 0) return p.price.toFixed(2)
+                return (p.price - (p.price * p.discount) / 100).toFixed(2)
+            }
+
+            const addToCart = () => {
+                if (quantity.value > 0) isInCart.value = true
+            }
+
+            const toggleFavorite = () => {
+                isFavorite.value = !isFavorite.value
+            }
 
             return {
-                quantity,
-                increase,
-                decrease
-            };
+                quantity, isInCart, isFavorite,
+                increase, decrease, addToCart, toggleFavorite,
+                getDiscountedPrice
+            }
         }
-    }
+    })
 </script>

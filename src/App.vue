@@ -1,13 +1,34 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { initFlowbite } from 'flowbite'
+import { onMounted } from 'vue'
+import Toast from './components/ui/Toast.vue'
+import Header from './components/layout/Header.vue'
+import Footer from './components/layout/Footer.vue'
+
+onMounted(() => {
+  initFlowbite()
+})
+</script>
 
 <template>
-  <router-view v-slot="{ Component }">
-    <Transition name="fade" mode="out-in">
-      <component :is="Component" />
-    </Transition>
-  </router-view>
-</template>
+<div class="flex flex-col min-h-screen">
+    
+    <Header/>
 
+    <main class="grow">
+      <router-view v-slot="{ Component }">
+        <Transition name="fade" mode="out-in">
+          <component :is="Component" />
+        </Transition>
+      </router-view>
+    </main>
+
+    <Toast />
+    
+    <Footer/>
+    
+  </div>
+</template>
 
 <style scoped>
 .fade-enter-active,

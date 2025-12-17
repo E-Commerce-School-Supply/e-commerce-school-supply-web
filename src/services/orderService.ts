@@ -6,6 +6,7 @@ interface OrderPayload {
   payment: any
   shipping: string
 }
+// Note: backend may accept additional fields like `paymentMethod` and `status`.
 
 const ORDER_BASE = '/api/orders'
 

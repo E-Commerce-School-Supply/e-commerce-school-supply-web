@@ -461,6 +461,8 @@ async function handleDone() {
       cartId: cartStore.cartId,
       address: selectedAddress.value,
       payment: selectedCard.value || null,
+      paymentMethod: selectedCardment.value || (selectedCard.value ? 'card' : null),
+      status: 'Paid',
       shipping: selectedShipping.value,
     }
 

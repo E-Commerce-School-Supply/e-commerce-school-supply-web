@@ -7,9 +7,11 @@ import MyProfile from '@/components/profile/MyProfile.vue'
 import type { UserProfile } from '@/types/user'
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
+import { useRouter } from 'vue-router'
 const authStore = useAuthStore()
 const user = authStore.user
 const selectedTab = ref('profile')
+const router = useRouter()
 
 // 2. The fake user data
 // const userData = ref<UserProfile>({
@@ -91,6 +93,9 @@ const selectedTab = ref('profile')
   </aside>
 
   <div class="p-5 sm:ml-64">
+    <div class="flex justify-end mb-4">
+      <button @click="router.back()" class="px-3 py-2 border rounded-base">Back</button>
+    </div>
     <div v-if="selectedTab === 'profile'">
       <MyProfile :user-detail="user" />
     </div>

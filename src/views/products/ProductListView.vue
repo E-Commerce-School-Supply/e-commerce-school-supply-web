@@ -206,7 +206,8 @@ export default {
     const products = ref<any[]>([])
     const loading = ref(false)
     const currentPage = ref(1)
-    const itemsPerPage = 5
+
+    const itemsPerPage = 8
 
     const loadProducts = async () => {
       loading.value = true

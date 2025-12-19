@@ -42,6 +42,10 @@ function isLikelyAvatarUrl(value: unknown): value is string {
 
 const userAvatarSrc = computed(() => {
 	const candidate = authStore.user?.avatarUrl
+	if (typeof candidate === 'string' && candidate.startsWith('/')) {
+		const base = import.meta.env.VITE_API_URL || ''
+		return `${String(base).replace(/\/$/, '')}${candidate}`
+	}
 	return isLikelyAvatarUrl(candidate) ? candidate.trim() : BlankProfile
 })
 

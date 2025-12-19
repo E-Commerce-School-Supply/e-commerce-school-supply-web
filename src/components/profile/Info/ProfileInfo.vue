@@ -40,6 +40,10 @@ function isLikelyAvatarUrl(value: unknown): value is string {
 
 const avatarSrc = computed(() => {
   const candidate = isLikelyAvatarUrl(form.avatar) ? form.avatar.trim() : (authStore.user?.avatarUrl || '')
+  if (typeof candidate === 'string' && candidate.startsWith('/')) {
+    const base = import.meta.env.VITE_API_URL || ''
+    return `${String(base).replace(/\/$/, '')}${candidate}`
+  }
   return isLikelyAvatarUrl(candidate) ? candidate : DEFAULT_AVATAR
 })
 

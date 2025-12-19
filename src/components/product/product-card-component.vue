@@ -1,18 +1,19 @@
 <template>
   <!-- Product grid -->
-  <div
-    v-for="(product, index) in products"
-    :key="index"
-    class="w-[300px] h-[330px] bg-white rounded-[20px] overflow-hidden border border-gray-400 hover:-translate-y-1 hover:shadow-lg transition cursor-pointer"
-    @click="goToDetail(product.id)"
-  >
-    <!-- Image Section -->
-    <div class="relative flex justify-center items-center h-40">
-      <img
-        :src="product.imageUrl"
-        :alt="product.name"
-        class="max-w-[250px] max-h-40 object-contain"
-      />
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div
+      v-for="(product, index) in products"
+      :key="index"
+      class="w-full bg-white rounded-[20px] overflow-hidden border border-gray-400 hover:-translate-y-1 hover:shadow-lg transition cursor-pointer"
+      @click="goToDetail(product.id)"
+    >
+      <!-- Image Section -->
+      <div class="relative flex justify-center items-center h-40">
+        <img
+          :src="product.imageUrl"
+          :alt="product.name"
+          class="w-full h-full object-contain px-6"
+        />
 
       <!-- Discount -->
       <div
@@ -35,19 +36,19 @@
       </button>
     </div>
 
-    <!-- Info Section -->
-    <div class="p-4 bg-[#F5F5F5] m-2 rounded-[20px]">
-      <!-- Product Name -->
-      <h1 class="text-[14px] font-bold">{{ product.name }}</h1>
+      <!-- Info Section -->
+      <div class="p-4 bg-[#F5F5F5] m-2 rounded-[20px]">
+        <!-- Product Name -->
+        <h1 class="text-[14px] font-bold">{{ product.name }}</h1>
 
       <!-- Rating -->
       <div class="flex items-center mb-3 text-[#FF6B6B]">
-        <span class="mr-2 font-semibold text-gray-800">{{ product.rating?.toFixed(1) }}</span>
+        <span class="mr-2 font-semibold text-gray-800">{{ (product.averageRating || product.rating || 0).toFixed(1) }}</span>
         <span class="text-[20px]">
           <template v-for="n in 5" :key="n">
-            <span v-if="n <= Math.floor(product.rating)">★</span>
+            <span v-if="n <= Math.floor(product.averageRating || product.rating || 0)">★</span>
             <!-- full star -->
-            <span v-else-if="n - product.rating <= 0.5">⯪</span>
+            <span v-else-if="n - (product.averageRating || product.rating || 0) <= 0.5">⯪</span>
             <!-- half star -->
             <span v-else>☆</span>
             <!-- empty star -->
@@ -91,6 +92,7 @@
             Added {{ addedQuantity[index] }}
           </div>
         </button>
+      </div>
       </div>
     </div>
   </div>
@@ -138,7 +140,7 @@ export default defineComponent({
         alert('Please sign in to add favorites')
         return
       }
-      
+
       if (!product.id) return
 
       if (isFavorited(product.id)) {
@@ -180,18 +182,19 @@ export default defineComponent({
       }
 
       const product = props.products[index]
+      if (!product) return
       try {
         // Add item to cart - map product fields correctly
         await cartStore.addToCart({
-          productId: product?.id || `product-${index}`,
-          name: product?.name,
-          itemNo: product?.id || `P${index}`,
-          brand: product?.brandName || 'TovRean',
-          color: product?.color || 'Standard',
-          rating: product?.rating || 4.5,
-          price: product.price,
+          productId: product.id || `product-${index}`,
+          name: product.name ?? 'Unknown product',
+          itemNo: product.id || `P${index}`,
+          brand: product.brandName || 'TovRean',
+          color: product.color || 'Standard',
+          rating: 0,
+          price: product.price ?? 0,
           quantity: 1,
-          image: product?.imageUrl || '',
+          image: product.imageUrl || '',
         })
         linkBtn.value[index] = true
         addedQuantity.value[index] = (addedQuantity.value[index] || 0) + 1

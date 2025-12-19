@@ -1,32 +1,33 @@
 <template>
-    <!-- Header --> 
-    <div class="h-40 border-b fixed top-0 w-full z-50 bg-white"></div>
-    <!-- Body -->
-    <div class="flex pt-40 ...">
-        <div class="w-1/20 ..."></div>
-        <div class="w-18/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Body -->
+        <div>
             <div>
-                <h1 class="text-[20px] my-5 ...">
-                    Home / Pen
+                <h1 class="text-[20px] my-5">
+                    {{ breadcrumbText }}
                 </h1>
             </div>
-            
-            <div class="grid grid-cols-6 gap-4 relative ...">
-                <!-- Left sid product -->
-                <div class=" grid grid-flow-col grid-rows-4 grid-cols-8 gap-4 col-start-1 col-end-5 h-[600px] sticky top-50 w-25/22 ...">
-                    <productImageComponent :images="productImages"/>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <!-- Left side product (image) -->
+                <div class="bg-white rounded-md p-4 h-[520px] lg:h-[600px] lg:sticky lg:top-24">
+                    <ProductImageComponent :images="productImages" />
                 </div>
-                
-                <!-- right side product -->
-                <div class="col-start-5 col-end-7 bg-[#F5F5F5] rounded-md ...">
-                    <product-detail-card-component :product="product" :product-info="productInfo" :product-colors="productColors"/>
+
+                <!-- Right side product (details) -->
+                <div class="bg-[#F5F5F5] rounded-md">
+                    <product-detail-card-component
+                        :product="detailProduct"
+                        :product-info="productInfo"
+                        :product-colors="productColors"
+                    />
                 </div>
             </div>
 
             <!-- Review Section -->
-            <div class="my-10">
+            <div id="review" class="my-10">
                 <h1 class="text-[36px]">Review</h1>
-                <h3 class="text-[14px]">Check what our customers think of this product</h3>            
+                <h3 class="text-[14px]">Check what our customers think of this product</h3>
             </div>
 
 
@@ -37,7 +38,7 @@
 
                     <!-- Top Review Summary -->
                     <div class="row-span-2 row-start-1 col-start-1 col-end-9 bg-[#F5F5F5] rounded-t-md p-6 ">
-                        <ProductRatingComponent :rating="product.rating" :reviews="product.reviews" :recommend="product.recommended" />
+                        <ProductRatingComponent :rating="detailProduct.rating" :reviews="detailProduct.reviews" :recommend="recommendCount" />
                     </div>
 
                     <!-- Bottom Rating Distribution Section -->
@@ -50,13 +51,30 @@
                 <!-- right side review -->
                 <div class="col-start-3 col-end-7 grid gap-4 ...">
                     <!-- TOP: Write a Review -->
-                    <div v-if="currentUser.VerifiedBuyer" class="bg-[#F5F5F5] w-full rounded-md p-6 space-y-5">
+                    <div v-if="canWriteReview" class="bg-[#F5F5F5] w-full rounded-md p-6 space-y-5">
                         <write-review-component
                             :userReview="userReview"
-                            :currentUserName="currentUser.name"
+                            :currentUserName="currentUserName"
+                            :profilePic="currentUserAvatar"
                             @submit-review="handleSubmitReview"
                             @delete-review="handleDeleteReview"
                         />
+                    </div>
+                    <div v-else class="bg-[#F5F5F5] w-full rounded-md p-6">
+                        <div v-if="!authStore.user" class="text-sm text-gray-700">
+                            Please sign in to write a review.
+                        </div>
+                        <div v-else>
+                            <div class="text-sm text-gray-700">
+                                You can only write a review after you have bought this product.
+                            </div>
+                            <router-link
+                                :to="{ name: 'profile', query: { tab: 'reviews' } }"
+                                class="inline-block mt-3 font-medium text-accent hover:underline"
+                            >
+                                See products you bought
+                            </router-link>
+                        </div>
                     </div>
 
                     <!-- User comment-->
@@ -70,10 +88,10 @@
             <div>
                 <div class="flex justify-between items-baseline text-[20px]">
                     <h1 class="text-[36px] my-15">More product you may like!!</h1>
-                    <p>See All</p>
+                    <button @click="goToProductList" class="text-[#1A535C] hover:underline">See All</button>
                 </div>
-                
-                <product-card-component :products="products" />
+
+                <product-card-component :products="moreProducts" />
             </div>
 
             <!-- Contact -->
@@ -84,22 +102,26 @@
                 </button>
             </div>
         </div>
-        <div class="w-1/20 ..."></div>
     </div>
-    <!-- Footer -->
-    <div class="h-[455px] bg-[#1A535C]  w-full"></div>
 </template>
 
 <script lang="ts">
-    import { defineComponent, ref, computed } from "vue";
+    import { computed, onMounted, ref, watch } from "vue";
+    import { useRoute, useRouter } from 'vue-router'
+    import type { Product } from '@/types/product';
+    import { productService } from '@/services/productService'
+    import orderService from '@/services/orderService'
+    import { useProductStore } from '@/stores/productStore'
+    import { useAuthStore } from '@/stores/authStore'
+    import BlankProfile from '@/assets/images/pfp_blank.jpeg'
 
-    import productCardComponent from '@/components/product-card-component.vue';
-    import productImageComponent from "@/components/Product Detail/product-image-component.vue";
-    import productDetailCardComponent from '@/components/Product Detail/product-detail-card-component.vue';
-    import productRatingComponent from '@/components/Product Detail/product-rating-component.vue';
-    import ratingGraphComponent, { type RatingItem } from '@/components/Product Detail/rating-graph-component.vue';
-    import writeReviewComponent from '@/components/Product Detail/write-review-component.vue';
-    import reviewsComponent from '@/components/Product Detail/reviews-component.vue';
+    import productCardComponent from '@/components/product/product-card-component.vue';
+    import productImageComponent from '@/components/ProductDetail/product-image-component.vue';
+    import productDetailCardComponent from '@/components/ProductDetail/product-detail-card-component.vue';
+    import productRatingComponent from '@/components/ProductDetail/product-rating-component.vue';
+    import ratingGraphComponent, { type RatingItem } from '@/components/ProductDetail/rating-graph-component.vue';
+    import writeReviewComponent from '@/components/ProductDetail/write-review-component.vue';
+    import reviewsComponent from '@/components/ProductDetail/reviews-component.vue';
 
     interface Review {
         id: number;
@@ -126,326 +148,338 @@
         },
 
         setup(){
-            const products = [
-            {
-                image: "https://static.vecteezy.com/system/resources/previews/026/792/668/original/backpack-transparent-background-with-ai-generative-free-png.png",
-                name: "UrbanTrail Classic 25L Backpack",
-                price: 39.99,
-                rating: 2.8,
-                discount: null
-            },
-            {
-                image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-                name: "Comfort Sneakers",
-                price: 40.0,
-                rating: 4.5,
-                discount: 30
-            },
-            {
-                image: "https://i.pinimg.com/originals/a4/b0/2d/a4b02dd9c6ec52fe882845b2866c5f2e.png",
-                name: "Comfort Sneakers",
-                price: 40.0,
-                rating: 4.5,
-                discount: null
-            },
-            {
-                image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-                name: "Comfort Sneakers",
-                price: 40.0,
-                rating: 4.5,
-                discount: 30
-            },
-            {
-                image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-                name: "Comfort Sneakers",
-                price: 40.0,
-                rating: 4.5,
-                discount: 30
-            },
-            {
-                image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-                name: "Comfort Sneakers",
-                price: 40.0,
-                rating: 4.5,
-                discount: 30
-            },
-            {
-                image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-                name: "Comfort Sneakers",
-                price: 40.0,
-                rating: 4.5,
-                discount: 30
-            },
-            {
-                image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-                name: "Comfort Sneakers",
-                price: 40.0,
-                rating: 4.5,
-                discount: 30
-            },
-            {
-                image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-                name: "Comfort Sneakers",
-                price: 1111149.99,
-                rating: 4.5,
-                discount: 99.99
-            },
-            {
-                image: "https://static.vecteezy.com/system/resources/previews/026/792/661/original/backpack-bag-transparent-background-ai-generative-free-png.png",
-                name: "Comfort Sneakers",
-                price: 40.0,
-                rating: 4.5,
-                discount: 30
-            }
-            ];
+            const route = useRoute()
+            const router = useRouter()
+            const productStore = useProductStore()
+            const authStore = useAuthStore()
 
-            // Right side product info, color
-            const product = {
-                name: 'Pen that make you come to buy',
-                price: 25.99,
-                rating: 3.23,
-                reviews: 150,
-                description: 'This high-quality ballpoint pen features smooth This high-quality ballpoint pen features smooth This high-quality ballpoint pen features smooth This high-quality ballpoint pen features smooth This high-quality ballpoint pen features smooth This high-quality ballpoint pen features smooth This high-quality ballpoint pen features smooth',
-                discount: 50,
-                stock: 10,
-                recommended: 140
+            const products = computed<Product[]>(() => productStore.products)
+
+            const backendProduct = ref<Product | null>(null)
+
+            const detailProduct = computed(() => {
+                const p = backendProduct.value
+                const stock = Number(p?.stockQuantity ?? 0)
+                return {
+                    id: p?.id ?? '',
+                    name: p?.name ?? 'Product',
+                    price: Number(p?.price ?? 0),
+                    rating: averageRating.value,
+                    reviews: productReviews.value.length,
+                    description: p?.description ?? '',
+                    discount: (p?.discount ?? null) as number | null,
+                    stock,
+                    imageUrl: resolveBackendUrl(p?.imageUrl),
+                }
+            })
+
+            const productInfo = computed(() => {
+                const p = backendProduct.value
+                const info: { label: string; value: string }[] = []
+                if (p?.brandName) info.push({ label: 'Brand', value: p.brandName })
+                if (p?.mainCategory) info.push({ label: 'Category', value: p.mainCategory })
+                if (p?.subCategory) info.push({ label: 'Sub Category', value: p.subCategory })
+                if (p?.type) info.push({ label: 'Type', value: p.type })
+                if (p?.size) info.push({ label: 'Size', value: p.size })
+                if (p?.material) info.push({ label: 'Material', value: p.material })
+                if (p?.color) info.push({ label: 'Color', value: p.color })
+                if (p?.status) info.push({ label: 'Status', value: p.status })
+                return info
+            })
+
+            const productColors = computed(() => {
+                const p = backendProduct.value
+                return p?.color ? [p.color] : ['#1E90FF', '#FF0000', '#000000']
+            })
+
+            function resolveBackendUrl(maybeUrl: unknown): string {
+                if (typeof maybeUrl !== 'string') return ''
+                const s = maybeUrl.trim()
+                if (!s) return ''
+                // If API returns relative paths like "/avatars/..." or "/images/...", prefix API base.
+                if (s.startsWith('/')) {
+                    const base = import.meta.env.VITE_API_URL || ''
+                    return `${String(base).replace(/\/$/, '')}${s}`
+                }
+                return s
             }
 
-            const productInfo = [
-                { label: 'Author', value: 'George Orwell' },
-                { label: 'Pages', value: '328' },
-                { label: 'Language', value: 'English' },
-                { label: 'ISBN', value: '978-0451524935' }
-            ]
+            const goToProductList = () => {
+                router.push({ name: 'Product List' })
+            }
 
-            const productColors = ['#1E90FF', '#FF0000', '#000000']
+            const productImages = computed(() => {
+                const p = backendProduct.value
+                const url = resolveBackendUrl(p?.imageUrl)
+                return url ? [url] : ['/Photo/ourproduct.png']
+            })
 
-            // Product Images Distplay
-            const productImages = [
-                '/src/assets/images/image6.png',
-                '/src/assets/images/image 7.png',
-                '/src/assets/images/image 8.png'
-            ]
+            // Show up to 12 products in the "More product you may like" section
+            const moreProducts = computed<Product[]>(() => {
+                const list = productStore.products || []
+                return list.slice(0, 12)
+            })
 
-            // Rating Graph
-            const ratingData: RatingItem[] = [
-                { stars: 5, count: 130, percentage: 90 },
-                { stars: 4, count: 10, percentage: 7 },
-                { stars: 3, count: 5, percentage: 3 },
-                { stars: 2, count: 0, percentage: 0 },
-                { stars: 1, count: 5, percentage: 3 }
-            ]
+            // Rating Graph - computed from actual reviews
+            const ratingData = computed<RatingItem[]>(() => {
+                const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
 
-            // Reviews
-            const productReviews = ref([
-            {
-                id: 1,
-                profile: "https://i.pinimg.com/736x/e5/e6/ad/e5e6add55f04938dd8dcf271fab0b8d0.jpg",
-                name: "Lim Kitty",
-                rating: 4,
-                date: "2025-12-03 11:11",
-                title: "Amazing pen!",
-                body: "This pen writes very smoothly and feels premium. I love the ink flow and the grip is very comfortable. Highly recommended!This pen writes very smoothly and feels premium. I love the ink flow and the grip is very comfortable. Highly recommended!This pen writes very smoothly and feels premium. I love the ink flow and the grip is very comfortable. Highly recommended!This pen writes very smoothly and feels premium. I love the ink flow and the grip is very comfortable. Highly recommended!This pen writes very smoothly and feels premium. I love the ink flow and the grip is very comfortable. Highly recommended!",
-                recommend: true,
-                verified: true
-            },
-            {
-                id: 2,
-                profile: "https://i.pinimg.com/736x/e5/e6/ad/e5e6add55f04938dd8dcf271fab0b8d0.jpg",
-                name: "Jane Smiths",
-                rating: 5,
-                date: "2025-12-02 14:22",
-                title: "Excellent product!",
-                body: "I love this pen! Great quality and writes perfectly.",
-                recommend: false,
-                verified: true
-            },
-            {
-                id: 3,
-                profile: "https://i.pinimg.com/736x/e5/e6/ad/e5e6add55f04938dd8dcf271fab0b8d0.jpg",
-                name: "Jane Smith",
-                rating: 5,
-                date: "2025-12-02 14:22",
-                title: "Excellent product!",
-                body: "I love this pen! Great quality and writes perfectly.",
-                recommend: true,
-                verified: true
-            },
-            {
-                id: 4,
-                profile: "https://i.pinimg.com/736x/e5/e6/ad/e5e6add55f04938dd8dcf271fab0b8d0.jpg",
-                name: "Jane Smith",
-                rating: 5,
-                date: "2025-12-02 14:22",
-                title: "Excellent product!",
-                body: "I love this pen! Great quality and writes perfectly.",
-                recommend: true,
-                verified: true
-            },
-            {
-                id: 5,
-                profile: "https://i.pinimg.com/736x/e5/e6/ad/e5e6add55f04938dd8dcf271fab0b8d0.jpg",
-                name: "Jane Smith",
-                rating: 5,
-                date: "2025-12-02 14:22",
-                title: "Excellent product!",
-                body: "I love this pen! Great quality and writes perfectly.",
-                recommend: true,
-                verified: true
-            },
-            {
-                id: 6,
-                profile: "https://i.pinimg.com/736x/e5/e6/ad/e5e6add55f04938dd8dcf271fab0b8d0.jpg",
-                name: "Jane Smith",
-                rating: 5,
-                date: "2025-12-02 14:22",
-                title: "Excellent product!",
-                body: "I love this pen! Great quality and writes perfectly.",
-                recommend: true,
-                verified: true
-            },
-            {
-                id: 7,
-                profile: "https://i.pinimg.com/736x/e5/e6/ad/e5e6add55f04938dd8dcf271fab0b8d0.jpg",
-                name: "Jane Smith",
-                rating: 5,
-                date: "2025-12-02 14:22",
-                title: "Excellent product!",
-                body: "I love this pen! Great quality and writes perfectly.",
-                recommend: true,
-                verified: true
-            },
-            {
-                id: 8,
-                profile: "https://i.pinimg.com/736x/e5/e6/ad/e5e6add55f04938dd8dcf271fab0b8d0.jpg",
-                name: "Jane Smith",
-                rating: 5,
-                date: "2025-12-02 14:22",
-                title: "Excellent product!",
-                body: "I love this pen! Great quality and writes perfectly.",
-                recommend: true,
-                verified: true
-            },
-            {
-                id: 9,
-                profile: "https://i.pinimg.com/736x/e5/e6/ad/e5e6add55f04938dd8dcf271fab0b8d0.jpg",
-                name: "Jane Smith",
-                rating: 5,
-                date: "2025-12-02 14:22",
-                title: "Excellent product!",
-                body: "I love this pen! Great quality and writes perfectly.",
-                recommend: true,
-                verified: true
-            },
-            {
-                id: 10,
-                profile: "https://i.pinimg.com/736x/e5/e6/ad/e5e6add55f04938dd8dcf271fab0b8d0.jpg",
-                name: "Jane Smith",
-                rating: 5,
-                date: "2025-12-02 13:22",
-                title: "Excellent product!",
-                body: "I love this pen! Great quality and writes perfectly.",
-                recommend: true,
-                verified: true
-            },
-            {
-                id: 11,
-                profile: "https://i.pinimg.com/736x/e5/e6/ad/e5e6add55f04938dd8dcf271fab0b8d0.jpg",
-                name: "Jane Smith",
-                rating: 5,
-                date: "2025-12-02 14:22",
-                title: "Excellent product!",
-                body: "I love this pen! Great quality and writes perfectly.",
-                recommend: true,
-                verified: true
-            },
-            {
-                id: 12,
-                profile: "https://i.pinimg.com/736x/e5/e6/ad/e5e6add55f04938dd8dcf271fab0b8d0.jpg",
-                name: "Jane Smith",
-                rating: 5,
-                date: "2025-12-02 14:22",
-                title: "Excellent product!",
-                body: "I love this pen! Great quality and writes perfectly.",
-                recommend: true,
-                verified: true
-            },
-            {
-                id: 13,
-                profile: "https://i.pinimg.com/736x/e5/e6/ad/e5e6add55f04938dd8dcf271fab0b8d0.jpg",
-                name: "Jane Smith",
-                rating: 5,
-                date: "2025-12-02 14:22",
-                title: "Excellent product!",
-                body: "I love this pen! Great quality and writes perfectly.",
-                recommend: true,
-                verified: true
-            },
-            {
-                id: 14,
-                profile: "https://i.pinimg.com/736x/e5/e6/ad/e5e6add55f04938dd8dcf271fab0b8d0.jpg",
-                name: "Jane Smith",
-                rating: 5,
-                date: "2025-12-02 14:22",
-                title: "Excellent product!",
-                body: "I love this pen! Great quality and writes perfectly.",
-                recommend: true,
-                verified: true
-            },
-            {
-                id: 15,
-                profile: "https://i.pinimg.com/736x/e5/e6/ad/e5e6add55f04938dd8dcf271fab0b8d0.jpg",
-                name: "Jane Smith",
-                rating: 5,
-                date: "2025-12-02 14:22",
-                title: "Excellent product!",
-                body: "I love this pen! Great quality and writes perfectly.",
-                recommend: true,
-                verified: true
-            },
-            {
-                id: 16,
-                profile: "https://i.pinimg.com/736x/e5/e6/ad/e5e6add55f04938dd8dcf271fab0b8d0.jpg",
-                name: "Jane Smith",
-                rating: 5,
-                date: "2025-12-02 14:22",
-                title: "Excellent product!",
-                body: "I love this pen! Great quality and writes perfectly.",
-                recommend: true,
-                verified: true
-            },
-            {
-                id: 17,
-                profile: "https://i.pinimg.com/736x/e5/e6/ad/e5e6add55f04938dd8dcf271fab0b8d0.jpg",
-                name: "Jane Smith",
-                rating: 5,
-                date: "2025-12-02 14:22",
-                title: "Excellent product!",
-                body: "I love this pen! Great quality and writes perfectly.",
-                recommend: true,
-                verified: true
-            },
-            // Add as many reviews as needed
-            ]);
+                // Count ratings
+                productReviews.value.forEach(review => {
+                    const rating = review.rating
+                    if (rating >= 1 && rating <= 5) {
+                        counts[rating as keyof typeof counts]++
+                    }
+                })
 
-            const currentUser = {
-                name: "Yagami",
-                VerifiedBuyer: false,
-            };
+                const total = productReviews.value.length || 1 // Avoid division by zero
+
+                return [
+                    { stars: 5, count: counts[5], percentage: Math.round((counts[5] / total) * 100) },
+                    { stars: 4, count: counts[4], percentage: Math.round((counts[4] / total) * 100) },
+                    { stars: 3, count: counts[3], percentage: Math.round((counts[3] / total) * 100) },
+                    { stars: 2, count: counts[2], percentage: Math.round((counts[2] / total) * 100) },
+                    { stars: 1, count: counts[1], percentage: Math.round((counts[1] / total) * 100) },
+                ]
+            })
+
+            // Reviews (start empty until backed by DB)
+            const productReviews = ref<Review[]>([])
+
+            const purchaseLoading = ref(false)
+            const purchasedProductIds = ref<Set<string>>(new Set())
+
+            const extractOrderItems = (o: any): any[] => {
+                if (Array.isArray(o?.items)) return o.items
+                if (Array.isArray(o?.orderItems)) return o.orderItems
+                return []
+            }
+
+            const extractProductId = (it: any): string => {
+                const raw = it?.productId ?? it?.sku ?? it?.product?.id ?? it?.product?.productId
+                return String(raw ?? '').trim()
+            }
+
+            async function loadPurchasedProducts() {
+                if (!authStore.user) {
+                    purchasedProductIds.value = new Set()
+                    return
+                }
+
+                purchaseLoading.value = true
+                try {
+                    const baseOrders = await orderService.getOrders()
+                    const orders = Array.isArray(baseOrders) ? baseOrders : []
+
+                    const hydratedOrders = await Promise.all(
+                        orders.map(async (o: any) => {
+                            const items = extractOrderItems(o)
+                            const orderId = String(o?.id ?? o?.orderId ?? '').trim()
+                            if (items.length > 0 || !orderId) return o
+                            const full = await orderService.getOrder(orderId)
+                            return full ?? o
+                        }),
+                    )
+
+                    const next = new Set<string>()
+                    for (const o of hydratedOrders) {
+                        for (const it of extractOrderItems(o)) {
+                            const pid = extractProductId(it)
+                            if (pid) next.add(pid)
+                        }
+                    }
+                    purchasedProductIds.value = next
+                } catch (e) {
+                    console.error('Failed to load purchased products', e)
+                    purchasedProductIds.value = new Set()
+                } finally {
+                    purchaseLoading.value = false
+                }
+            }
+
+            const canWriteReview = computed(() => {
+                if (!authStore.user) return false
+                const id = String(route.params.id || '').trim()
+                if (!id) return false
+                return purchasedProductIds.value.has(id)
+            })
+            const currentUserName = computed(() => authStore.user?.username || authStore.user?.email || 'User')
+            const currentUserAvatar = computed(() => {
+                const candidate = authStore.user?.avatarUrl
+                if (typeof candidate === 'string' && /^(https?:\/\/|data:image\/|blob:|\/|\.{1,2}\/)/.test(candidate.trim())) {
+                    return resolveBackendUrl(candidate)
+                }
+                return BlankProfile
+            })
+
+            const breadcrumbText = computed(() => {
+                const p = backendProduct.value
+                if (p?.mainCategory && p?.subCategory) return `Home / ${p.mainCategory} / ${p.subCategory}`
+                if (p?.mainCategory) return `Home / ${p.mainCategory}`
+                return 'Home'
+            })
+
+            const averageRating = computed(() => {
+                if (productReviews.value.length === 0) return 0
+                const sum = productReviews.value.reduce((acc, r) => acc + Number(r.rating || 0), 0)
+                return Math.round((sum / productReviews.value.length) * 10) / 10
+            })
+
+            const recommendCount = computed(() => {
+                return productReviews.value.filter(r => !!r.recommend).length
+            })
 
             const userReview = ref<Review | null>(null);
+            const reviewsLoading = ref(false);
 
-            const handleSubmitReview = (review: Review) => {
-                userReview.value = review;
+            const handleSubmitReview = async (review: Review) => {
+                try {
+                    const productId = String(route.params.id || '').trim()
+                    if (!productId) return
+
+                    const payload = {
+                        title: review.title,
+                        body: review.body,
+                        rating: review.rating,
+                        recommend: review.recommend,
+                        userName: currentUserName.value,
+                        userAvatar: currentUserAvatar.value,
+                        verified: canWriteReview.value,
+                    }
+
+                    const savedReview = await productService.submitReview(productId, payload)
+
+                    // Update local state
+                    userReview.value = {
+                        id: savedReview.id,
+                        profile: savedReview.userAvatar || currentUserAvatar.value,
+                        name: savedReview.userName || currentUserName.value,
+                        title: savedReview.title,
+                        body: savedReview.body,
+                        rating: savedReview.rating,
+                        recommend: savedReview.recommend,
+                        verified: savedReview.verified || canWriteReview.value,
+                        date: savedReview.createdAt || new Date().toISOString(),
+                    }
+
+                    // Reload reviews and product to update rating
+                    await Promise.all([
+                        loadReviews(),
+                        loadProductByRoute(),
+                    ])
+                } catch (e) {
+                    console.error('Failed to submit review', e)
+                }
             };
 
-            const handleDeleteReview = () => {
-                userReview.value = null;
+            const handleDeleteReview = async () => {
+                try {
+                    if (!userReview.value?.id) return
+
+                    await productService.deleteReview(String(userReview.value.id))
+                    userReview.value = null
+
+                    // Reload reviews and product to update rating
+                    await Promise.all([
+                        loadReviews(),
+                        loadProductByRoute(),
+                    ])
+                } catch (e) {
+                    console.error('Failed to delete review', e)
+                }
             };
-            
+
+            async function loadReviews() {
+                const productId = String(route.params.id || '').trim()
+                if (!productId) return
+
+                reviewsLoading.value = true
+                try {
+                    const reviews = await productService.getProductReviews(productId)
+
+                    // Convert backend reviews to frontend format
+                    productReviews.value = reviews.map((r: any) => ({
+                        id: r.id,
+                        profile: resolveBackendUrl(r.userAvatar),
+                        name: r.userName || 'User',
+                        title: r.title,
+                        body: r.body,
+                        rating: r.rating,
+                        recommend: r.recommend,
+                        verified: r.verified || false,
+                        date: r.createdAt || r.updatedAt || new Date().toISOString(),
+                    }))
+
+                    // Load user's review if logged in
+                    if (authStore.user?.id) {
+                        try {
+                            const userReviewData = await productService.getUserReviewForProduct(
+                                productId,
+                                authStore.user.id
+                            )
+                            userReview.value = {
+                                id: userReviewData.id,
+                                profile: resolveBackendUrl(userReviewData.userAvatar),
+                                name: userReviewData.userName || currentUserName.value,
+                                title: userReviewData.title,
+                                body: userReviewData.body,
+                                rating: userReviewData.rating,
+                                recommend: userReviewData.recommend,
+                                verified: userReviewData.verified || false,
+                                date: userReviewData.createdAt || new Date().toISOString(),
+                            }
+                        } catch (e) {
+                            // User hasn't written a review yet
+                            userReview.value = null
+                        }
+                    }
+                } catch (e) {
+                    console.error('Failed to load reviews', e)
+                    productReviews.value = []
+                } finally {
+                    reviewsLoading.value = false
+                }
+            }
+
+            async function loadProductByRoute() {
+                const id = String(route.params.id || '').trim()
+                if (!id) return
+                try {
+                    backendProduct.value = await productService.getProductById(id)
+                } catch (e) {
+                    console.error('Failed to load product', e)
+                    backendProduct.value = null
+                }
+            }
+
+            onMounted(async () => {
+                await Promise.all([
+                    productStore.fetchProducts(),
+                    loadProductByRoute(),
+                    loadPurchasedProducts(),
+                    loadReviews(),
+                ])
+            })
+
+            watch(
+                () => route.params.id,
+                async (newId) => {
+                    if (newId) {
+                        await Promise.all([
+                            loadProductByRoute(),
+                            loadReviews(),
+                            loadPurchasedProducts(),
+                        ])
+                    }
+                },
+                { flush: 'post' }
+            )
+
             return {
                 products,
-                product,
+                moreProducts,
+                goToProductList,
+                detailProduct,
                 productInfo,
                 productColors,
                 productImages,
@@ -453,9 +487,13 @@
                 productReviews,
                 handleSubmitReview,
                 handleDeleteReview,
-                currentUser,
+                canWriteReview,
+                authStore,
+                currentUserName,
+                currentUserAvatar,
+                breadcrumbText,
+                recommendCount,
                 userReview
-
             }
         }
     }

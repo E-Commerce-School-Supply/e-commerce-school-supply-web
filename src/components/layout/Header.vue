@@ -4,17 +4,18 @@ import { initFlowbite } from 'flowbite'
 import { useAuthStore } from '@/stores/authStore'
 import { useCartStore } from '@/stores/cartStore'
 import { useProductStore } from '@/stores/productStore'
+import { useFavoriteStore } from '@/stores/favoriteStore'
 import { useRoute, useRouter } from 'vue-router'
 import  BlankProfile  from '@/assets/images/pfp_blank.jpeg'
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const productStore = useProductStore()
+const favoriteStore = useFavoriteStore()
 const router = useRouter()
 const route = useRoute()
 
 const isSearchFocused = ref(false)
 const searchQuery = ref('')
-const wishlistCount = ref(0)
 
 const guestMode = computed(() => sessionStorage.getItem('guestMode') === 'true')
 const isAuthenticated = computed(() => !!authStore.user)
@@ -29,6 +30,19 @@ const displayEmail = computed(() => {
 	if (isAuthenticated.value && authStore.user) return authStore.user.email || 'Signed in'
 	if (guestMode.value) return 'Browsing as guest'
 	return 'Please sign in'
+})
+
+function isLikelyAvatarUrl(value: unknown): value is string {
+	if (typeof value !== 'string') return false
+	const s = value.trim()
+	if (!s) return false
+	// Support common safe sources: absolute urls, data/blob urls, and app-relative paths.
+	return /^(https?:\/\/|data:image\/|blob:|\/|\.{1,2}\/)/.test(s)
+}
+
+const userAvatarSrc = computed(() => {
+	const candidate = authStore.user?.avatarUrl
+	return isLikelyAvatarUrl(candidate) ? candidate.trim() : BlankProfile
 })
 
 const isHome = computed(() => route.name === 'home')
@@ -65,8 +79,12 @@ function goToAuthPage(tab: 'signin' | 'signup') {
 	router.push({ name: tab })
 }
 
-function addToWishlist() {
-	wishlistCount.value++
+function goToFavorites() {
+	if (!isAuthenticated.value) {
+		goToAuthPage('signin')
+		return
+	}
+	router.push({ name: 'my-favorites' })
 }
 
 async function onSearchFocus() {
@@ -95,6 +113,11 @@ onMounted(() => {
 	cartStore.fetchCart().catch(() => {
 		// ignore (e.g. not signed in)
 	})
+	if (isAuthenticated.value) {
+		favoriteStore.fetchFavorite().catch(() => {
+			// ignore
+		})
+	}
 })
 
 onBeforeUnmount(() => {
@@ -192,7 +215,7 @@ onBeforeUnmount(() => {
 					</div>
 
 					<div class="flex items-center space-x-5">
-						<button @click="addToWishlist" class="text-gray-800 hover:text-[#EF4444] transition hidden sm:block relative">
+						<button @click="goToFavorites" class="text-gray-800 hover:text-[#EF4444] transition hidden sm:block relative">
 							<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
 									stroke-linecap="round"
@@ -202,10 +225,10 @@ onBeforeUnmount(() => {
 								/>
 							</svg>
 							<span
-								v-if="wishlistCount > 0"
+								v-if="favoriteStore.count > 0"
 								class="absolute -top-1 -right-1 bg-[#EF4444] text-white text-2xs font-bold rounded-full w-4 h-4 flex items-center justify-center"
 							>
-								{{ wishlistCount }}
+								{{ favoriteStore.count }}
 							</span>
 						</button>
 
@@ -241,7 +264,7 @@ onBeforeUnmount(() => {
 						>
 							<span class="sr-only">Open user menu</span>
 							<img v-if="guestMode" class="w-12 h-12 rounded-full object-cover" :src="BlankProfile" alt="user photo">
-							<img v-else class="w-9 h-9 rounded-full object-cover border border-gray-200" :src="authStore.user?.avatarUrl" alt="user photo">
+							<img v-else class="w-9 h-9 rounded-full object-cover border border-gray-200" :src="userAvatarSrc" alt="user photo">
 						</button>
 						<div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-xl w-44" id="user-dropdown">
 							<div class="px-4 py-3">
@@ -250,13 +273,23 @@ onBeforeUnmount(() => {
 							</div>
 							<ul class="py-2" aria-labelledby="user-menu-button">
 								<template v-if="isAuthenticated">
-									<li>
-										<router-link to="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-											Dashboard
+									<li v-if="authStore.user?.role === 'ADMIN'">
+										<router-link :to="{ name: 'Admin Dashboard' }" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 font-medium">
+											<i class="pi pi-th-large mr-2"></i>Admin Dashboard
 										</router-link>
 									</li>
 									<li>
-										<router-link to="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+										<router-link :to="{ name: 'my-orders' }" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+											My Orders
+										</router-link>
+									</li>
+									<li>
+										<router-link :to="{ name: 'my-reviews' }" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+											Review
+										</router-link>
+									</li>
+									<li>
+										<router-link :to="{ name: 'profile', query: { tab: 'profile' } }" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
 											Settings
 										</router-link>
 									</li>

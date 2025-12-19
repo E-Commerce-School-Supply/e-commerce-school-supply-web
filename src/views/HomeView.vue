@@ -44,7 +44,7 @@ const closeAuthPrompt = () => {
 
 // Intercept navigation for non-authenticated users if needed
 const handleShopNavigation = (event: Event) => {
-  // Optional: If you want to force login before viewing products, keep this. 
+  // Optional: If you want to force login before viewing products, keep this.
   // Otherwise, you can remove this check to let guests shop.
   /* if (!isAuthenticated.value) {
     event.preventDefault()
@@ -85,31 +85,37 @@ const addToWishlist = () => {
   wishlistCount.value++
 }
 
+// --- HELPERS ---
+const isMongoId = (id: any) => typeof id === 'string' && /^[a-fA-F0-9]{24}$/.test(id)
+const getObjectIdTime = (id: string) => (isMongoId(id) ? parseInt(id.substring(0, 8), 16) * 1000 : 0)
+
 // --- ACTIONS: DATA FETCHING ---
-const mapProductToViewModel = (product: any, index: number, type: 'sales' | 'carousel') => {
+const mapProductToViewModel = (product: any, index: number, type: 'sales' | 'carousel', tags?: string[]) => {
   const isFeatured = type === 'sales' && index === 2
-  const priceFormatted = `$${product.price.toFixed(2)}`
-  
+  const priceFormatted = `$${Number(product.price).toFixed(2)}`
+
   return {
     id: product.id || (100 + index),
     name: product.name,
     brand: product.brandName || 'TovRean',
+    priceValue: Number(product.price) || 0,
     price: priceFormatted,
-    oldPrice: product.discount 
-      ? `$${(product.price / (1 - product.discount / 100)).toFixed(2)}` 
+    oldPrice: product.discount
+      ? `$${(product.price / (1 - product.discount / 100)).toFixed(2)}`
       : null,
     image: product.imageUrl || '/Photo/ourproduct.png',
     stockQuantity: product.stockQuantity ?? 0,
     status: product.status || (product.stockQuantity > 0 ? 'In Stock' : 'Out of stock'),
-    
+    reviewCount: Number(product.reviewCount || 0),
+
     // Type specific fields
     ...(type === 'sales' && {
       type: isFeatured ? 'featured' : 'grid',
       desc: isFeatured ? product.description : undefined
     }),
     ...(type === 'carousel' && {
-      rating: 4 + (index % 2),
-      tags: index % 2 === 0 ? ['popular', 'latest'] : ['latest']
+      rating: Number(product.averageRating ?? product.rating ?? 0),
+      tags: tags ?? []
     })
   }
 }
@@ -117,12 +123,51 @@ const mapProductToViewModel = (product: any, index: number, type: 'sales' | 'car
 const loadProducts = async () => {
   loading.value = true
   try {
-    await productStore.fetchProducts() // Ensure this action exists in your store
-    const backendProducts = productStore.products || [] // Access state directly or via storeToRefs
+    await productStore.fetchProducts()
+    const backendProducts = productStore.products || []
 
-    salesProducts.value = backendProducts.slice(0, 5).map((p, i) => mapProductToViewModel(p, i, 'sales'))
-    carouselProducts.value = backendProducts.slice(0, 5).map((p, i) => mapProductToViewModel(p, i, 'carousel'))
-    
+    // Best sale = highest discount percentage (then by absolute savings)
+    const saleSorted = [...backendProducts]
+      .filter(p => Number(p.discount || 0) > 0)
+      .sort((a, b) => {
+        const dA = Number(a.discount || 0)
+        const dB = Number(b.discount || 0)
+        if (dB !== dA) return dB - dA
+        const saveA = Number(a.price) * dA
+        const saveB = Number(b.price) * dB
+        return saveB - saveA
+      })
+
+    const salesSource = saleSorted.length > 0 ? saleSorted : backendProducts
+
+    salesProducts.value = salesSource.slice(0, 5).map((p, i) => mapProductToViewModel(p, i, 'sales'))
+
+    // Prepare Latest/Popular from database values
+    const latestSorted = [...backendProducts]
+      .sort((a: any, b: any) => getObjectIdTime(String(b.id)) - getObjectIdTime(String(a.id)))
+
+    const popularSorted = [...backendProducts]
+      .sort((a: any, b: any) => {
+        const rcA = Number(a.reviewCount || 0)
+        const rcB = Number(b.reviewCount || 0)
+        if (rcB !== rcA) return rcB - rcA
+        const arA = Number(a.averageRating || a.rating || 0)
+        const arB = Number(b.averageRating || b.rating || 0)
+        return arB - arA
+      })
+
+    const latestSet = new Set(latestSorted.slice(0, 24).map(p => p.id))
+    const popularSet = new Set(popularSorted.slice(0, 24).map(p => p.id))
+
+    carouselProducts.value = backendProducts.slice(0, 48).map((p, i) => {
+      const tags: string[] = []
+      if (p && p.id) {
+        if (latestSet.has(p.id)) tags.push('latest')
+        if (popularSet.has(p.id)) tags.push('popular')
+      }
+      return mapProductToViewModel(p, i, 'carousel', tags)
+    })
+
   } catch (err) {
     console.error('Failed to load products:', err)
     error.value = err || 'Failed to Fetch Data.'
@@ -147,10 +192,27 @@ const setFilter = (filterName: string) => {
 }
 
 const filteredProducts = computed(() => {
-  if (activeFilter.value === 'All') return carouselProducts.value
-  if (activeFilter.value === 'Latest') return carouselProducts.value.filter(p => p.tags.includes('latest'))
-  if (activeFilter.value === 'Popular') return carouselProducts.value.filter(p => p.tags.includes('popular'))
-  return carouselProducts.value
+  const list = carouselProducts.value
+  if (!list || list.length === 0) return []
+
+  if (activeFilter.value === 'All') {
+    return [...list].sort((a: any, b: any) => Number(b.priceValue || 0) - Number(a.priceValue || 0))
+  }
+  if (activeFilter.value === 'Latest') {
+    return [...list]
+      .filter((p: any) => p.tags?.includes('latest'))
+      .sort((a: any, b: any) => getObjectIdTime(String(b.id)) - getObjectIdTime(String(a.id)))
+  }
+  if (activeFilter.value === 'Popular') {
+    return [...list]
+      .filter((p: any) => p.tags?.includes('popular'))
+      .sort((a: any, b: any) => {
+        const rcDiff = Number(b.reviewCount || 0) - Number(a.reviewCount || 0)
+        if (rcDiff !== 0) return rcDiff
+        return Number(b.rating || 0) - Number(a.rating || 0)
+      })
+  }
+  return list
 })
 
 // Carousel Scrolling
@@ -183,7 +245,7 @@ onMounted(() => {
 
 <template>
   <div class="font-sans antialiased text-gray-900 bg-white">
-    
+
     <section class="bg-gray-50 py-4 lg:py-9 overflow-hidden relative">
       <div class="grid max-w-7xl px-4 mx-auto lg:gap-16 xl:gap-24 lg:grid-cols-12 items-center">
         <div class="mr-auto place-self-center lg:col-span-6 z-10 text-center lg:text-left">
@@ -193,7 +255,7 @@ onMounted(() => {
           <p class="max-w-xl mb-6 font-light text-gray-600 text-sm md:text-base leading-relaxed mx-auto lg:mx-0">
             {{ text.heroSubtitle }}
           </p>
-          <router-link 
+          <router-link
             to="/product-list"
             class="inline-flex items-center justify-center px-8 py-3 text-sm font-medium text-center text-white rounded-lg bg-[#114B5F] hover:bg-[#0d3a4b] focus:ring-4 focus:ring-blue-100 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer"
           >
@@ -226,7 +288,7 @@ onMounted(() => {
     <section v-else class="pb-16 bg-white">
       <div class="max-w-7xl mx-auto px-4">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-          
+
           <div class="space-y-6 flex flex-col justify-between">
             <div v-for="product in salesProducts.slice(0, 2)" :key="product.id" :id="'product-'+product.id" class="relative bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition border border-gray-100">
               <div v-if="(product.stockQuantity ?? 0) <= 0" class="absolute top-3 left-3 bg-red-600 text-white text-[12px] px-2 py-1 rounded">Out of stock</div>
@@ -270,7 +332,7 @@ onMounted(() => {
         </div>
       </div>
     </section>
- 
+
     <section class="bg-gray-50 py-16 lg:py-20">
       <div class="max-w-7xl mx-auto px-4">
         <div class="bg-[#F9FAFB] rounded-2xl p-8 md:p-12 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-12">
@@ -305,7 +367,7 @@ onMounted(() => {
     </section>
     <section v-else-if="error">
         <p>{{ error }}</p>
-    </section>  
+    </section>
     <section v-else class="py-16 bg-white relative" id="carousel-section">
       <div class="max-w-7xl mx-auto px-4 text-center">
         <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8">{{ text.ourProductTitle }}</h2>

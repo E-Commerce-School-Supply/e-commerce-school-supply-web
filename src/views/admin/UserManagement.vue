@@ -54,6 +54,62 @@ const toggleSelectUser = (userId: string) => {
 const isSelected = (userId: string) => {
   return selectedUsers.value.includes(userId)
 }
+
+const formatDateTime = (value?: string) => {
+  if (!value) return 'N/A'
+
+  // Try ISO or timestamp first
+  const direct = tryParseDate(value)
+  if (direct) return format(direct)
+
+  // Try relative strings like "2 days ago"
+  const relative = parseRelativeDate(value)
+  if (relative) return format(relative)
+
+  return value
+}
+
+const tryParseDate = (val: string) => {
+  // Numeric timestamp
+  if (/^\d+$/.test(val.trim())) {
+    const num = Number(val)
+    const d = new Date(num)
+    return Number.isNaN(d.getTime()) ? null : d
+  }
+  const d = new Date(val)
+  return Number.isNaN(d.getTime()) ? null : d
+}
+
+const parseRelativeDate = (val: string) => {
+  const match = val.trim().match(/^(\d+)\s+(minute|hour|day|week|month|year)s?\s+ago$/i)
+  if (!match) return null
+  const amount = Number(match[1])
+  const unit = match[2].toLowerCase()
+  if (Number.isNaN(amount)) return null
+
+  const now = Date.now()
+  const unitMs: Record<string, number> = {
+    minute: 60 * 1000,
+    hour: 60 * 60 * 1000,
+    day: 24 * 60 * 60 * 1000,
+    week: 7 * 24 * 60 * 60 * 1000,
+    month: 30 * 24 * 60 * 60 * 1000,
+    year: 365 * 24 * 60 * 60 * 1000,
+  }
+  const delta = unitMs[unit]
+  if (!delta) return null
+  return new Date(now - amount * delta)
+}
+
+const format = (date: Date) => {
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
 </script>
 
 <template>
@@ -120,8 +176,7 @@ const isSelected = (userId: string) => {
               </th>
               <th class="px-4 py-3 text-left font-medium">Username</th>
               <th class="px-4 py-3 text-left font-medium">Email</th>
-              <th class="px-4 py-3 text-left font-medium">Status</th>
-              <th class="px-4 py-3 text-left font-medium">Last Login Date</th>
+              <th class="px-4 py-3 text-left font-medium">Last Login</th>
               <th class="px-4 py-3 text-left font-medium">Action</th>
             </tr>
           </thead>
@@ -146,19 +201,7 @@ const isSelected = (userId: string) => {
                 </div>
               </td>
               <td class="px-4 py-3 text-sm text-gray-600">{{ user.email }}</td>
-              <td class="px-4 py-3">
-                <span
-                  :class="[
-                    'px-3 py-1 rounded-full text-xs font-medium',
-                    user.status === 'Active'
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-200 text-gray-600',
-                  ]"
-                >
-                  {{ user.status }}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-sm text-gray-600">{{ user.lastLoginDate }}</td>
+              <td class="px-4 py-3 text-sm text-gray-600">{{ formatDateTime(user.lastLoginDate) }}</td>
               <td class="px-4 py-3">
                 <button class="p-1 hover:bg-gray-200 rounded transition">
                   <IconDotsVertical class="w-5 h-5 text-gray-600" />
@@ -167,7 +210,7 @@ const isSelected = (userId: string) => {
             </tr>
             <!-- Empty State -->
             <tr v-if="users.length === 0">
-              <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+              <td colspan="5" class="px-4 py-8 text-center text-gray-500">
                 No users found
               </td>
             </tr>

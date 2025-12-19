@@ -36,6 +36,30 @@ const adminService = {
   refreshUsers: async (): Promise<User[]> => {
     return adminService.getAllUsers()
   },
+
+  getDashboardStats: async () => {
+    try {
+      const response = await apiClient.get('/api/admin/dashboard/stats')
+      return response.data
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error)
+      return {
+        totalSales: 0,
+        totalOrders: 0,
+        totalProducts: 0
+      }
+    }
+  },
+
+  getAllOrders: async () => {
+    try {
+      const response = await apiClient.get('/api/admin/orders')
+      return response.data || []
+    } catch (error) {
+      console.error('Error fetching all orders:', error)
+      throw error
+    }
+  },
 }
 
 export default adminService

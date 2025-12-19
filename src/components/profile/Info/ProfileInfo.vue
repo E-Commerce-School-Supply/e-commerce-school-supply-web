@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import Banner from '@/assets/images/banner.jpg'
-import { ref, type Component, reactive } from 'vue'
+import { computed, ref, type Component, reactive } from 'vue'
 import InfoCard from './InfoCard.vue'
+import BlankProfile from '@/assets/images/pfp_blank.jpeg'
 import {
-  IconDotsVertical,
   IconMailFilled,
   IconPhoneFilled,
   IconUserCog,
@@ -28,7 +28,19 @@ import { useAuthStore } from '@/stores/authStore'
 const props = defineProps<Props>()
 const authStore = useAuthStore()
 
-const DEFAULT_AVATAR = '/Photo/MyProfile.JPG'
+const DEFAULT_AVATAR = BlankProfile
+
+function isLikelyAvatarUrl(value: unknown): value is string {
+  if (typeof value !== 'string') return false
+  const s = value.trim()
+  if (!s) return false
+  // Support common safe sources: absolute urls, data/blob urls, and app-relative paths.
+  return /^(https?:\/\/|data:image\/|blob:|\/|\.{1,2}\/)/.test(s)
+}
+
+const avatarSrc = computed(() => {
+  return isLikelyAvatarUrl(form.avatar) ? form.avatar.trim() : DEFAULT_AVATAR
+})
 
 const isEditing = ref(false)
 const showPasswordForm = ref(false)
@@ -40,7 +52,7 @@ const form = reactive({
   name: props.name || '',
   email: props.email || '',
   phoneNumber: props.phoneNumber || '',
-  avatar: props.avatar || DEFAULT_AVATAR,
+  avatar: props.avatar || '',
 })
 
 const selectedFile = ref<File | null>(null)
@@ -87,7 +99,7 @@ function cancelEdit() {
   form.name = props.name || ''
   form.email = props.email || ''
   form.phoneNumber = props.phoneNumber || ''
-  form.avatar = props.avatar || DEFAULT_AVATAR
+  form.avatar = props.avatar || ''
 }
 
 function startEditPassword() {
@@ -97,7 +109,12 @@ function startEditPassword() {
 
 async function saveEdit() {
   try {
-    await authStore.updateProfile({ username: form.name, email: form.email, phoneNumber: form.phoneNumber, avatarUrl: form.avatar })
+    await authStore.updateProfile({
+      username: form.name,
+      email: form.email,
+      phoneNumber: form.phoneNumber,
+      avatarUrl: isLikelyAvatarUrl(form.avatar) ? form.avatar.trim() : '',
+    })
     // update displayed details
     userDetail.value = [
       { label: 'Name', value: form.name, icon: IconUserFilled },
@@ -139,7 +156,7 @@ async function submitPasswordChange() {
       :style="{ backgroundImage: `url(${Banner})` }"
     >
       <img
-        :src="form.avatar || DEFAULT_AVATAR"
+        :src="avatarSrc"
         alt="profile"
         class="absolute -bottom-14 left-10 w-36 h-36 rounded-circle rounded-full border-5 border-white object-cover"
       />
@@ -212,7 +229,7 @@ async function submitPasswordChange() {
         </form>
       </div>
 
-      <div v-else="!isEditing" class="flex flex-wrap gap-5 w-full justify-between items-center mt-5">
+      <div v-else class="flex flex-wrap gap-5 w-full justify-between items-center mt-5">
         <InfoCard
           v-for="detail in userDetail"
           :key="detail.label"

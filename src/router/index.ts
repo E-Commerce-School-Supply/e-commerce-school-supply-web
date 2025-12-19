@@ -14,6 +14,12 @@ const route = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/contact',
+    name: 'Contact us',
+    component: () => import('../views/ContactView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/signin',
     name: 'signin',
     component: () => import('../views/auth/SigninPage.vue'),
@@ -53,7 +59,7 @@ const route = [
   {
     path: '/product/:id',
     name: 'product-detail',
-    component: () => import('../views/products/ProductDetailView.vue'),
+    component: () => import('../views/ProductDetailView.vue'),
     meta: { requiresAuth: true }
   },
   {
@@ -66,7 +72,7 @@ const route = [
     path: '/admin',
     name: 'Admin Dashboard',
     component: () => import('../views/admin/AdminDashboard.vue'),
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, hideLayout: true }
   },
   {
     path: '/cart',
@@ -84,6 +90,24 @@ const route = [
     path: '/orders/:id',
     name: 'order-detail',
     component: () => import('../views/orders/OrderDetailView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/orders',
+    name: 'my-orders',
+    component: () => import('../views/orders/MyOrdersView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/reviews',
+    name: 'my-reviews',
+    component: () => import('../views/orders/MyReviewsView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/favorites',
+    name: 'my-favorites',
+    component: () => import('../views/favorites/MyFavoritesView.vue'),
     meta: { requiresAuth: true },
   },
 ]
@@ -116,6 +140,11 @@ router.beforeEach((to, from, next) => {
   else {
     next()
   }
+})
+
+// Scroll to top on every route change (instant, no animation)
+router.afterEach(() => {
+  window.scrollTo({ top: 0, behavior: 'auto' })
 })
 
 export default router

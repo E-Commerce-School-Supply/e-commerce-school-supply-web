@@ -4,14 +4,17 @@ import MyCard from '@/components/profile/MyCard.vue'
 import MyFavorite from '@/components/profile/MyFavorite.vue'
 import MyOrders from '@/components/profile/MyOrders.vue'
 import MyProfile from '@/components/profile/MyProfile.vue'
+import MyReviews from '@/components/profile/MyReviews.vue'
 import type { UserProfile } from '@/types/user'
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import Sidebar from '@/components/layout/Sidebar.vue'
 import Spinner from '@/components/ui/Spinner.vue'
 import { useFavoriteStore } from '@/stores/favoriteStore'
+import { useRoute } from 'vue-router'
 const authStore = useAuthStore()
 const favStore = useFavoriteStore();
+const route = useRoute()
 
 // 2. The fake user data
 // const userData = ref<UserProfile>({
@@ -22,7 +25,31 @@ const favStore = useFavoriteStore();
 //   avatarUrl: 'https://i.pravatar.cc/150?img=11', // Free fake profile image service
 // })
 
-const currentTab = ref('profile');
+const allowedTabs = new Set(['profile', 'address', 'payment', 'orders', 'favorites', 'reviews'])
+
+const defaultTab = computed(() => {
+  // For regular users, show orders by default (instead of a dashboard-like profile tab)
+  if (authStore.user?.role === 'admin') return 'profile'
+  return 'orders'
+})
+
+const currentTab = ref<string>(defaultTab.value)
+
+watch(
+  () => route.query.tab,
+  (tab) => {
+    if (typeof tab === 'string' && allowedTabs.has(tab)) {
+      currentTab.value = tab
+    } else if (tab == null) {
+      currentTab.value = defaultTab.value
+    }
+  },
+  { immediate: true },
+)
+
+watch(defaultTab, (nextDefault) => {
+  if (route.query.tab == null) currentTab.value = nextDefault
+})
 </script>
 
 <template>
@@ -44,6 +71,9 @@ const currentTab = ref('profile');
       </div>
       <div v-else-if="currentTab === 'favorites'">
         <MyFavorite :fav-product="favStore.favProduct"/>
+      </div>
+      <div v-else-if="currentTab === 'reviews'">
+        <MyReviews />
       </div>
     </div>
   </div>

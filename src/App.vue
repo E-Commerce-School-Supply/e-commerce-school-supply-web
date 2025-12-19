@@ -1,9 +1,16 @@
 <script setup lang="ts">
 import { initFlowbite } from 'flowbite'
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import Toast from './components/ui/Toast.vue'
 import Header from './components/layout/Header.vue'
 import Footer from './components/layout/Footer.vue'
+
+const route = useRoute()
+
+const hideHeaderFooter = computed(() => {
+  return route.meta.guest === true || route.meta.hideLayout === true
+})
 
 onMounted(() => {
   initFlowbite()
@@ -12,8 +19,8 @@ onMounted(() => {
 
 <template>
 <div class="flex flex-col min-h-screen">
-    
-    <Header/>
+
+    <Header v-if="!hideHeaderFooter"/>
 
     <main class="grow">
       <router-view v-slot="{ Component }">
@@ -24,9 +31,9 @@ onMounted(() => {
     </main>
 
     <Toast />
-    
-    <Footer/>
-    
+
+    <Footer v-if="!hideHeaderFooter"/>
+
   </div>
 </template>
 

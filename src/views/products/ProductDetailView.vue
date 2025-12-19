@@ -35,12 +35,12 @@
           <div class="flex items-center gap-3 mb-6">
             <div class="flex text-[#FF6B6B] text-2xl">
               <template v-for="n in 5" :key="n">
-                <span v-if="n <= Math.floor(product.rating || 4.5)">★</span>
-                <span v-else-if="n - (product.rating || 4.5) <= 0.5">⯪</span>
+                <span v-if="n <= Math.floor(0)">★</span>
+                <span v-else-if="n - 0 <= 0.5">⯪</span>
                 <span v-else>☆</span>
               </template>
             </div>
-            <span class="font-semibold">{{ (product.rating || 4.5).toFixed(1) }}</span>
+            <span class="font-semibold">{{ (0).toFixed(1) }}</span>
           </div>
 
           <!-- Price -->
@@ -115,15 +115,10 @@
     <div v-else class="flex justify-center items-center min-h-96">
       <p class="text-gray-500">Loading product...</p>
     </div>
-
-    <!-- Footer -->
-    <Footer />
   </div>
 </template>
 
 <script lang="ts">
-import Header from '@/components/layout/Header.vue'
-import Footer from '@/components/layout/Footer.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useProductStore } from '@/stores/productStore'
 import { useCartStore } from '@/stores/cartStore'
@@ -133,7 +128,7 @@ import { initFlowbite } from 'flowbite'
 
 export default {
   name: 'product-detail-view',
-  components: { Header, Footer },
+  components: {},
   data() {
     return {
       authStore: useAuthStore(),
@@ -162,7 +157,7 @@ export default {
             itemNo: this.product.id,
             brand: this.product.brandName || 'TovRean',
             color: this.product.color || 'Standard',
-            rating: this.product.rating || 4.5,
+            rating: 0,
             price: this.product.price,
             quantity: 1,
             image: this.product.imageUrl || this.product.imageURL || '',

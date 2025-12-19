@@ -11,7 +11,7 @@
       <!-- Left Profile + Name + Stars -->
       <div class="flex gap-3">
         <img
-          :src="review.profile || '/src/assets/images/default-avatar.png'"
+          :src="avatarSrc"
           alt="User Profile"
           class="w-[50px] h-[50px] rounded-full object-cover"
         />
@@ -53,12 +53,23 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import BlankProfile from '@/assets/images/pfp_blank.jpeg'
 
 export default defineComponent({
   name: "review-card-component",
   props: {
     review: { type: Object, required: true },
     editable: { type: Boolean, default: false }
+  },
+  computed: {
+    avatarSrc(): string {
+      const raw = (this as any)?.review?.profile
+      if (typeof raw !== 'string') return BlankProfile
+      const s = raw.trim()
+      if (!s) return BlankProfile
+      if (/^(https?:\/\/|data:image\/|blob:|\/|\.{1,2}\/)/.test(s)) return s
+      return BlankProfile
+    }
   }
 });
 </script>

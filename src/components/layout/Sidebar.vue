@@ -42,8 +42,8 @@
     <div v-if="isAdmin" class="bg-white rounded shadow p-4">
         <h4 class="font-semibold mb-3">Management</h4>
         <ul class="text-sm space-y-2">
-            <li 
-            @click="activeTab = 'userManagement'" 
+            <li
+            @click="activeTab = 'userManagement'"
             :class="isActive('userManagement') ? 'text-accent font-medium' : 'cursor-pointer text-gray-600 hover:text-accent'">
             User Management
             </li>
@@ -62,22 +62,7 @@
         </ul>
     </div>
 
-    <div v-else class="bg-white rounded shadow p-4">
-        <h4 class="font-semibold mb-3">Shopping Activity</h4>
-        <ul class="text-sm space-y-2">
-            <li 
-            @click="activeTab = 'orders'" 
-            :class="isActive('orders') ? 'text-accent font-medium' : 'cursor-pointer text-gray-600 hover:text-accent'">
-            My Orders
-            </li>
-            <li
-            @click="activeTab = 'favorites'"
-            :class="isActive('favorites') ? 'text-accent font-medium cursor-pointer' : 'text-gray-600 hover:text-accent cursor-pointer'"
-            >
-            My Favorites
-            </li>
-        </ul>
-    </div>
+
 </aside>
 
 </template>

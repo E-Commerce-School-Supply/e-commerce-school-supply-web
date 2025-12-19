@@ -48,7 +48,14 @@ onMounted(async () => {
               <td class="px-3 py-4">${{ (o.total || o.amount || 0).toFixed(2) }}</td>
               <td class="px-3 py-4">{{ new Date(o.createdAt || o.date || Date.now()).toLocaleDateString() }}</td>
               <td class="px-3 py-4">{{ o.status || o.orderStatus || '—' }}</td>
-              <td class="px-3 py-4"><router-link :to="{ name: 'order-detail', params: { id: o.id || o.orderId } }" class="font-medium text-accent hover:underline">View</router-link></td>
+              <td class="px-3 py-4">
+                <router-link
+                  :to="{ name: 'order-detail', params: { id: o.id || o.orderId } }"
+                  class="font-medium text-accent hover:underline"
+                >
+                  View
+                </router-link>
+              </td>
             </tr>
           </tbody>
         </table>

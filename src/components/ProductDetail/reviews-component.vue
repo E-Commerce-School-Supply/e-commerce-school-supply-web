@@ -38,7 +38,7 @@
     </div>
     <div v-if="reviews.length === 0" class="w-full justify-center flex text-[24px]  text-red-500">
         <h1>There are no comment here!!</h1>
-    </div>    
+    </div>
   </div>
 
 </template>
@@ -49,7 +49,7 @@ import ReviewCardComponent from "./review-card-component.vue";
 import DropDownComponent from "./drop-down-component.vue";
 
 interface Review {
-  id: number;
+  id: string | number;
   profile: string;
   name: string;
   rating: number;

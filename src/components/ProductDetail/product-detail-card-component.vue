@@ -1,5 +1,5 @@
 <template>
-    <div class="col-start-5 col-end-7 rounded-md p-6 space-y-6 m-[50px] relative z-30">
+    <div class="rounded-md p-8 space-y-6">
 
         <!-- Product Name -->
         <h1 class="text-[36px] font-bold leading-tight">
@@ -9,18 +9,18 @@
         <!-- Rating + Reviews + Stock -->
         <div class="flex items-center gap-2 text-gray-600 text-sm">
             <div class="flex items-center mb-3 text-[#FF6B6B]">
-                <span class="mr-2 font-semibold text-gray-800">{{ product.rating.toFixed(1) }}</span>
+                <span class="mr-2 font-semibold text-gray-800">{{ (0).toFixed(1) }}</span>
                 <span class="text-[20px]">
                     <template v-for="n in 5" :key="n">
-                        <span v-if="n <= Math.floor(product.rating)">★</span>
-                        <span v-else-if="n - product.rating <= 0.9">⯪</span>
+                        <span v-if="n <= Math.floor(0)">★</span>
+                        <span v-else-if="n - 0 <= 0.9">⯪</span>
                         <span v-else>☆</span>
                     </template>
                 </span>
                 <span class="text-black">({{ product.reviews }} reviews)</span>
                 <span class="mx-1 text-black">|</span>
                 <span v-if="product.stock > 0" class="text-green-500 font-medium">{{product.stock}} In Stock</span>
-                <span v-else class="text-red-500 font-medium">Out Of Stock</span> 
+                <span v-else class="text-red-500 font-medium">Out Of Stock</span>
             </div>
         </div>
 
@@ -70,7 +70,7 @@
             </div>
 
             <!-- Favorite Button -->
-            <button 
+            <button
                 class="w-10 h-10 ml-5 border p-1 rounded-md flex justify-center items-center"
                 @click="toggleFavorite"
             >
@@ -90,22 +90,48 @@
         </button>
 
         <!-- Buy Now -->
-        <button v-if="product.stock > 0" class="w-full h-15 text-white font-semibold rounded-lg text-lg">
+        <button v-if="product.stock > 0" class="w-full h-15 text-white font-semibold rounded-lg text-lg" @click="buyNow">
             <div class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm">Buy Now</div>
         </button>
 
-        <div v-if="product.stock === 0" class="w-full justify-center flex text-[24px] mt-10 text-red-500">
+        <!-- Back to Products -->
+        <button
+            v-if="product.stock > 0"
+            @click="goBackToProducts"
+            class="w-full h-15 font-semibold rounded-lg text-lg"
+        >
+            <div class="w-full h-full flex justify-center items-center rounded-sm border border-[#1A535C] text-[#1A535C]">
+                Back to Products
+            </div>
+        </button>
+
+        <div v-if="product.stock === 0" class="w-full flex flex-col items-center text-[24px] mt-10 text-red-500">
             <h1>This product is out of our stock!!</h1>
+
+            <button
+                @click="goBackToProducts"
+                class="mt-6 w-full max-w-xs h-12 font-semibold rounded-lg text-lg"
+            >
+                <div class="w-full h-full flex justify-center items-center rounded-sm border border-[#1A535C] text-[#1A535C]">
+                    Back to Products
+                </div>
+            </button>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-    import { defineComponent, ref } from 'vue'
+    import { computed, defineComponent, ref } from 'vue'
+    import { useRouter } from 'vue-router'
     import ColourPickerComponent from './colour-picker-component.vue'
     import ProductInfoComponent from './product-info-component.vue'
+    import { useFavoriteStore } from '@/stores/favoriteStore'
+    import { useAuthStore } from '@/stores/authStore'
+    import { useCartStore } from '@/stores/cartStore'
+    import type { Product as FavoriteProduct } from '@/types/product'
 
     export interface Product {
+        id?: string
         name: string
         price: number
         rating: number
@@ -113,6 +139,7 @@
         description: string
         discount: number | null
         stock: number
+        imageUrl?: string
     }
 
     export default defineComponent({
@@ -126,35 +153,99 @@
         },
 
         setup(props) {
-            const quantity = ref(0)
+            const router = useRouter()
+            const favStore = useFavoriteStore()
+            const authStore = useAuthStore()
+            const cartStore = useCartStore()
+
+            const quantity = ref(1)
             const isInCart = ref(false)
-            const isFavorite = ref(false)
+
+            const isFavorite = computed(() => favStore.isFavorited(props.product.id))
 
             const increase = () => {
                 if (quantity.value < props.product.stock) quantity.value++
             }
 
             const decrease = () => {
-                if (quantity.value > 0) quantity.value--
+                if (quantity.value > 1) quantity.value--
+            }
+
+            const getDiscountedPriceValue = (p: Product) => {
+                if (!p.discount || p.discount <= 0) return Number(p.price)
+                return Number(p.price) - (Number(p.price) * Number(p.discount)) / 100
             }
 
             const getDiscountedPrice = (p: Product) => {
-                if (!p.discount || p.discount <= 0) return p.price.toFixed(2)
-                return (p.price - (p.price * p.discount) / 100).toFixed(2)
+                return getDiscountedPriceValue(p).toFixed(2)
             }
 
-            const addToCart = () => {
-                if (quantity.value > 0) isInCart.value = true
+            const addToCart = async () => {
+                if (!authStore.user) {
+                    router.push({ name: 'signin' })
+                    return
+                }
+
+                if (!props.product.id) {
+                    console.error('Missing product id; cannot add to cart')
+                    return
+                }
+
+                const brand = props.productInfo.find(info => info.label === 'Brand')?.value || ''
+                const color = props.productColors[0] || ''
+
+                try {
+                    await cartStore.addToCart({
+                        productId: props.product.id,
+                        name: props.product.name,
+                        itemNo: props.product.id,
+                        brand,
+                        color,
+                        rating: Number(props.product.rating) || 0,
+                        price: getDiscountedPriceValue(props.product),
+                        quantity: quantity.value,
+                        image: props.product.imageUrl || '',
+                    })
+                    isInCart.value = true
+                } catch (error) {
+                    console.error('Failed to add to cart:', error)
+                }
             }
 
-            const toggleFavorite = () => {
-                isFavorite.value = !isFavorite.value
+            const buyNow = async () => {
+                await addToCart()
+                if (authStore.user) {
+                    router.push({ name: 'checkout' })
+                }
+            }
+
+            const toggleFavorite = async () => {
+                if (!authStore.user) {
+                    router.push({ name: 'signin' })
+                    return
+                }
+
+                const favPayload: FavoriteProduct = {
+                    id: props.product.id,
+                    name: props.product.name,
+                    price: props.product.price,
+                    rating: props.product.rating,
+                    discount: props.product.discount,
+                    imageUrl: props.product.imageUrl,
+                }
+
+                await favStore.toggleFavorite(favPayload)
+            }
+
+            const goBackToProducts = () => {
+                router.push('/products')
             }
 
             return {
                 quantity, isInCart, isFavorite,
-                increase, decrease, addToCart, toggleFavorite,
-                getDiscountedPrice
+                increase, decrease, addToCart, buyNow, toggleFavorite,
+                getDiscountedPrice,
+                goBackToProducts,
             }
         }
     })

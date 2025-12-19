@@ -1,5 +1,9 @@
 <script setup lang="ts">
 
+defineOptions({
+    name: 'AppFooter',
+})
+
 
 
 </script>
@@ -49,7 +53,7 @@
                     <li><router-link to="/about" class="hover:text-white hover:underline transition">Privacy policy</router-link></li>
                     <li><router-link to="/about" class="hover:text-white hover:underline transition">term of Use</router-link></li>
                     <li><router-link to="/about" class="hover:text-white hover:underline transition">FAQ</router-link></li>
-                    <li><router-link to="/about" class="hover:text-white hover:underline transition">Contact</router-link></li>
+                    <li><router-link to="/contact" class="hover:text-white hover:underline transition">Contact</router-link></li>
                 </ul>
             </div>
 

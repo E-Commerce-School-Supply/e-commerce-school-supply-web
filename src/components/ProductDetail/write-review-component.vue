@@ -15,7 +15,7 @@
       <h2 class="text-2xl font-bold">Write a review for this product</h2>
       <div class="flex gap-4 mt-4">
         <!-- Profile -->
-        <img :src="profilePic" class="w-[50px] h-[50px] rounded-full bg-gray-400" />
+        <img :src="profilePicSrc" class="w-[50px] h-[50px] rounded-full bg-gray-400" />
 
         <!-- Form -->
         <div class="flex-1 space-y-3">
@@ -56,12 +56,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, type PropType } from "vue";
+import { computed, defineComponent, ref, type PropType } from "vue";
 import DropDownComponent from "./drop-down-component.vue";
 import ReviewCardComponent from "./review-card-component.vue";
+import BlankProfile from '@/assets/images/pfp_blank.jpeg'
 
 interface Review {
-  id: number;
+  id: string | number;
   profile: string;
   name: string;
   title: string;
@@ -79,7 +80,7 @@ export default defineComponent({
   props: {
     profilePic: {
       type: String,
-      default: "https://i.pinimg.com/736x/e5/da/72/e5da72f5e61cd1776498bae3cb7b8645.jpg"
+      default: ""
     },
     currentUserName: {
       type: String,
@@ -94,9 +95,18 @@ export default defineComponent({
   emits: ["submit-review", "delete-review"],
 
   setup(props, { emit }) {
+        const profilePicSrc = computed(() => {
+          const raw = props.profilePic
+          if (typeof raw !== 'string') return BlankProfile
+          const s = raw.trim()
+          if (!s) return BlankProfile
+          if (/^(https?:\/\/|data:image\/|blob:|\/|\.{1,2}\/)/.test(s)) return s
+          return BlankProfile
+        })
+
     const title = ref("");
     const body = ref("");
-    const starOption = ref("5");
+    const starOption = ref("0");
     const recommendOption = ref("true");
 
     const recommendOptions = [
@@ -105,6 +115,7 @@ export default defineComponent({
     ];
 
     const starOptions = [
+      { label: "0 Stars", value: "0" },
       { label: "5 Stars", value: "5" },
       { label: "4 Stars", value: "4" },
       { label: "3 Stars", value: "3" },
@@ -114,6 +125,7 @@ export default defineComponent({
 
     const submitReview = () => {
       if (!title.value || !body.value) return;
+      if (Number(starOption.value) <= 0) return;
 
       emit("submit-review", {
         id: Date.now(),
@@ -129,7 +141,7 @@ export default defineComponent({
 
       title.value = "";
       body.value = "";
-      starOption.value = "5";
+      starOption.value = "0";
       recommendOption.value = "true";
     };
 
@@ -150,6 +162,7 @@ export default defineComponent({
     };
 
     return {
+      profilePicSrc,
       title,
       body,
       starOption,

@@ -3,6 +3,7 @@ import { ref, reactive, onMounted, computed, onBeforeUnmount } from 'vue'
 import { IconDotsVertical } from '@tabler/icons-vue'
 import { productService } from '@/services/productService'
 import type { Product } from '@/types/product'
+import BlankProfile from '@/assets/images/pfp_blank.jpeg'
 
 const products = ref<Product[]>([])
 const selectedProducts = ref<string[]>([])
@@ -190,7 +191,7 @@ const saveProduct = async () => {
       stockQuantity: productForm.stockQuantity,
       price: productForm.salePrice,
       discount: productForm.discount,
-      imageUrl: productForm.images.length > 0 ? productForm.images[0] : 'https://via.placeholder.com/100?text=No+Image',
+      imageUrl: productForm.images.length > 0 ? productForm.images[0] : BlankProfile,
     }
 
     if (isEditMode.value && editingProductId.value) {
@@ -384,9 +385,9 @@ const isDropdownOpen = (productId: string) => {
             <td class="py-3 px-4">
               <div class="flex items-center gap-3">
                 <img
-                  :src="product.imageUrl && product.imageUrl.trim() !== '' ? product.imageUrl : 'https://via.placeholder.com/100?text=No+Image'"
+                  :src="product.imageUrl && product.imageUrl.trim() !== '' ? product.imageUrl : BlankProfile"
                   :alt="product.name"
-                  @error="(e) => (e.target as HTMLImageElement).src = 'https://via.placeholder.com/100?text=Error'"
+                  @error="(e) => (e.target as HTMLImageElement).src = BlankProfile"
                   class="w-10 h-10 rounded object-cover bg-gray-100"
                 />
                 <span class="font-medium">{{ product.name }}</span>

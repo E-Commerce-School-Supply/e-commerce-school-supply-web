@@ -27,9 +27,11 @@ export const useAuthStore = defineStore('auth', () => {
         email: response.data.email,
         role: response.data.role,
         phoneNumber: response.data.phoneNumber || '',
-        avatarUrl: '',
+        avatarUrl: response.data.avatarUrl || '',
       }
       token.value = response.data.token
+      // Persist user with avatar immediately
+      sessionStorage.setItem('user', JSON.stringify(user.value))
 
       // Clear guest browsing flag when a real session starts
       sessionStorage.removeItem('guestMode')
@@ -95,6 +97,18 @@ export const useAuthStore = defineStore('auth', () => {
       const avatarUrl = res.data.avatarUrl
       user.value = { ...user.value, avatarUrl }
       sessionStorage.setItem('user', JSON.stringify(user.value))
+
+      // Refresh profile from server to ensure all fields (and absolute avatar URL) are up-to-date
+      try {
+        const profileRes = await authService.getProfile()
+        if (profileRes?.data) {
+          user.value = profileRes.data
+          sessionStorage.setItem('user', JSON.stringify(user.value))
+        }
+      } catch (e) {
+        // ignore profile refresh errors
+      }
+
       return avatarUrl
     } catch (err) {
       console.error('Failed to upload avatar', err)

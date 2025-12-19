@@ -39,7 +39,8 @@ function isLikelyAvatarUrl(value: unknown): value is string {
 }
 
 const avatarSrc = computed(() => {
-  return isLikelyAvatarUrl(form.avatar) ? form.avatar.trim() : DEFAULT_AVATAR
+  const candidate = isLikelyAvatarUrl(form.avatar) ? form.avatar.trim() : (authStore.user?.avatarUrl || '')
+  return isLikelyAvatarUrl(candidate) ? candidate : DEFAULT_AVATAR
 })
 
 const isEditing = ref(false)

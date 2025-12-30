@@ -108,11 +108,11 @@
           <div v-if="loading">
             <Spinner/>
           </div>
-          <div v-else class="flex flex-wrap gap-5 justify-between">
+          <div v-else class="flex flex-wrap gap-5">
             <product-card-component :products="products" />
           </div>
 
-          <div v-if="totalPages() > 1" class="flex justify-end my-20 items-center gap-6 text-[16px]">
+          <div v-if="totalPages() > 0" class="flex justify-end my-20 items-center gap-6 text-[16px]">
             <!-- Previous -->
             <div
               @click="previousPage"
@@ -229,7 +229,7 @@ export default {
           imageUrl: product.imageUrl || 'https://via.placeholder.com/300x300?text=No+Image',
           name: product.name,
           price: product.price,
-          rating: product.averageRating || product.rating || 0,
+          averageRating: product.averageRating || 0,
           discount: product.discount || null,
           stockQuantity: product.stockQuantity ?? 0,
           status: (product.stockQuantity ?? 0) > 0 ? 'In Stock' : 'Out of stock',

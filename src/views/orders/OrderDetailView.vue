@@ -131,7 +131,7 @@ const itemImage = (it: any) => {
                       </div>
                     </div>
                   </td>
-                  <td class="px-4 py-3 text-center">{{ it.quantity || it.qty || 1 }}</td>
+                  <td class="px-4 py-3">{{ it.quantity || it.qty || 1 }}</td>
                   <td class="px-4 py-3">${{ (it.price || it.unitPrice || 0).toFixed(2) }}</td>
                 </tr>
               </tbody>

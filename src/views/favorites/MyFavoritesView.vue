@@ -1,12 +1,12 @@
 ﻿<template>
-  <div class="favorites-page">
+  <div class="favorites-page max-w-8xl mx-auto">
     <div class="container">
       <div class="page-header">
         <h1>My Favorites</h1>
         <p class="subtitle">{{ favorites.length }} items</p>
       </div>
       <div v-if="loading" class="loading">
-        <p>Loading your favorites...</p>
+        <Spinner/>
       </div>
       <div v-else-if="favorites.length === 0" class="empty-state">
         <i class="pi pi-heart" style="font-size: 4rem; color: #ccc"></i>
@@ -14,9 +14,9 @@
         <p>Start adding products to your favorites to see them here</p>
         <button @click="goToProducts" class="btn-primary">Browse Products</button>
       </div>
-      <div v-else class="favorites-grid">
-        <div v-for="product in favorites" :key="product.id || product.name" class="product-card">
-          <div class="product-image" @click="goToProductDetail(product.id)">
+      <div v-else >
+        
+          <!-- <div class="product-image" @click="goToProductDetail(product.id)">
             <img :src="product.imageUrl || product.imageURL || (product as any).image || '/Photo/ourproduct.png'" :alt="product.name" />
             <button @click.stop="removeFromFavorites(product.id)" class="remove-btn">
               <i class="pi pi-times"></i>
@@ -38,8 +38,9 @@
               <i class="pi pi-shopping-cart"></i>
               Add to Cart
             </button>
-          </div>
-        </div>
+          </div> -->
+          <ProductCardComponent :products="favorites"/>
+     
       </div>
     </div>
   </div>
@@ -52,6 +53,8 @@ import { useFavoriteStore } from '@/stores/favoriteStore'
 import { useCartStore } from '@/stores/cartStore'
 import { useToastStore } from '@/stores/toastStore'
 import type { Product } from '@/types/product'
+import Spinner from '@/components/ui/Spinner.vue'
+import ProductCardComponent from '@/components/product/product-card-component.vue'
 
 const router = useRouter()
 const favoriteStore = useFavoriteStore()
@@ -132,7 +135,7 @@ const goToProducts = () => {
 </script>
 
 <style scoped>
-.favorites-page { min-height: 100vh; padding: 2rem 0; background-color: #f5f5f5; }
+.favorites-page { min-height: 100vh; padding: 2rem 0; }
 .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
 .page-header { margin-bottom: 2rem; }
 .page-header h1 { font-size: 2rem; font-weight: 600; color: #333; margin-bottom: 0.5rem; }
@@ -144,7 +147,6 @@ const goToProducts = () => {
 .btn-primary { background-color: #007bff; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; font-size: 1rem; cursor: pointer; transition: background-color 0.3s; }
 .btn-primary:hover { background-color: #0056b3; }
 .favorites-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; }
-.product-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.3s, box-shadow 0.3s; }
 .product-card:hover { transform: translateY(-4px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 .product-image { position: relative; width: 100%; height: 250px; overflow: hidden; cursor: pointer; }
 .product-image img { width: 100%; height: 100%; object-fit: cover; }

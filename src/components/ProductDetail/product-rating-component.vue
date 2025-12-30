@@ -7,13 +7,7 @@
 
       <div class="ml-5">
         <!-- Stars Row -->
-        <div class="flex text-[#FF6B6B] text-2xl">
-          <template v-for="n in 5" :key="n">
-            <span v-if="n <= Math.floor(rating)">★</span>
-            <span v-else-if="n - rating <= 0.9">⯪</span>
-            <span v-else>☆</span>
-          </template>
-        </div>
+        <StarRating :rating="rating" />
 
         <!-- Reviews Count -->
         <span class="text-gray-600 text-sm">{{ reviews }} reviews</span>                 
@@ -29,10 +23,11 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import StarRating from '../ui/StarRating.vue';
 
 export default defineComponent({
   name: 'ProductRatingComponent',
-
+  components: { StarRating },
   props: {
     rating: { type: Number, required: true },       // e.g., 4.0
     reviews: { type: Number, required: true },      // e.g., 150

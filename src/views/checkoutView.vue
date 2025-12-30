@@ -97,27 +97,15 @@
           </div>
 
           <div class="flex flex-col gap-3">
-            <PaymentOption
-              label="ABA Pay"
-              description="Pay with ABA bank"
-              :image= "aba"
-              :selected="selectedCardment === 'default'"
-              @select="selectedCardment = 'default'"
-            />
-            <PaymentOption
-              label="KHQR"
-              description="Pay with other memeber bank"
-              :image="khqr"
-              :selected="selectedCardment === 'khqr'"
-              @select="selectedCardment = 'khqr'"
-            />
-            <PaymentOption
-              label="Credit Card"
-              description="Pay via bank"
-              :image="null"
-              :selected="selectedCardment === 'card'"
-              @select="selectedCardment = 'card'"
-            />
+              <PaymentOption
+                v-for="option in paymentOptions"
+                :key="option.key"
+                :label="option.label"
+                :description="option.description"
+                :image="option.image"
+                :selected="selectedCardment === option.key"
+                @select="selectedCardment = option.key"
+              />
 
             <PayDropdown
               :cards="savedCards"
@@ -178,7 +166,7 @@
                   class="flex gap-4"
                 >
                   <!-- Product Image -->
-                  <div class="flex-shrink-0">
+                  <div class="shrink-0">
                     <img
                       :src="item.image"
                       :alt="item.name"
@@ -187,7 +175,7 @@
                   </div>
 
                   <!-- Product Details -->
-                  <div class="flex-grow">
+                  <div class="grow">
                     <h3 class="text-lg font-semibold">
                       {{ item.name }}
                     </h3>
@@ -197,7 +185,7 @@
                   </div>
 
                   <!-- Price -->
-                  <div class="flex-shrink-0 text-right">
+                  <div class="shrink-0 text-right">
                     <p class="text-base font-bold">
                       ${{ item.price.toFixed(2) }}
                     </p>
@@ -246,7 +234,7 @@
                   type="text"
                   placeholder="Discount Code"
                   v-model="discountCode"
-                  class="flex-grow px-4 py-3 border border-black rounded text-base"
+                  class="grow px-4 py-3 border border-black rounded text-base"
                 />
                 <button
                   @click="handleApplyDiscount"
@@ -325,7 +313,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, reactive } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import ShippingOption from '@/components/ShippingOption.vue'
 import PaymentOption from '@/components/PaymentOption.vue'
 import AddressEdit from '@/components/profile/edit/AddressEdit.vue'
@@ -361,6 +349,31 @@ onMounted(async () => {
   await loadAddresses()
 })
 
+// Payment Option
+const paymentOptions = [
+  {
+    key: 'default',
+    label: 'ABA Pay',
+    description: 'Pay with ABA bank',
+    image: aba,
+    type: 'ABA'
+  },
+  {
+    key: 'khqr',
+    label: 'KHQR',
+    description: 'Pay with other member bank',
+    image: khqr,
+    type: 'KHQR'
+  },
+  {
+    key: 'card',
+    label: 'Credit Card',
+    description: 'Pay via bank',
+    image: null,
+    type: 'CARD'
+  }
+]
+
 
 // Use cart store items directly for the order summary
 const orderItems = computed(() => cartStore.items)
@@ -391,6 +404,10 @@ const provinces = [
   'Svay Rieng',
   'Tbong Khmum',
 ]
+
+const paymentMethod = computed(() => {
+  return paymentOptions.find(p => p.key === selectedCardment.value)?.type ?? null
+})
 
 // Helper to compute shipping price for a given method based on selected address
 function computeShippingFor(method: 'standard' | 'priority') {
@@ -457,17 +474,18 @@ async function handleDone() {
   isDoneProcessing.value = true
 
   try {
+    const finalAmount = total.value
     const payload = {
       cartId: cartStore.cartId,
       address: selectedAddress.value,
-      payment: selectedCard.value || null,
-      paymentMethod: selectedCardment.value || (selectedCard.value ? 'card' : null),
-      status: 'Paid',
+      payment: selectedCardment.value === 'card' ? selectedCard.value : null,
+      paymentMethod: paymentMethod.value,
+      status: 'PAID',
       shipping: selectedShipping.value,
     }
 
     await orderService.createOrder(payload)
-
+    successTotal.value = finalAmount
     // Clear cart locally (server already cleared it)
     try {
       await cartStore.clearCart()
@@ -476,7 +494,7 @@ async function handleDone() {
     }
 
     // show success UI instead of alert
-    successTotal.value = total.value
+
     showQR.value = false
     showSuccess.value = true
   } catch (err) {

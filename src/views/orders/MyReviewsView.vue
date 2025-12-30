@@ -6,7 +6,7 @@
     </div>
 
     <div v-if="loading" class="text-center py-8">
-      <div class="text-gray-600">Loading purchased products...</div>
+      <spinner/>
     </div>
 
     <div v-else>
@@ -63,6 +63,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import orderService from '@/services/orderService'
+import Spinner from '@/components/ui/Spinner.vue'
 
 type PurchasedProduct = {
   id: string

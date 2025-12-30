@@ -55,7 +55,7 @@ watch(defaultTab, (nextDefault) => {
 <template>
   <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
     <Sidebar v-model="currentTab"/>
-
+    
     <div class="col-span-3">
       <div v-if="currentTab  === 'profile' && authStore.user">
         <MyProfile :user-detail="authStore.user" />

@@ -6,7 +6,7 @@
     </div>
 
     <div v-if="loading" class="text-center py-8">
-      <div class="text-gray-600">Loading orders...</div>
+      <spinner/>
     </div>
 
     <div v-else>
@@ -79,6 +79,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import orderService from '@/services/orderService'
+import Spinner from '@/components/ui/Spinner.vue'
 
 const orders = ref<any[]>([])
 const loading = ref(false)

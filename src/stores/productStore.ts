@@ -11,7 +11,7 @@ export const useProductStore = defineStore('product', () => {
 
 // GETTER
   const getPopularProducts = computed(() => {
-    return products.value.filter(product => product.rating >= 4.5)
+    return products.value.filter(product => product.averageRating >= 4.5)
   })
 
   const getAllProducts = computed(() => {

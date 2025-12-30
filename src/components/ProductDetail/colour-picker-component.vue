@@ -1,7 +1,10 @@
 <template>
     <div class="flex items-center space-x-3">
         <span class="text-[20px] font-medium">Colour:</span>
-        <div class="flex gap-2">
+        <div v-if="colors.length === 0" class="text-grey-300 ">
+            No colours available
+        </div>
+        <div v-else class="flex gap-2">
             <button
                 v-for="(color, index) in colors"
                 :key="index"

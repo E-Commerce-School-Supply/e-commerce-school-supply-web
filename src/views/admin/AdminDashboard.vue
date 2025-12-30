@@ -340,15 +340,45 @@ const fetchDashboardStats = async () => {
     totalProducts.value = products.length
 
     // Fetch ALL orders using admin endpoint for proper total calculations
-    const orders = await adminService.getAllOrders()
+    let orders = []
+    try {
+      orders = await adminService.getAllOrders()
+      console.log('Orders fetched from admin endpoint:', orders.length)
+    } catch (error) {
+      console.error('Failed to fetch orders from admin endpoint:', error)
+    }
+    
+    // If no orders, try alternative endpoint
+    if (orders.length === 0) {
+      try {
+        orders = await adminService.getAllOrdersAlternative()
+        console.log('Orders fetched from alternative endpoint:', orders.length)
+      } catch (error) {
+        console.error('Failed to fetch orders from alternative endpoint:', error)
+      }
+    }
+    
+    // If still no orders, try fallback to regular order service
+    if (orders.length === 0) {
+      try {
+        orders = await orderService.getOrders()
+        console.log('Orders fetched from regular endpoint:', orders.length)
+      } catch (error) {
+        console.error('Failed to fetch orders from regular endpoint:', error)
+        orders = []
+      }
+    }
+    
     totalOrders.value = orders.length
+    console.log('Total orders set to:', totalOrders.value)
 
     // Calculate total sales from all orders (sum of order totals)
     const sales = orders.reduce((sum: number, order: any) => {
-      const orderTotal = Number(order.total || order.totalAmount || 0)
+      const orderTotal = Number(order.total || order.totalAmount || order.finalTotal || 0)
       return sum + orderTotal
     }, 0)
     totalSales.value = sales
+    console.log('Total sales set to:', totalSales.value)
 
     // Calculate product sales from orders
     const productSales: any = {}
@@ -428,8 +458,10 @@ const fetchDashboardStats = async () => {
 
           if (!isNaN(date.getTime()) && date >= thirtyDaysAgo && date <= today) {
             const dayKey = date.toISOString().split('T')[0] // YYYY-MM-DD format
-            dailyData[dayKey] = (dailyData[dayKey] || 0) + orderTotal
-            console.log(`Added $${orderTotal} to day ${dayKey}`);
+            if (dayKey) {
+              dailyData[dayKey] = (dailyData[dayKey] ?? 0) + orderTotal
+              console.log(`Added $${orderTotal} to day ${dayKey}`)
+            }
           }
         } catch (e) {
           console.warn('Invalid date:', dateStr)
@@ -471,7 +503,12 @@ const initializeCharts = () => {
       const label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 
       dayLabels.push(label)
-      salesByDay.push(monthlySalesData.value[dayKey] || 0)
+      if (dayKey && monthlySalesData.value && typeof monthlySalesData.value === 'object') {
+        const value = (monthlySalesData.value as any)[dayKey] ?? 0
+        salesByDay.push(typeof value === 'number' ? value : 0)
+      } else {
+        salesByDay.push(0)
+      }
     }
 
     console.log('Sales by day array:', salesByDay)
@@ -515,8 +552,12 @@ const initializeCharts = () => {
           },
           tooltip: {
             callbacks: {
-              label: function(context) {
-                return 'Sales: $' + context.parsed.y.toFixed(2)
+              label: function(context: any) {
+                const value = context.parsed?.y
+                if (typeof value === 'number') {
+                  return 'Sales: $' + value.toFixed(2)
+                }
+                return 'Sales: $0.00'
               }
             }
           }
@@ -594,7 +635,7 @@ const initializeCharts = () => {
               padding: 12,
               font: {
                 size: 12,
-                weight: '500'
+                weight: 500 as any
               },
               boxWidth: 15,
               boxHeight: 15,
@@ -602,18 +643,23 @@ const initializeCharts = () => {
               pointStyle: 'circle',
               generateLabels: function(chart) {
                 const data = chart.data
-                if (data.labels && data.datasets.length) {
-                  return data.labels.map((label: any, i: number) => {
-                    const value = data.datasets[0].data[i]
-                    const total = data.datasets[0].data.reduce((a: any, b: any) => a + b, 0)
-                    const percentage = ((value / total) * 100).toFixed(1)
-                    return {
-                      text: `${label}: ${value} (${percentage}%)`,
-                      fillStyle: data.datasets[0].backgroundColor[i],
-                      hidden: false,
-                      index: i
-                    }
-                  })
+                if (data.labels && data.datasets.length && data.datasets[0]) {
+                  const dataset = data.datasets[0]
+                  if (dataset.data) {
+                    return (data.labels as any[]).map((label: any, i: number) => {
+                      const dataArray = dataset.data as (number | null)[]
+                      const value = dataArray[i] ?? 0
+                      const total = dataArray.reduce((a: number, b: any) => a + (typeof b === 'number' ? b : 0), 0)
+                      const percentage = total > 0 ? ((Number(value) / total) * 100).toFixed(1) : '0'
+                      const bgColor = (dataset.backgroundColor as any)?.[i] || '#000000'
+                      return {
+                        text: `${label}: ${value} (${percentage}%)`,
+                        fillStyle: bgColor,
+                        hidden: false,
+                        index: i
+                      }
+                    })
+                  }
                 }
                 return []
               }

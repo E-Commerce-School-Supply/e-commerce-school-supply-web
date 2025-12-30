@@ -215,7 +215,7 @@ onBeforeUnmount(() => {
 					</div>
 
 					<div class="flex items-center space-x-5">
-						<button @click="goToFavorites" class="text-gray-800 hover:text-[#EF4444] transition hidden sm:block relative">
+						<button @click="goToFavorites" class="text-gray-800 hover:text-[#EF4444] transition relative">
 							<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
 									stroke-linecap="round"

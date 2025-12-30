@@ -18,18 +18,36 @@ const handleLogin = async () => {
   try {
     await authStore.login({ email: form.value.email, password: form.value.password })
 
-    // 1. Call the global toast
+    // Show success toast and redirect
     toast.showToast('Welcome back! Redirecting...', 'success')
 
-    setTimeout(() => {
-      router.push('/profile')
-    }, 1500)
-  } catch (error: any) {
-    const msg = error.message || 'Invalid email or password.'
+    // Check if user is admin
+    if (authStore.user?.role === 'ADMIN') {
+      setTimeout(() => {
+        router.push({ name: 'Admin Dashboard' })
+      }, 1500)
+    } else {
+      // Check if user was browsing as guest (likely has items in cart)
+      const wasGuest = sessionStorage.getItem('guestMode') === 'true'
 
-    // 2. Call the global toast for error
+      setTimeout(() => {
+        if (wasGuest) {
+          router.push({ name: 'cart' })
+        } else {
+          router.push({ name: 'home' })
+        }
+      }, 1500)
+    }
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Invalid email or password.'
     toast.showToast(msg, 'error')
   }
+}
+
+const continueAsGuest = () => {
+  // Set guest mode in sessionStorage
+  sessionStorage.setItem('guestMode', 'true')
+  router.push({ name: 'home' })
 }
 </script>
 
@@ -80,12 +98,19 @@ const handleLogin = async () => {
         <div class="w-full mb-10">
           <button
             type="submit"
-            class="w-full text-white bg-secondary box-border border border-transparent hover:bg-secondary/80 focus:ring-4 focus:ring-secondary/25 shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none"
+            class="w-full text-white bg-secondary box-border border border-transparent hover:bg-secondary/80 focus:ring-4 focus:ring-secondary/25 shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none mb-3"
           >
             Sign in
           </button>
+          <button
+            @click="continueAsGuest"
+            type="button"
+            class="w-full text-secondary bg-white box-border border border-secondary hover:bg-gray-50 focus:ring-4 focus:ring-secondary/25 shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none mb-3"
+          >
+            Continue as Guest
+          </button>
           <span class="text-extralight text-sm"
-            >Don’t have account?
+            >Don't have account?
             <router-link to="/signup" class="text-accent hover:underline"
               >Sign up</router-link
             ></span

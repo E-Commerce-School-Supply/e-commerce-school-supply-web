@@ -14,6 +14,7 @@ export interface SavedCard {
 }
 
 export interface UserProfile {
+  id?: string
   username: string
   role: string
   email: string

@@ -58,4 +58,18 @@ export default {
   async login(credentials: LoginCredentials): Promise<AxiosResponse<AuthResponse>> {
     return apiClient.post<AuthResponse>('/api/auth/signin', credentials)
   },
+  async getProfile() {
+    return apiClient.get('/api/users/me')
+  },
+  async updateProfile(payload: Record<string, any>) {
+    return apiClient.put('/api/users/me', payload)
+  },
+  async changePassword(oldPassword: string, newPassword: string) {
+    return apiClient.put('/api/users/me/password', { oldPassword, newPassword })
+  },
+  async uploadAvatar(file: File) {
+    const form = new FormData()
+    form.append('file', file)
+    return apiClient.post('/api/users/me/avatar', form)
+  },
 }

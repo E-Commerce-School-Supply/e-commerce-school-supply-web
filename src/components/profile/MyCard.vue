@@ -5,8 +5,10 @@ import CardInfo from './Info/CardInfo.vue'
 
 <template>
   <div>
-    <h1>My Credit Card</h1>
-    <!-- <CardInfo /> -->
-    <CardEdit />
+    <h1 class="font-bold mb-4">Payment Options</h1>
+    <div class="border border-default border-dashed rounded-base p-5">
+      <h2 class="font-semibold mb-3">Saved Cards</h2>
+      <CardInfo />
+    </div>
   </div>
 </template>

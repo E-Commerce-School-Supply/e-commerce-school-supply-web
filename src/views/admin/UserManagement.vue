@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { IconDotsVertical } from '@tabler/icons-vue'
 import adminService, { type User } from '@/services/adminService'
-
+import defaultPf from '@/assets/images/pfp_blank.jpeg'
 const users = ref<User[]>([])
 const selectedUsers = ref<string[]>([])
 const loading = ref(true)
@@ -17,7 +17,7 @@ const fetchUsers = async () => {
     users.value = data.map((user) => ({
       ...user,
       // Provide fallback avatar using initials or gravatar
-      avatarUrl: user.avatarUrl || `https://i.pravatar.cc/150?u=${user.email}`,
+      avatarUrl: user.avatarUrl || defaultPf,
     }))
   } catch (err) {
     console.error('Failed to fetch users:', err)

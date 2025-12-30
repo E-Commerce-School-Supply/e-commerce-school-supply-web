@@ -22,5 +22,5 @@ export interface UserProfile {
   addresses?: Address[]
   savedCards?: SavedCard[]
   wishlistProductIds?: string[]
-  avatarUrl?: string // Optional image
+  avatarUrl: string // Make it non-optional with default empty string
 }

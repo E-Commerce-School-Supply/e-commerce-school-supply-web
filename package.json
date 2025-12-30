@@ -21,10 +21,7 @@
     "@tabler/icons-vue": "^3.35.0",
     "@tailwindcss/vite": "^4.1.17",
     "axios": "^1.13.2",
-<<<<<<< HEAD
-=======
     "chart.js": "^4.5.1",
->>>>>>> merge_and_fix
     "flowbite": "^4.0.1",
     "pinia": "^3.0.4",
     "primeicons": "^7.0.0",

@@ -9,11 +9,11 @@
         <!-- Rating + Reviews + Stock -->
         <div class="flex items-center gap-2 text-gray-600 text-sm">
             <div class="flex items-center mb-3 text-[#FF6B6B]">
-                <span class="mr-2 font-semibold text-gray-800">{{ (0).toFixed(1) }}</span>
+                <span class="mr-2 font-semibold text-gray-800">{{ (product.rating ?? 0).toFixed(1) }}</span>
                 <span class="text-[20px]">
                     <template v-for="n in 5" :key="n">
-                        <span v-if="n <= Math.floor(0)">★</span>
-                        <span v-else-if="n - 0 <= 0.9">⯪</span>
+                        <span v-if="n <= Math.floor(product.rating ?? 0)">★</span>
+                        <span v-else-if="n - (product.rating ?? 0) <= 0.9">⯪</span>
                         <span v-else>☆</span>
                     </template>
                 </span>
@@ -225,13 +225,19 @@
                     return
                 }
 
+                // Ensure product id exists before creating favorite payload
+                if (!props.product.id) {
+                    console.error('Missing product id; cannot add to favorites')
+                    return
+                }
+
                 const favPayload: FavoriteProduct = {
-                    id: props.product.id,
+                    id: props.product.id, // Now guaranteed to be non-null
                     name: props.product.name,
                     price: props.product.price,
-                    rating: props.product.rating,
-                    discount: props.product.discount,
-                    imageUrl: props.product.imageUrl,
+                    rating: props.product.rating ?? 0,
+                    discount: props.product.discount ?? null,
+                    imageUrl: props.product.imageUrl || '',
                 }
 
                 await favStore.toggleFavorite(favPayload)

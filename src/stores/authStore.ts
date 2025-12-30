@@ -27,7 +27,7 @@ export const useAuthStore = defineStore('auth', () => {
         email: response.data.email,
         role: response.data.role,
         phoneNumber: response.data.phoneNumber || '',
-        avatarUrl: '',
+        avatarUrl: response.data.avatarUrl || '', // Ensure avatarUrl is always a string
       }
       token.value = response.data.token
 
@@ -76,10 +76,13 @@ export const useAuthStore = defineStore('auth', () => {
       // Refetch profile from server to get the updated data in correct format
       const res = await authService.getProfile()
       if (res.data) {
-        user.value = res.data
+        user.value = {
+          ...res.data,
+          avatarUrl: res.data.avatarUrl || user.value.avatarUrl || '' // Ensure avatarUrl has a fallback
+        }
         sessionStorage.setItem('user', JSON.stringify(user.value))
       } else {
-        user.value = { ...user.value, ...partial }
+        user.value = { ...user.value, ...partial, avatarUrl: partial.avatarUrl || user.value.avatarUrl || '' }
         sessionStorage.setItem('user', JSON.stringify(user.value))
       }
     } catch (err) {

@@ -26,7 +26,7 @@
       <!-- Out of stock badge -->
       <div v-if="(product.stockQuantity ?? 0) <= 0"
            class="absolute bottom-4 left-4 bg-red-600 text-white text-[12px] px-2 py-1 rounded">
-        Out of stock
+        {{ $t('home.out_of_stock') }}
       </div>
 
       <!-- Heart Icon -->
@@ -47,7 +47,7 @@
       <!-- Price and Add to Cart -->
       <div class="flex items-end justify-between">
         <div>
-          <h2 class="text-sm text-gray-500">Price</h2>
+          <h2 class="text-sm text-gray-500">{{ $t('productCard.price') }}</h2>
           <div class="flex items-end">
             <p class="font-bold text-[24px]">${{ getDiscountedPrice(product) }}</p>
             <p v-if="product.discount" class="font-bold text-[12px] ml-2 line-through">
@@ -65,19 +65,19 @@
             v-if="(product.stockQuantity ?? 0) <= 0"
             class="w-full h-full flex justify-center items-center rounded-sm bg-gray-400 opacity-60 cursor-not-allowed"
           >
-            Out of stock
+            {{ $t('home.out_of_stock') }}
           </div>
           <div
             v-else-if="!linkBtn[index]"
             class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm hover:bg-[#15444a] transition"
           >
-            Add to Cart
+            {{ $t('home.add_to_cart') }}
           </div>
           <div
             v-else
             class="bg-[#C3C3C3] w-full h-full flex justify-center items-center rounded-sm"
           >
-            Added {{ addedQuantity[index] }}
+            {{ $t('productCard.added_quantity', { count: addedQuantity[index] }) }}
           </div>
         </button>
       </div>
@@ -95,6 +95,7 @@ import { defineComponent, ref, watch, computed, onMounted } from 'vue'
 import { useFavoriteStore } from '@/stores/favoriteStore'
 import { useToastStore } from '@/stores/toastStore'
 import StarRating from '../ui/StarRating.vue'
+import { useI18n } from 'vue-i18n'
 
 
 export default defineComponent({
@@ -117,6 +118,7 @@ export default defineComponent({
     const toast = useToastStore();
     const isAuthenticated = computed(() => !!authStore.user)
 
+    const { t } = useI18n();
     // Create reactive arrays to track like and add-to-cart states for each product
     const linkBtn = ref<boolean[]>([])
     const addedQuantity = ref<number[]>([])
@@ -129,18 +131,18 @@ export default defineComponent({
 
     const toggleLike = async (product: Product) => {
       if (!isAuthenticated.value) {
-        alert('Please sign in to add favorites')
+        alert(t('productCard.alert_signin_favorite'))
         return
       }
   
       if (!product.id) return
 
       if (isFavorited(product.id)) {
-        toast.showToast('Item deleted from your favorites list.', 'error')
+        toast.showToast(t('productCard.toast_favorite_deleted'), 'error')
         await favStore.deleteFavorite(product.id)
       } else {
         await favStore.addFavorite(product) // Ensure backend expects ID
-        toast.showToast('Item saved to your favorites list.', 'success')
+        toast.showToast(t('productCard.toast_favorite_saved'), 'success')
       }
     }
     // Initialize arrays when products prop changes
@@ -169,7 +171,7 @@ export default defineComponent({
 
     const btnLink = async (index: number) => {
       if (!isAuthenticated.value) {
-        alert('Please sign in first to add items to your cart')
+        alert(t('productCard.alert_signin_cart'))
         return
       }
 

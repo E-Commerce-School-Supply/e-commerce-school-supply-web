@@ -2,8 +2,8 @@
   <div class="space-y-8 border-b border-gray-300 pb-6 relative">
     <!-- Edit/Delete Buttons -->
     <div v-if="editable" class="absolute bottom-2 right-2 flex gap-2">
-      <button @click="$emit('edit')" class="px-2 py-1 text-white bg-blue-500 rounded-sm">Edit</button>
-      <button @click="$emit('delete')" class="px-2 py-1 text-white bg-red-500 rounded-sm">Delete</button>
+      <button @click="$emit('edit')" class="px-2 py-1 text-white bg-blue-500 rounded-sm">{{ $t("reviewCard.edit") }}</button>
+      <button @click="$emit('delete')" class="px-2 py-1 text-white bg-red-500 rounded-sm">{{ $t("reviewCard.delete") }}</button>
     </div>
 
     <!-- Top Row: Profile + Name + Stars + Verified -->
@@ -29,15 +29,15 @@
             </div>
           </div>
 
-          <div class="text-gray-500 text-sm">{{ review.date }}</div>
+          <div class="text-gray-500 text-sm">{{ formatDate(review.date) }}</div>
 
           <h4 class="mt-3 font-semibold text-lg">{{ review.title }}</h4>
           <p class="text-gray-700 text-sm leading-relaxed text-wrap max-w-[800px]">{{ review.body }}</p>
 
           <p class="text-sm mt-2 font-medium">
-            Recommend this product:
+            {{ $t("reviewCard.recommend_prompt") }}
             <span :class="review.recommend ? 'text-green-600' : 'text-red-600'">
-              {{ review.recommend ? '✔ Yes' : '✖ No' }}
+              {{ review.recommend ? $t("reviewCard.recommend_yes") : $t("reviewCard.recommend_no") }}
             </span>
           </p>
         </div>
@@ -45,7 +45,7 @@
 
       <!-- Verified -->
       <div v-if="review.verified" class="flex items-center gap-1 text-green-600 text-sm w-[150px] text-nowrap">
-        ✔ Verified purchase
+        {{ $t("reviewCard.verified_purchase") }}
       </div>
     </div>
   </div>
@@ -69,7 +69,14 @@ export default defineComponent({
       if (!s) return BlankProfile
       if (/^(https?:\/\/|data:image\/|blob:|\/|\.{1,2}\/)/.test(s)) return s
       return BlankProfile
+    },
+  },
+  methods: {
+      formatDate(dateString: string) {
+        if (!dateString) return ''
+        // Split at 'T' and take the first part
+        return dateString.split('T')[0]
+      }
     }
-  }
 });
 </script>

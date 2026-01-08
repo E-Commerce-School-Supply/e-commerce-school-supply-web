@@ -3,7 +3,7 @@
 <template>
   <div class="space-y-2 text-[16px] leading-tight">
     <h2 class="text-[32px]">
-      {{ title }}
+      {{ $t(title) }}
     </h2>
 
     <div
@@ -34,11 +34,18 @@ export default defineComponent({
     title: {
       type: String,
       required: false,
-      default: 'Product Info'
+      default: 'productDetailCard.product_info'
     },
     info: {
       type: Array as PropType<ProductInfoItem[]>,
       required: true
+    }
+  },
+
+  computed: {
+    translatedTitle() {
+      // You can access 'this.$t' in Options API
+      return this.$t(this.title)
     }
   }
 })

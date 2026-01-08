@@ -9,6 +9,9 @@ import {
   IconUserCog,
   IconUserFilled,
 } from '@tabler/icons-vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 interface Props {
   name: string
@@ -68,24 +71,24 @@ function onFileChange(e: Event) {
 
 async function uploadSelectedFile() {
   if (!selectedFile.value) {
-    alert('Please choose a file first')
+    alert(t('profile.alerts.choose_file_first'))
     return
   }
   try {
     const url = await authStore.uploadAvatar(selectedFile.value)
     form.avatar = url
-    alert('Avatar uploaded')
+    alert(t('profile.alerts.avatar_uploaded'))
   } catch (err) {
     console.error('Upload failed', err)
-    alert('Upload failed')
+    alert(t('profile.alerts.upload_failed'))
   }
 }
 
 const userDetail = ref<InfoItem[]>([
-  { label: 'Name', value: form.name, icon: IconUserFilled },
-  { label: 'Role', value: props.role, icon: IconUserCog },
-  { label: 'Email', value: form.email, icon: IconMailFilled },
-  { label: 'Phone Number', value: form.phoneNumber, icon: IconPhoneFilled },
+  { label: t('profile.name'), value: form.name, icon: IconUserFilled },
+  { label: t('profile.role'), value: props.role, icon: IconUserCog },
+  { label: t('profile.email'), value: form.email, icon: IconMailFilled },
+  { label: t('profile.phone_number'), value: form.phoneNumber, icon: IconPhoneFilled },
 ])
 
 function startEdit() {
@@ -117,34 +120,34 @@ async function saveEdit() {
     })
     // update displayed details
     userDetail.value = [
-      { label: 'Name', value: form.name, icon: IconUserFilled },
-      { label: 'Role', value: props.role, icon: IconUserCog },
-      { label: 'Email', value: form.email, icon: IconMailFilled },
-      { label: 'Phone Number', value: form.phoneNumber, icon: IconPhoneFilled },
+      { label: t('profile.name'), value: form.name, icon: IconUserFilled },
+      { label: t('profile.role'), value: props.role, icon: IconUserCog },
+      { label: t('profile.email'), value: form.email, icon: IconMailFilled },
+      { label: t('profile.phone_number'), value: form.phoneNumber, icon: IconPhoneFilled },
     ]
     isEditing.value = false
-    alert('Profile updated')
+    alert(t('profile.alerts.profile_updated'))
   } catch (err) {
     console.error('Failed to save profile', err)
-    alert('Failed to save profile')
+    alert(t('profile.alerts.save_profile_failed'))
   }
 }
 
 async function submitPasswordChange() {
   if (newPassword.value !== confirmPassword.value) {
-    alert('New passwords do not match')
+    alert(t('profile.alerts.passwords_no_match'))
     return
   }
   try {
     await authStore.changePassword(oldPassword.value, newPassword.value)
-    alert('Password changed successfully')
+    alert(t('profile.alerts.password_change_success'))
     showPasswordForm.value = false
     oldPassword.value = ''
     newPassword.value = ''
     confirmPassword.value = ''
   } catch (err) {
     console.error('Password change failed', err)
-    alert('Password change failed')
+    alert(t('profile.alerts.password_change_failed'))
   }
 }
 </script>
@@ -162,69 +165,69 @@ async function submitPasswordChange() {
       />
       <div class="absolute top-4 right-4 flex gap-2">
         <button @click="startEdit" class="text-heading px-4 py-2 bg-neutral-primary box-border border border-transparent focus:ring-4 focus:ring-neutral-tertiary font-medium rounded-base text-sm focus:outline-none hover:bg-accent/70 hover:text-white transition">
-          Edit
+          {{ t('profile.edit') }}
         </button>
         <button @click="startEditPassword" class="text-heading px-4 py-2 bg-neutral-primary box-border border border-transparent focus:ring-4 focus:ring-neutral-tertiary font-medium rounded-base text-sm focus:outline-none hover:bg-accent/70 hover:text-white  transition">
-          Change Password
+          {{ t('profile.change_password') }}
         </button>
       </div>
     </div>
     <div class="w-full mt-20 px-16 pb-10">
-      <h1 class="font-bold mt-5 text-xl">Account Information</h1>
+      <h1 class="font-bold mt-5 text-xl">{{ t('profile.account_information') }}</h1>
 
 
       <div v-if="isEditing" class="mt-5 max-w-3xl">
         <form @submit.prevent="saveEdit" class="space-y-4">
           <div>
-            <label class="block text-sm text-body mb-1">Name</label>
+            <label class="block text-sm text-body mb-1">{{ t('profile.name') }}</label>
             <input v-model="form.name" class="w-full p-2 border rounded" />
           </div>
           <div>
-            <label class="block text-sm text-body mb-1">Email</label>
+            <label class="block text-sm text-body mb-1">{{ t('profile.email') }}</label>
             <input v-model="form.email" class="w-full p-2 border rounded" />
           </div>
           <div>
-            <label class="block text-sm text-body mb-1">Phone Number</label>
+            <label class="block text-sm text-body mb-1">{{ t('profile.phone_number') }}</label>
             <input v-model="form.phoneNumber" class="w-full p-2 border rounded" />
           </div>
           <div>
-            <label class="block text-sm text-body mb-1">Avatar URL</label>
+            <label class="block text-sm text-body mb-1">{{ t('profile.avatar_url') }}</label>
             <input v-model="form.avatar" class="w-full p-2 border rounded" />
-            <p class="text-xs text-gray-500 mt-1">Or keep default profile picture.</p>
+            <p class="text-xs text-gray-500 mt-1">{{ t('profile.default_profile_picture_note') }}</p>
           </div>
           <div>
-            <label class="block text-sm text-body mb-1">Upload Avatar</label>
+            <label class="block text-sm text-body mb-1">{{ t('profile.upload_avatar') }}</label>
             <input type="file" accept="image/*" @change="onFileChange" class="w-full p-2" />
             <div class="flex gap-2 mt-2">
-              <button type="button" @click="uploadSelectedFile" class="px-4 py-2 bg-[#1A535C] text-white rounded">Upload</button>
-              <p class="text-xs text-gray-500 flex items-center">Or provide an Avatar URL above.</p>
+              <button type="button" @click="uploadSelectedFile" class="px-4 py-2 bg-[#1A535C] text-white rounded">{{ t('profile.upload') }}</button>
+              <p class="text-xs text-gray-500 flex items-center">{{ t('profile.avatar_url_note') }}</p>
             </div>
           </div>
           <div class="flex gap-2 justify-end">
-            <button type="button" @click="cancelEdit" class="px-4 py-2 border rounded">Cancel</button>
-            <button type="submit" class="px-4 py-2 bg-[#1A535C] text-white rounded">Save</button>
+            <button type="button" @click="cancelEdit" class="px-4 py-2 border rounded">{{ t('profile.cancel') }}</button>
+            <button type="submit" class="px-4 py-2 bg-[#1A535C] text-white rounded">{{ t('profile.save') }}</button>
           </div>
         </form>
       </div>
 
       <div v-else-if="showPasswordForm" class="mt-6 max-w-md">
-        <h3 class="font-semibold mb-3">Change Password</h3>
+        <h3 class="font-semibold mb-3">{{ t('profile.change_password') }}</h3>
         <form @submit.prevent="submitPasswordChange" class="space-y-3">
           <div>
-            <label class="block text-sm text-body mb-1">Old Password</label>
+            <label class="block text-sm text-body mb-1">{{ t('profile.old_password') }}</label>
             <input v-model="oldPassword" type="password" class="w-full p-2 border rounded" />
           </div>
           <div>
-            <label class="block text-sm text-body mb-1">New Password</label>
+            <label class="block text-sm text-body mb-1">{{ t('profile.new_password') }}</label>
             <input v-model="newPassword" type="password" class="w-full p-2 border rounded" />
           </div>
           <div>
-            <label class="block text-sm text-body mb-1">Confirm New Password</label>
+            <label class="block text-sm text-body mb-1">{{ t('profile.confirm_new_password') }}</label>
             <input v-model="confirmPassword" type="password" class="w-full p-2 border rounded" />
           </div>
           <div class="flex gap-2 justify-end">
-            <button type="button" @click="showPasswordForm = false" class="px-4 py-2 border rounded">Cancel</button>
-            <button type="submit" class="px-4 py-2 bg-[#1A535C] text-white rounded">Change</button>
+            <button type="button" @click="showPasswordForm = false" class="px-4 py-2 border rounded">{{ t('profile.cancel') }}</button>
+            <button type="submit" class="px-4 py-2 bg-[#1A535C] text-white rounded">{{ t('profile.change') }}</button>
           </div>
         </form>
       </div>

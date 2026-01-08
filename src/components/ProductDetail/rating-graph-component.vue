@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3 class="text-xl font-bold mb-4">Rating</h3>
+    <h3 class="text-xl font-bold mb-4">{{ $t('ratingGraph.title') }}</h3>
 
     <!-- Rating Bars -->
     <div class="space-y-1">

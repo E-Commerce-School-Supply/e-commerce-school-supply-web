@@ -2,7 +2,7 @@
 
 <aside class="col-span-1">
     <div class="bg-white rounded shadow p-4 mb-6">
-        <h4 class="font-semibold mb-3">Manage My Account</h4>
+        <h4 class="font-semibold mb-3">{{ $t('profile.manage') }}</h4>
         <ul v-if="isAdmin" class="text-sm space-y-2">
             <li
             @click="activeTab = 'dashboard'"
@@ -22,19 +22,19 @@
             @click="activeTab = 'profile'"
             :class="isActive('profile') ? 'text-accent font-medium' : 'text-gray-600 hover:text-accent cursor-pointer'"
             >
-            My Profile
+            {{ $t('profile.my_profile') }}
             </li>
             <li
             @click="activeTab = 'address'"
             :class="isActive('address') ? 'text-accent font-medium' : 'text-gray-600 hover:text-accent cursor-pointer'"
             >
-            Address
+            {{ $t('profile.my_address') }}
             </li>
             <li
             @click="activeTab = 'payment'"
             :class="isActive('payment') ? 'text-accent font-medium' : 'text-gray-600 hover:text-accent cursor-pointer'"
             >
-            Payment Options
+            {{ $t('profile.payment_options') }}
             </li>
         </ul>
     </div>

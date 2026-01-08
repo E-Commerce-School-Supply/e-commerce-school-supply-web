@@ -7,6 +7,7 @@ import { useProductStore } from '@/stores/productStore'
 import { useFavoriteStore } from '@/stores/favoriteStore'
 import { useRoute, useRouter } from 'vue-router'
 import  BlankProfile  from '@/assets/images/pfp_blank.jpeg'
+import LangagueSwitcher from '@/components/ui/LangagueSwitcher.vue'
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const productStore = useProductStore()
@@ -48,7 +49,7 @@ const userAvatarSrc = computed(() => {
 const isHome = computed(() => route.name === 'home')
 const isProducts = computed(() => route.name === 'Product List' || route.name === 'product-detail')
 const isContact = computed(() => route.name === 'Contact us')
-const isAbout = computed(() => route.name === 'About us')
+const isAbout = computed(() => route.name === 'about')
 
 const searchResults = computed(() => {
 	const query = searchQuery.value.trim().toLowerCase()
@@ -131,7 +132,7 @@ onBeforeUnmount(() => {
 			<div class="max-w-7xl mx-auto flex justify-center items-center">
 				<div class="text-center flex gap-2">
 					<span class="opacity-95 font-light tracking-wide">Black Friday Sale For All Pen and Book - OFF 50%!</span>
-					<router-link to="/product-list" class="font-bold underline hover:text-gray-200 cursor-pointer">ShopNow</router-link>
+					<router-link to="/product-list" class="font-bold underline hover:text-gray-200 cursor-pointer">{{ $t('common.shop_now') }}</router-link>
 				</div>
 			</div>
 		</div>
@@ -146,14 +147,14 @@ onBeforeUnmount(() => {
 					class="hidden lg:flex items-center transform space-x-8 text-gray-600 font-medium text-[16px]"
 				>
 					<router-link to="/" :class="isHome ? 'text-[#114B5F] font-bold' : 'hover:text-[#114B5F] transition-colors'">
-						Home
+						{{ $t('common.home') }}
 					</router-link>
 					<router-link
 						to="/product-list"
 						class="block py-2 px-3 rounded"
 						:class="isProducts ? 'text-[#114B5F] font-bold' : 'hover:text-[#114B5F] transition-colors'"
 					>
-						Products
+						{{ $t('common.products') }}
 					</router-link>
 					<!-- <router-link :to="{ path: '/', hash: '#promotion-section' }" class="hover:text-[#114B5F] transition-colors">
 						Promotion
@@ -162,13 +163,13 @@ onBeforeUnmount(() => {
 						to="/contact"
 						:class="isContact ? 'text-[#114B5F] font-bold' : 'hover:text-[#114B5F] transition-colors'"
 					>
-						Contact us
+						{{ $t('common.contact_us') }}
 					</router-link>
 					<router-link
 						to="/about"
 						:class="isAbout ? 'text-[#114B5F] font-bold' : 'hover:text-[#114B5F] transition-colors'"
 					>
-						About us
+						{{ $t('common.about_us') }}
 					</router-link>
 				</div>
 
@@ -178,7 +179,7 @@ onBeforeUnmount(() => {
 							type="text"
 							v-model="searchQuery"
 							@focus="onSearchFocus"
-							placeholder="What are you looking for?"
+							:placeholder="$t('header.search_placeholder')"
 							class="bg-gray-100 text-sm rounded-full px-5 py-2.5 w-64 focus:outline-none focus:ring-1 focus:ring-[#114B5F] border-none placeholder-gray-500"
 						>
 						<button class="absolute right-3 top-2.5 text-gray-500 hover:text-[#114B5F]">
@@ -250,10 +251,11 @@ onBeforeUnmount(() => {
 						</button>
 
 						<div class="hidden md:block text-right leading-tight mr-2">
-							<p class="text-[11px] text-gray-500">Currently</p>
+							<p class="text-[11px] text-gray-500">{{ $t('header.currently') }}</p>
 							<p class="text-sm font-semibold text-gray-800">{{ displayName }}</p>
 						</div>
 
+						
 						<button
 							type="button"
 							class="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300"
@@ -266,6 +268,9 @@ onBeforeUnmount(() => {
 							<img v-if="guestMode" class="w-12 h-12 rounded-full object-cover" :src="BlankProfile" alt="user photo">
 							<img v-else class="w-9 h-9 rounded-full object-cover border border-gray-200" :src="userAvatarSrc" alt="user photo">
 						</button>
+						<div class="ml-4">
+							<langague-switcher/>
+						</div>
 						<div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-xl w-44" id="user-dropdown">
 							<div class="px-4 py-3">
 								<span class="block text-sm text-gray-900">{{ displayName }}</span>
@@ -275,22 +280,22 @@ onBeforeUnmount(() => {
 								<template v-if="isAuthenticated">
 									<li v-if="authStore.user?.role === 'ADMIN'">
 										<router-link :to="{ name: 'Admin Dashboard' }" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 font-medium">
-											<i class="pi pi-th-large mr-2"></i>Admin Dashboard
+											<i class="pi pi-th-large mr-2"></i>{{$t('common.admin_dashboard')}}
 										</router-link>
 									</li>
 									<li>
 										<router-link :to="{ name: 'my-orders' }" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-											My Orders
+											{{$t('common.my_orders')}}
 										</router-link>
 									</li>
 									<li>
 										<router-link :to="{ name: 'my-reviews' }" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-											Review
+											{{$t('common.review')}}
 										</router-link>
 									</li>
 									<li>
 										<router-link :to="{ name: 'profile', query: { tab: 'profile' } }" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-											Settings
+											{{$t('common.settings')}}
 										</router-link>
 									</li>
 									<li>
@@ -299,7 +304,7 @@ onBeforeUnmount(() => {
 											href="#"
 											class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
 										>
-											Sign out
+											{{$t('common.signout')}}
 										</a>
 									</li>
 								</template>
@@ -309,7 +314,7 @@ onBeforeUnmount(() => {
 											@click="goToAuthPage('signin')"
 											class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
 										>
-											Sign in
+											{{ $t('common.signin') }}
 										</button>
 									</li>
 									<li>
@@ -317,7 +322,7 @@ onBeforeUnmount(() => {
 											@click="goToAuthPage('signup')"
 											class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
 										>
-											Register
+											{{ $t('common.signup') }}
 										</button>
 									</li>
 								</template>
@@ -349,7 +354,7 @@ onBeforeUnmount(() => {
 			<div class="hidden w-full md:hidden border-t border-gray-100" id="navbar-user">
 				<ul class="flex flex-col font-medium p-4 bg-gray-50 space-y-2">
 					<li>
-						<router-link to="/" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100">Home</router-link>
+						<router-link to="/" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100">{{ $t('common.home') }}</router-link>
 					</li>
 					<li>
 						<router-link
@@ -357,7 +362,7 @@ onBeforeUnmount(() => {
 							class="block py-2 px-3 rounded"
 							:class="isProducts ? 'text-white bg-[#EF4444]' : 'text-gray-900 hover:bg-gray-100'"
 						>
-							Products
+							{{ $t('common.products') }}
 						</router-link>
 					</li>
 					<!-- <li>
@@ -367,18 +372,18 @@ onBeforeUnmount(() => {
 					</li> -->
 					<li>
 						<router-link to="/contact" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100">
-							Contact us
+							{{ $t('common.contact_us') }}
 						</router-link>
 					</li>
 					<li>
-						<router-link to="/about" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100">About us</router-link>
+						<router-link to="/about" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100">{{ $t('common.about_us') }}</router-link>
 					</li>
 					<li class="mt-2 pt-2 border-t border-gray-200" @click.stop>
 						<input
 							type="text"
 							v-model="searchQuery"
 							@focus="onSearchFocus"
-							placeholder="What are you looking for?"
+							:placeholder="$t('header.search_placeholder')"
 							class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#114B5F] focus:border-[#114B5F] block p-2.5"
 						>
 					</li>

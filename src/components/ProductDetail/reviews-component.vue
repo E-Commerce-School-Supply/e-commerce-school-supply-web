@@ -1,10 +1,10 @@
 <template>
   <!-- Header: Total reviews + Sort -->
   <div class="flex items-center justify-between h-[70px] border-b border-gray-300 bg-[#F5F5F5] px-6">
-    <h2 class="text-xl font-bold">{{ reviews.length }} Reviews</h2>
+    <h2 class="text-xl font-bold">{{ $t("reviews.title", {count: reviews.length}) }}</h2>
 
     <div class="flex items-center gap-2 text-sm">
-      <span class="font-semibold text-nowrap">Sort by:</span>
+      <span class="font-semibold text-nowrap">{{ $t("reviews.sortBy") }}</span>
       <drop-down-component v-model="sortOption" :options="sortOptions" />
     </div>
   </div>
@@ -25,7 +25,7 @@
         @click="seeMore()"
         class="px-6 py-2 bg-[#1A535C] text-white rounded-sm font-semibold"
       >
-        See More
+        {{ $t('reviews.seeMore') }}
       </button>
 
       <button
@@ -33,11 +33,11 @@
         @click="showLess()"
         class="px-6 py-2 bg-[#1A535C] text-white rounded-sm font-semibold"
       >
-        Show Less
+        {{ $t('reviews.showLess') }}
       </button>
     </div>
     <div v-if="reviews.length === 0" class="w-full justify-center flex text-[24px]  text-red-500">
-        <h1>There are no comment here!!</h1>
+        <h1>{{ $t('reviews.noComments') }}</h1>
     </div>
   </div>
 

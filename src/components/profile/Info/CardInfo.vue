@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { IconPlus } from '@tabler/icons-vue'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 function maskCreditCard(cardNumber: string): string {
   // 1. Remove all non-numeric characters
@@ -35,12 +38,12 @@ const hiddenCardNumber = computed(() => {
 <template>
   <div class="border border-default border-dashed rounded-base p-5">
     <div class="w-full flex flex-row justify-between items-center">
-      <h1>All Address</h1>
+      <h1>{{ t('profile.all_cards') }}</h1>
       <button
         type="button"
         class="flex flex-row gap-2 items-center justify-center text-white bg-secondary box-border border border-transparent hover:bg-secondary/80 focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-md text-sm px-2 py-2 mb-4 focus:outline-none"
       >
-        <IconPlus size="16" /> Add new Card
+        <IconPlus size="16" /> {{ t('profile.add_new_card') }}
       </button>
     </div>
     <div
@@ -60,10 +63,10 @@ const hiddenCardNumber = computed(() => {
                 <label for="table-checkbox-38" class="sr-only">Table checkbox</label>
               </div>
             </th>
-            <th scope="col" class="px-3 py-3 font-medium">Card name</th>
-            <th scope="col" class="px-3 py-3 font-medium">Card Number</th>
-            <th scope="col" class="px-3 py-3 font-medium">Status</th>
-            <th scope="col" class="px-3 py-3 font-medium">Action</th>
+            <th scope="col" class="px-3 py-3 font-medium">{{ t('profile.card_name') }}</th>
+            <th scope="col" class="px-3 py-3 font-medium">{{ t('profile.card_number') }}</th>
+            <th scope="col" class="px-3 py-3 font-medium">{{ t('profile.status') }}</th>
+            <th scope="col" class="px-3 py-3 font-medium">{{ t('profile.action') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -87,9 +90,9 @@ const hiddenCardNumber = computed(() => {
             <td class="px-3 py-4">
               {{ hiddenCardNumber }}
             </td>
-            <td class="px-3 py-4 text-success">Default</td>
+            <td class="px-3 py-4 text-success">{{ t('profile.default') }}</td>
             <td class="px-3 py-4">
-              <a href="#" class="font-medium text-dark hover:underline">Edit</a>
+              <a href="#" class="font-medium text-dark hover:underline">{{ t('profile.edit') }}</a>
             </td>
           </tr>
 
@@ -113,9 +116,9 @@ const hiddenCardNumber = computed(() => {
             <td class="px-3 py-4">
               {{ hiddenCardNumber }}
             </td>
-            <td class="px-3 py-4 font-medium text-accent hover:underline">Set Default</td>
+            <td class="px-3 py-4 font-medium text-accent hover:underline">{{ t('profile.set_default') }}</td>
             <td class="px-3 py-4">
-              <a href="#" class="font-medium text-dark hover:underline">Edit</a>
+              <a href="#" class="font-medium text-dark hover:underline">{{ t('profile.edit') }}</a>
             </td>
           </tr>
         </tbody>

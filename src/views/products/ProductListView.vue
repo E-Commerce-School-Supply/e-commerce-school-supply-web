@@ -3,14 +3,14 @@
 
     <div class="w-18/20 relative ...">
       <div>
-        <h1 class="text-[20px] my-10 ...">Home / Products</h1>
+        <h1 class="text-[20px] my-10 ...">{{ $t('productList.breadcrumb') }}</h1>
       </div>
 
       <div class="grid grid-cols-5 gap-4 ...">
         <!-- Category -->
         <div class="col-span-1 mb-20 ...">
           <div class="sticky top-32">
-            <h1 class="text-[20px] font-semibold mb-5">Category</h1>
+            <h1 class="text-[20px] font-semibold mb-5">{{ $t('productList.category') }}</h1>
 
             <div class="text-base/8 text-[15px]">
               <div
@@ -30,10 +30,10 @@
             </div>
 
             <div class="pr-20">
-              <h1 class="text-[20px] font-semibold my-5">Price</h1>
+              <h1 class="text-[20px] font-semibold my-5">{{ $t('productList.price') }}</h1>
 
               <div class="flex justify-between">
-                <p>Range</p>
+                <p>{{ $t('productList.range') }}</p>
                 <p>${{ Math.round(priceMin) }}-{{ Math.round(priceMax) }}</p>
               </div>
 
@@ -73,7 +73,7 @@
             </div>
 
             <div class="mb-10 mt-5">
-              <h1 class="text-[20px] font-semibold mb-5">Customer Review</h1>
+              <h1 class="text-[20px] font-semibold mb-5">{{ $t('productList.customer_review') }}</h1>
               <div class="text-base/8 text-[15px]">
                 <div
                   v-for="r in ratingOptions"
@@ -102,8 +102,8 @@
         <!-- Product List -->
         <div class="col-start-2 col-end-6 ...">
           <div class="flex justify-between mb-10 items-baseline">
-            <h1 class="text-[20px]">School Products</h1>
-            <p class="text-[16px] font-light">{{ filteredAllProducts.length }} items</p>
+            <h1 class="text-[20px]">{{ $t('productList.school_products') }}</h1>
+            <p class="text-[16px] font-light">{{ $t('productList.items_count', { count: filteredAllProducts.length }) }}</p>
           </div>
           <div v-if="loading">
             <Spinner/>
@@ -118,7 +118,7 @@
               @click="previousPage"
               :class="currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-[#757575] cursor-pointer hover:text-black'"
             >
-              &larr; Previous
+              &larr; {{ $t('productList.previous') }}
             </div>
 
             <!-- Page Numbers -->
@@ -143,7 +143,7 @@
               @click="nextPage"
               :class="currentPage === totalPages() ? 'text-gray-300 cursor-not-allowed' : 'cursor-pointer hover:text-black'"
             >
-              Next &rarr;
+              {{ $t('productList.next') }} &rarr;
             </div>
           </div>
         </div>
@@ -187,7 +187,7 @@ export default {
     const products = ref<Product[]>([])
     const currentPage = ref(1)
     const itemsPerPage =10
-
+    
     const categories = ref<string[]>([
       'Writing Instruments',
       'Paper Products',

@@ -1,8 +1,8 @@
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="mb-6">
-      <h1 class="text-3xl font-bold text-heading">My Orders</h1>
-      <p class="text-body mt-2">View and track all your orders</p>
+      <h1 class="text-3xl font-bold text-heading">{{ $t('orders.title') }}</h1>
+      <p class="text-body mt-2">{{ $t('orders.subtitle') }}</p>
     </div>
 
     <div v-if="loading" class="text-center py-8">
@@ -11,12 +11,12 @@
 
     <div v-else>
       <div v-if="orders.length === 0" class="bg-white rounded-lg shadow p-8 text-center">
-        <div class="text-gray-500 mb-4">No orders found.</div>
+        <div class="text-gray-500 mb-4">{{ $t('orders.empty_title') }}</div>
         <router-link
           to="/products"
           class="inline-block px-6 py-3 bg-accent text-white rounded-base hover:bg-accent/90"
         >
-          Start Shopping
+          {{ $t('orders.start_shopping') }}
         </router-link>
       </div>
 
@@ -25,12 +25,12 @@
           <table class="w-full text-sm text-left text-body">
             <thead class="text-sm text-body bg-neutral-secondary-medium border-b border-default-medium">
               <tr>
-                <th scope="col" class="px-6 py-4 font-medium">Order ID</th>
-                <th scope="col" class="px-6 py-4 font-medium">Method</th>
-                <th scope="col" class="px-6 py-4 font-medium">Total</th>
-                <th scope="col" class="px-6 py-4 font-medium">Date</th>
-                <th scope="col" class="px-6 py-4 font-medium">Status</th>
-                <th scope="col" class="px-6 py-4 font-medium">Action</th>
+                <th scope="col" class="px-6 py-4 font-medium">{{ $t('orders.order_id') }}</th>
+                <th scope="col" class="px-6 py-4 font-medium">{{ $t('orders.method') }}</th>
+                <th scope="col" class="px-6 py-4 font-medium">{{ $t('orders.total') }}</th>
+                <th scope="col" class="px-6 py-4 font-medium">{{ $t('orders.date') }}</th>
+                <th scope="col" class="px-6 py-4 font-medium">{{ $t('orders.status') }}</th>
+                <th scope="col" class="px-6 py-4 font-medium">{{ $t('orders.action') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -64,7 +64,7 @@
                     :to="{ name: 'order-detail', params: { id: order.id || order.orderId } }"
                     class="font-medium text-accent hover:underline"
                   >
-                    View Details
+                    {{ $t('orders.view_details') }}
                   </router-link>
                 </td>
               </tr>

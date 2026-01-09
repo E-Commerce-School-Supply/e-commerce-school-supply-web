@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import orderService from '@/services/orderService'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const order = ref<any | null>(null)
 const loading = ref(false)
 const id = route.params.id as string
@@ -30,7 +32,7 @@ onMounted(async () => {
 
 // Helper to format address objects or strings into an array of lines
 const formatAddress = (addr: any) => {
-  if (!addr) return ['Not provided']
+  if (!addr) return [t('order_detail.not_provided')]
   if (typeof addr === 'string') return [addr]
   if (Array.isArray(addr)) return addr
 
@@ -67,13 +69,13 @@ const itemImage = (it: any) => {
 
 <template>
   <div class="p-6">
-    <div v-if="loading">Loading order...</div>
-    <div v-else-if="!order">Order not found.</div>
+    <div v-if="loading">{{ $t('order_detail.loading') }}</div>
+    <div v-else-if="!order">{{ $t('order_detail.not_found') }}</div>
     <div v-else class="relative">
       <div class="mb-6 flex items-center justify-between">
-        <h1 class="text-2xl font-semibold">Order: {{ order.id || order.orderId }}</h1>
+        <h1 class="text-2xl font-semibold">{{ $t('order_detail.title') }}: {{ order.id || order.orderId }}</h1>
         <div>
-          <button @click="$router.back()" class="px-4 py-2 border rounded-base">Back</button>
+          <button @click="$router.back()" class="px-4 py-2 border rounded-base">{{ $t('order_detail.back') }}</button>
         </div>
       </div>
 
@@ -81,25 +83,25 @@ const itemImage = (it: any) => {
         <div class="grid grid-cols-2 gap-6">
           <!-- Left: summary -->
           <div class="col-span-1">
-            <h2 class="font-medium mb-3">Summary</h2>
+            <h2 class="font-medium mb-3">{{ $t('order_detail.summary') }}</h2>
             <div class="text-sm text-[#6B6B6B]">
-              <div class="mb-3"><strong>Status:</strong> <span class="ml-2">{{ order.status || order.orderStatus || '—' }}</span></div>
-              <div class="mb-3"><strong>Total:</strong> <span class="ml-2">${{ (order.total || order.amount || 0).toFixed(2) }}</span></div>
-              <div class="mb-3"><strong>Date:</strong> <span class="ml-2">{{ new Date(order.createdAt || order.date || Date.now()).toLocaleString() }}</span></div>
-              <div class="mb-3"><strong>Payment:</strong> <span class="ml-2">{{ order.paymentMethod || order.method || '—' }}</span></div>
+              <div class="mb-3"><strong>{{ $t('order_detail.status') }}:</strong> <span class="ml-2">{{ order.status || order.orderStatus || '—' }}</span></div>
+              <div class="mb-3"><strong>{{ $t('order_detail.total') }}:</strong> <span class="ml-2">${{ (order.total || order.amount || 0).toFixed(2) }}</span></div>
+              <div class="mb-3"><strong>{{ $t('order_detail.date') }}:</strong> <span class="ml-2">{{ new Date(order.createdAt || order.date || Date.now()).toLocaleString() }}</span></div>
+              <div class="mb-3"><strong>{{ $t('order_detail.payment') }}:</strong> <span class="ml-2">{{ order.paymentMethod || order.method || '—' }}</span></div>
             </div>
           </div>
 
           <!-- Middle: shipping / billing (if available) -->
           <div class="col-span-1">
-            <h2 class="font-medium mb-3">Addresses</h2>
+            <h2 class="font-medium mb-3">{{ $t('order_detail.addresses') }}</h2>
             <div class="text-sm text-[#6B6B6B]">
-              <div class="mb-2"><strong>Shipping:</strong></div>
+              <div class="mb-2"><strong>{{ $t('order_detail.shipping') }}:</strong></div>
               <div class="mb-4">
                 <div v-for="(line, i) in formatAddress(order.shippingAddress || order.address)" :key="i">{{ line }}</div>
               </div>
 
-              <div class="mb-2"><strong>Billing:</strong></div>
+              <div class="mb-2"><strong>{{ $t('order_detail.billing') }}:</strong></div>
               <div>
                 <div v-for="(line, i) in formatAddress(order.billingAddress || order.billing)" :key="i">{{ line }}</div>
               </div>
@@ -110,14 +112,14 @@ const itemImage = (it: any) => {
         </div>
 
         <div class="mt-6">
-          <h3 class="font-medium mb-3">Items</h3>
+          <h3 class="font-medium mb-3">{{ $t('order_detail.items') }}</h3>
           <div class="overflow-x-auto">
             <table class="w-full text-sm text-left">
               <thead class="text-sm bg-[#F7F7F7]">
                 <tr>
-                  <th class="px-4 py-3">Item</th>
-                  <th class="px-4 py-3">Qty</th>
-                  <th class="px-4 py-3">Price</th>
+                  <th class="px-4 py-3">{{ $t('order_detail.item') }}</th>
+                  <th class="px-4 py-3">{{ $t('order_detail.qty') }}</th>
+                  <th class="px-4 py-3">{{ $t('order_detail.price') }}</th>
                 </tr>
               </thead>
               <tbody>

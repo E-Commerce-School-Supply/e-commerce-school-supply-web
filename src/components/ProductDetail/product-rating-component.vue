@@ -1,7 +1,7 @@
 <template>
   <!-- Overall Rating (Rating + Stars + Reviews) -->
   <div class="flex flex-col justify-start space-y-1 m-5">
-    <h2 class="text-[20px]">Overall product rating</h2>
+    <h2 class="text-[20px]">{{ $t('productRating.overall') }}</h2>
     <div class="flex items-center">
       <h2 class="text-[96px]">{{ rating.toFixed(1) }}</h2>
 
@@ -10,13 +10,13 @@
         <StarRating :rating="rating" />
 
         <!-- Reviews Count -->
-        <span class="text-gray-600 text-sm">{{ reviews }} reviews</span>                 
+        <span class="text-gray-600 text-sm">{{ $t('productRating.reviews', { count: reviews }) }}</span>                 
       </div>
     </div>
 
     <!-- Recommendation Line -->
     <span class="text-gray-600 text-[14px] mt-1">
-      {{ recommend }} out of {{ reviews }} recommend this product
+      {{ $t('productRating.recommendation', { recommendCount: recommend, reviewCount: reviews }) }}
     </span>
   </div>
 </template>

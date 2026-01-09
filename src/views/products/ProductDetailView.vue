@@ -26,8 +26,8 @@
 
             <!-- Review Section -->
             <div id="review" class="my-10">
-                <h1 class="text-[36px]">Review</h1>
-                <h3 class="text-[14px]">Check what our customers think of this product</h3>
+                <h1 class="text-[36px]">{{ $t('productDetail.review_title') }}</h1>
+                <h3 class="text-[14px]">{{ $t('productDetail.review_subtitle') }}</h3>
             </div>
 
 
@@ -62,17 +62,17 @@
                     </div>
                     <div v-else class="bg-[#F5F5F5] w-full rounded-md p-6">
                         <div v-if="!authStore.user" class="text-sm text-gray-700">
-                            Please sign in to write a review.
+                            {{ $t('productDetail.signin_to_review') }}
                         </div>
                         <div v-else>
                             <div class="text-sm text-gray-700">
-                                You can only write a review after you have bought this product.
+                                {{ $t('productDetail.buy_to_review') }}
                             </div>
                             <router-link
                                 :to="{ name: 'profile', query: { tab: 'reviews' } }"
                                 class="inline-block mt-3 font-medium text-accent hover:underline"
                             >
-                                See products you bought
+                                {{ $t('productDetail.see_bought_products') }}
                             </router-link>
                         </div>
                     </div>
@@ -87,21 +87,21 @@
 
             <div>
                 <div class="flex justify-between items-baseline text-[20px]">
-                    <h1 class="text-[36px] my-15">More product you may like!!</h1>
-                    <button @click="goToProductList" class="text-[#1A535C] hover:underline">See All</button>
+                    <h1 class="text-[36px] my-15">{{ $t('productDetail.more_products_title') }}</h1>
+                    <button @click="goToProductList" class="text-[#1A535C] hover:underline">{{ $t('productDetail.see_all') }}</button>
                 </div>
                 <div v-if="moreProducts.length > 0" class="flex flex-wrap gap-2">
                     <product-card-component :products="moreProducts" />
                 </div>
-                <div v-else class="text-gray-500 text-center">No similar products found.</div>
+                <div v-else class="text-gray-500 text-center">{{ $t('productDetail.no_similar_products') }}</div>
 
             </div>
 
             <!-- Contact -->
             <div class="flex flex-col items-center my-20 ...">
-                <h1 class="text-[24px] text-[#1A535C] mb-10">Have any problem with this product?</h1>
+                <h1 class="text-[24px] text-[#1A535C] mb-10">{{ $t('productDetail.problem_prompt') }}</h1>
                 <button class="w-[216px] h-[60px] bg-[#1A535C] rounded-sm text-white text-[16px]">
-                    Contact
+                    {{ $t('productDetail.contact_button') }}
                 </button>
             </div>
         </div>
@@ -125,6 +125,7 @@
     import ratingGraphComponent, { type RatingItem } from '@/components/ProductDetail/rating-graph-component.vue';
     import writeReviewComponent from '@/components/ProductDetail/write-review-component.vue';
     import reviewsComponent from '@/components/ProductDetail/reviews-component.vue';
+import { useI18n } from "vue-i18n";
 
     interface Review {
         id: number;
@@ -156,6 +157,8 @@
             const productStore = useProductStore()
             const authStore = useAuthStore()
 
+            const { t } = useI18n();
+
             const products = computed<Product[]>(() => productStore.products)
 
             const backendProduct = ref<Product | null>(null)
@@ -180,14 +183,14 @@
             const productInfo = computed(() => {
                 const p = backendProduct.value
                 const info: { label: string; value: string }[] = []
-                if (p?.brandName) info.push({ label: 'Brand', value: p.brandName })
-                if (p?.mainCategory) info.push({ label: 'Category', value: p.mainCategory })
-                if (p?.subCategory) info.push({ label: 'Sub Category', value: p.subCategory })
-                if (p?.type) info.push({ label: 'Type', value: p.type })
-                if (p?.size) info.push({ label: 'Size', value: p.size })
-                if (p?.material) info.push({ label: 'Material', value: p.material })
-                if (p?.color) info.push({ label: 'Color', value: p.color })
-                if (p?.status) info.push({ label: 'Status', value: p.status })
+                if (p?.brandName) info.push({ label: t("productDetailCard.info_brand"), value: p.brandName })
+                if (p?.mainCategory) info.push({ label: t("productDetailCard.info_category"), value: p.mainCategory })
+                if (p?.subCategory) info.push({ label: t("productDetailCard.info_sub_category"), value: p.subCategory })
+                if (p?.type) info.push({ label: t("productDetailCard.info_type"), value: p.type })
+                if (p?.size) info.push({ label: t("productDetailCard.info_size"), value: p.size })
+                if (p?.material) info.push({ label: t("productDetailCard.info_material"), value: p.material })
+                if (p?.color) info.push({ label: t("productDetailCard.info_color"), value: p.color })
+                if (p?.status) info.push({ label: t("productDetailCard.info_status"), value: p.status })
                 return info
             })
 
@@ -330,9 +333,9 @@
 
             const breadcrumbText = computed(() => {
                 const p = backendProduct.value
-                if (p?.mainCategory && p?.subCategory) return `Home / ${p.mainCategory} / ${p.subCategory}`
-                if (p?.mainCategory) return `Home / ${p.mainCategory}`
-                return 'Home'
+                if (p?.mainCategory && p?.subCategory) return `${t('productDetail.home')} / ${p.mainCategory} / ${p.subCategory}`
+                if (p?.mainCategory) return `${t('productDetail.home')} / ${p.mainCategory}`
+                return t('productDetail.home')
             })
 
             const averageRating = computed(() => {

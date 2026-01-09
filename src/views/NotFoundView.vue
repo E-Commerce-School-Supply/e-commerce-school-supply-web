@@ -9,8 +9,8 @@
         <h1 class="text-9xl font-bold text-[#1A535C] mb-4">404</h1>
         
         <!-- Error Message -->
-        <h2 class="text-4xl font-bold text-gray-800 mb-2">Page Not Found</h2>
-        <p class="text-xl text-gray-600 mb-8">Look like you got lost here</p>
+        <h2 class="text-4xl font-bold text-gray-800 mb-2">{{ $t('notFound.title') }}</h2>
+        <p class="text-xl text-gray-600 mb-8">{{ $t('notFound.message') }}</p>
         
         
         <!-- Action Buttons -->
@@ -19,13 +19,13 @@
             @click="goHome"
             class="px-8 py-3 bg-[#1A535C] text-white rounded-lg font-semibold hover:bg-[#15444a] transition"
             >
-            Go to Back to Home page
+            {{ $t('notFound.go_home') }}
             </button>
             <button
             @click="goBack"
             class="px-8 py-3 bg-gray-400 text-white rounded-lg font-semibold hover:bg-gray-500 transition"
             >
-            Go Back
+            {{ $t('notFound.go_back') }}
             </button>
         </div>
     </div>

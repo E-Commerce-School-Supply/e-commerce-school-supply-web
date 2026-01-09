@@ -2,17 +2,17 @@
   <div class="favorites-page max-w-8xl mx-auto">
     <div class="container">
       <div class="page-header">
-        <h1>My Favorites</h1>
-        <p class="subtitle">{{ favorites.length }} items</p>
+        <h1>{{ $t('favorites.title') }}</h1>
+        <p class="subtitle">{{ $t('favorites.items_count', { count: favorites.length }) }}</p>
       </div>
       <div v-if="loading" class="loading">
         <Spinner/>
       </div>
       <div v-else-if="favorites.length === 0" class="empty-state">
         <i class="pi pi-heart" style="font-size: 4rem; color: #ccc"></i>
-        <h2>No favorites yet</h2>
-        <p>Start adding products to your favorites to see them here</p>
-        <button @click="goToProducts" class="btn-primary">Browse Products</button>
+        <h2>{{ $t('favorites.empty_title') }}</h2>
+        <p>{{ $t('favorites.empty_subtitle') }}</p>
+        <button @click="goToProducts" class="btn-primary">{{ $t('favorites.browse_products') }}</button>
       </div>
       <div v-else >
         
@@ -36,7 +36,7 @@
             </div>
             <button @click="addToCart(product)" class="btn-add-cart">
               <i class="pi pi-shopping-cart"></i>
-              Add to Cart
+              {{ $t('home.add_to_cart') }}
             </button>
           </div> -->
           <ProductCardComponent :products="favorites"/>
@@ -49,6 +49,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useFavoriteStore } from '@/stores/favoriteStore'
 import { useCartStore } from '@/stores/cartStore'
 import { useToastStore } from '@/stores/toastStore'
@@ -57,6 +58,7 @@ import Spinner from '@/components/ui/Spinner.vue'
 import ProductCardComponent from '@/components/product/product-card-component.vue'
 
 const router = useRouter()
+const { t } = useI18n()
 const favoriteStore = useFavoriteStore()
 const cartStore = useCartStore()
 const toastStore = useToastStore()
@@ -85,10 +87,10 @@ const removeFromFavorites = async (productId?: string) => {
   try {
     await favoriteStore.deleteFavorite(productId)
     favorites.value = favorites.value.filter((p) => p.id !== productId)
-    toastStore.showToast('Removed from favorites', 'success')
+    toastStore.showToast(t('favorites.removed_success'), 'success')
   } catch (error) {
     console.error('Error removing from favorites:', error)
-    toastStore.showToast('Failed to remove from favorites', 'error')
+    toastStore.showToast(t('favorites.removed_error'), 'error')
   }
 }
 
@@ -110,10 +112,10 @@ const addToCart = async (product: Product) => {
       image: (product as any).image || product.imageUrl || '',
     })
 
-    toastStore.showToast('Added to cart', 'success')
+    toastStore.showToast(t('favorites.add_to_cart_success'), 'success')
   } catch (error) {
     console.error('Error adding to cart:', error)
-    toastStore.showToast('Failed to add to cart', 'error')
+    toastStore.showToast(t('favorites.add_to_cart_error'), 'error')
   }
 }
 

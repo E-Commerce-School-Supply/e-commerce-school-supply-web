@@ -17,10 +17,10 @@
                         <span v-else>☆</span>
                     </template>
                 </span>
-                <span class="text-black">({{ product.reviews }} reviews)</span>
+                <span class="text-black">{{$t("productDetailCard.reviews", {count: product.reviews})}}</span>
                 <span class="mx-1 text-black">|</span>
-                <span v-if="product.stock > 0" class="text-green-500 font-medium">{{product.stock}} In Stock</span>
-                <span v-else class="text-red-500 font-medium">Out Of Stock</span>
+                <span v-if="product.stock > 0" class="text-green-500 font-medium">{{ $t("productDetailCard.in_stock", {count: product.stock}) }}</span>
+                <span v-else class="text-red-500 font-medium">{{$t("productDetailCard.out_of_stock")}}</span>
             </div>
         </div>
 
@@ -42,7 +42,7 @@
 
         <!-- Product Description -->
         <div class="space-y-1">
-            <h2 class="text-[32px]">Description</h2>
+            <h2 class="text-[32px]">{{ $t("productDetailCard.description") }}</h2>
             <p class="text-[#5E5B5B] text-[20px] leading-relaxed text-balance break-normal">
                 {{ product.description }}
             </p>
@@ -85,13 +85,13 @@
             @click="addToCart"
             class="w-full h-15 text-white font-semibold rounded-lg text-lg"
             >
-            <div v-if="!isInCart" class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm">Add to Cart</div>
-            <div v-else class="bg-[#df6868] w-full h-full flex justify-center items-center rounded-sm">Add another cart</div>
+            <div v-if="!isInCart" class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm">{{ $t("productDetailCard.add_to_cart") }}</div>
+            <div v-else class="bg-[#df6868] w-full h-full flex justify-center items-center rounded-sm">{{ $t("productDetailCard.add_another_cart") }}</div>
         </button>
 
         <!-- Buy Now -->
         <button v-if="product.stock > 0" class="w-full h-15 text-white font-semibold rounded-lg text-lg" @click="buyNow">
-            <div class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm">Buy Now</div>
+            <div class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm">{{ $t("productDetailCard.buy_now") }}</div>
         </button>
 
         <!-- Back to Products -->
@@ -101,19 +101,19 @@
             class="w-full h-15 font-semibold rounded-lg text-lg"
         >
             <div class="w-full h-full flex justify-center items-center rounded-sm border border-[#1A535C] text-[#1A535C]">
-                Back to Products
+                {{ $t("productDetailCard.back_to_products") }}
             </div>
         </button>
 
         <div v-if="product.stock === 0" class="w-full flex flex-col items-center text-[24px] mt-10 text-red-500">
-            <h1>This product is out of our stock!!</h1>
+            <h1>{{ $t("productDetailCard.out_of_stock") }}</h1>
 
             <button
                 @click="goBackToProducts"
                 class="mt-6 w-full max-w-xs h-12 font-semibold rounded-lg text-lg"
             >
                 <div class="w-full h-full flex justify-center items-center rounded-sm border border-[#1A535C] text-[#1A535C]">
-                    Back to Products
+                    {{ $t("productDetailCard.back_to_products") }}
                 </div>
             </button>
         </div>

@@ -14,11 +14,10 @@ const route = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/contact',
-    name: 'Contact us',
-    component: () => import('../views/ContactView.vue'),
-    meta: { requiresAuth: true }
-  },
+      path: '/contact',
+      name: 'Contact us',
+      component: () => import('../views/ContactView.vue')
+    },
   {
     path: '/signin',
     name: 'signin',

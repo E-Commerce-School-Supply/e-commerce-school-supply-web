@@ -11,8 +11,9 @@
     </div>
 
     <!-- Show Form if no review submitted -->
+        <!-- Show Form if no review submitted -->
     <div v-else>
-      <h2 class="text-2xl font-bold">Write a review for this product</h2>
+      <h2 class="text-2xl font-bold">{{ $t('writeReview.title') }}</h2>
       <div class="flex gap-4 mt-4">
         <!-- Profile -->
         <img :src="profilePicSrc" class="w-[50px] h-[50px] rounded-full bg-gray-400" />
@@ -21,12 +22,12 @@
         <div class="flex-1 space-y-3">
           <input
             type="text"
-            placeholder="Review Title"
+            :placeholder="$t('writeReview.placeholder_title')"
             v-model="title"
             class="w-full h-10 px-3 rounded-sm focus:outline-none bg-white"
           />
           <textarea
-            placeholder="Write your comments..."
+            :placeholder="$t('writeReview.placeholder_body')"
             v-model="body"
             class="w-full h-[150px] px-3 py-2 rounded-sm resize-none focus:outline-none bg-white"
           ></textarea>
@@ -35,12 +36,12 @@
 
       <div class="flex items-center gap-4 flex-wrap justify-end mt-4">
         <div class="flex flex-col text-sm">
-          <label class="font-semibold mb-1">Recommend this product?</label>
+          <label class="font-semibold mb-1">{{ $t('writeReview.recommend_prompt') }}</label>
           <drop-down-component v-model="recommendOption" :options="recommendOptions" />
         </div>
 
         <div class="flex flex-col text-sm">
-          <label class="font-semibold mb-1">Rating</label>
+          <label class="font-semibold mb-1">{{ $t('writeReview.rating_prompt') }}</label>
           <drop-down-component v-model="starOption" :options="starOptions" />
         </div>
 
@@ -48,7 +49,7 @@
           @click="submitReview"
           class="mt-6 px-6 py-3 bg-[#1A535C] text-white rounded-sm font-semibold"
         >
-          Post your review
+          {{ $t('writeReview.post_button') }}
         </button>
       </div>
     </div>

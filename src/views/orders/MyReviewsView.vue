@@ -1,8 +1,8 @@
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="mb-6">
-      <h1 class="text-3xl font-bold text-heading">My Reviews</h1>
-      <p class="text-body mt-2">Review products you've purchased</p>
+      <h1 class="text-3xl font-bold text-heading">{{ $t('reviews_page.title') }}</h1>
+      <p class="text-body mt-2">{{ $t('reviews_page.subtitle') }}</p>
     </div>
 
     <div v-if="loading" class="text-center py-8">
@@ -11,15 +11,15 @@
 
     <div v-else>
       <div v-if="sortedProducts.length === 0" class="bg-white rounded-lg shadow p-8 text-center">
-        <div class="text-gray-500 mb-4">No purchased products found.</div>
+        <div class="text-gray-500 mb-4">{{ $t('reviews_page.empty_title') }}</div>
         <p class="text-sm text-gray-600 mb-4">
-          You can only review products that you have purchased.
+          {{ $t('reviews_page.empty_subtitle') }}
         </p>
         <router-link
           to="/products"
           class="inline-block px-6 py-3 bg-accent text-white rounded-base hover:bg-accent/90"
         >
-          Start Shopping
+          {{ $t('orders.start_shopping') }}
         </router-link>
       </div>
 
@@ -51,7 +51,7 @@
             @click="goToReview(product.id)"
             class="px-4 py-2 bg-accent text-white box-border border border-transparent focus:ring-4 focus:ring-neutral-tertiary font-medium rounded-base text-sm focus:outline-none hover:bg-accent/90 transition whitespace-nowrap"
           >
-            Review
+            {{ $t('common.review') }}
           </button>
         </div>
       </div>

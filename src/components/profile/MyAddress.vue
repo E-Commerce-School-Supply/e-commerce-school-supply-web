@@ -6,8 +6,8 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <div>
-    <h1>{{ t('profile.my_address') }}</h1>
+  <div class="dark:text-white transition-colors">
+    <h1 class="dark:text-white">{{ t('profile.my_address') }}</h1>
     <AddressInfo />
   </div>
 </template>

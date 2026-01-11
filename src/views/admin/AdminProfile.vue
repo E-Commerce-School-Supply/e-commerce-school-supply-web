@@ -13,9 +13,9 @@ const authStore = useAuthStore();
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col">
+  <div class="min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors">
     <!-- Main Content -->
-    <div v-if="authStore.user" class="flex-1 bg-white rounded shadow p-6">
+    <div v-if="authStore.user" class="flex-1 bg-white dark:bg-gray-800 dark:border dark:border-gray-700 rounded shadow p-6 transition-colors">
       <MyProfile :user-detail="authStore.user" />
     </div>
 

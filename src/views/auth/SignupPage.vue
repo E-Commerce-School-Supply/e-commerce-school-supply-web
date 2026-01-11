@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useToastStore } from '@/stores/toastStore'
@@ -63,6 +63,20 @@ const handleRegister = async () => {
     toast.showToast(msg, 'error')
   }
 }
+
+// Force light mode for auth pages
+let wasDarkMode = false
+
+onMounted(() => {
+  wasDarkMode = document.documentElement.classList.contains('dark')
+  document.documentElement.classList.remove('dark')
+})
+
+onBeforeUnmount(() => {
+  if (wasDarkMode) {
+    document.documentElement.classList.add('dark')
+  }
+})
 </script>
 
 <template>

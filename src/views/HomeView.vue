@@ -217,15 +217,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="antialiased text-gray-900 bg-white">
+  <div class="antialiased text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 transition-colors">
 
-    <section class="bg-gray-50 py-4 lg:py-9 overflow-hidden relative">
+    <section class="bg-gray-50 dark:bg-gray-800 py-4 lg:py-9 overflow-hidden relative transition-colors">
       <div class="grid max-w-7xl px-4 mx-auto lg:gap-16 xl:gap-24 lg:grid-cols-12 items-center">
         <div class="mr-auto place-self-center lg:col-span-6 z-10 text-center lg:text-left">
-          <h1 class="max-w-2xl mb-4 text-3xl font-extrabold tracking-tight leading-tight md:text-3xl xl:text-4xl text-[#114B5F]">
+          <h1 class="max-w-2xl mb-4 text-3xl font-extrabold tracking-tight leading-tight md:text-3xl xl:text-4xl text-[#114B5F] dark:text-[#4EB8D4]">
             {{ $t('home.hero_title') }}
           </h1>
-          <p class="max-w-xl mb-6 font-light text-gray-600 text-sm md:text-base leading-relaxed mx-auto lg:mx-0">
+          <p class="max-w-xl mb-6 font-light text-gray-600 dark:text-gray-300 text-sm md:text-base leading-relaxed mx-auto lg:mx-0">
             {{ $t('home.hero_subtitle') }}
           </p>
           <router-link
@@ -245,9 +245,9 @@ onMounted(() => {
       </div>
     </section>
 
-    <section class="pt-12 pb-8 bg-white">
+    <section class="pt-12 pb-8 bg-white dark:bg-gray-900 transition-colors">
       <div class="max-w-7xl mx-auto px-4 text-center">
-        <h2 class="text-2xl md:text-3xl font-bold text-[#114B5F] mb-3">{{ $t('home.section_sale') }}</h2>
+        <h2 class="text-2xl md:text-3xl font-bold text-[#114B5F] dark:text-[#4EB8D4] mb-3">{{ $t('home.section_sale') }}</h2>
         <div class="w-20 h-1 bg-[#EF4444] mx-auto rounded-full"></div>
       </div>
     </section>
@@ -258,53 +258,53 @@ onMounted(() => {
     <section v-else-if="error">
         <p>{{ error }}</p>
     </section>
-    <section v-else class="pb-16 bg-white">
+    <section v-else class="pb-16 bg-white dark:bg-gray-900 transition-colors">
       <div class="max-w-7xl mx-auto px-4">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
 
           <div class="space-y-6 flex flex-col justify-between">
-            <div v-for="product in salesProducts.slice(0, 2)" :key="product.id" :id="'product-'+product.id" class="relative bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition border border-gray-100">
+            <div v-for="product in salesProducts.slice(0, 2)" :key="product.id" :id="'product-'+product.id" class="relative bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition border border-gray-100 dark:border-gray-700">
               <div v-if="(product.stockQuantity ?? 0) <= 0" class="absolute top-3 left-3 bg-red-600 text-white text-[12px] px-2 py-1 rounded">
                 {{ $t('home.out_of_stock') }}
               </div>
-              <div class="bg-gray-100 rounded-lg p-6 mb-4 flex justify-center">
-                <img :src="product.image" :alt="product.name" class="h-32 object-contain mix-blend-multiply">
+              <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-6 mb-4 flex justify-center">
+                <img :src="product.image" :alt="product.name" class="h-32 object-contain mix-blend-multiply dark:mix-blend-normal">
               </div>
-              <h3 class="font-bold text-gray-900 text-sm mb-1">{{ product.name }}</h3>
-              <p class="text-xs text-gray-500 mb-2">{{ product.brand }}</p>
-              <p class="font-bold text-gray-900 text-sm">{{ product.price }}</p>
+              <h3 class="font-bold text-gray-900 dark:text-white text-sm mb-1">{{ product.name }}</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">{{ product.brand }}</p>
+              <p class="font-bold text-gray-900 dark:text-white text-sm">{{ product.price }}</p>
             </div>
           </div>
 
-          <div v-if="salesProducts[2]" :id="'product-'+salesProducts[2].id" class="relative bg-white rounded-xl p-6 shadow-lg border-2 border-blue-400 flex flex-col h-full">
+          <div v-if="salesProducts[2]" :id="'product-'+salesProducts[2].id" class="relative bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border-2 border-blue-400 dark:border-blue-500 flex flex-col h-full">
             <div v-if="(salesProducts[2].stockQuantity ?? 0) <= 0" class="absolute top-4 left-4 bg-red-600 text-white text-[12px] px-3 py-1 rounded">
                {{ $t('home.out_of_stock') }}
             </div>
-            <div class="bg-gray-100 rounded-lg p-8 mb-6 grow flex items-center justify-center">
-              <img :src="salesProducts[2].image" :alt="salesProducts[2].name" class="h-64 object-contain mix-blend-multiply transform -rotate-12">
+            <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-8 mb-6 grow flex items-center justify-center">
+              <img :src="salesProducts[2].image" :alt="salesProducts[2].name" class="h-64 object-contain mix-blend-multiply dark:mix-blend-normal transform -rotate-12">
             </div>
             <div class="mt-auto">
-              <h3 class="font-bold text-gray-900 text-lg mb-1">{{ salesProducts[2].name }}</h3>
-              <p class="text-xs text-gray-500 mb-3">{{ salesProducts[2].brand }}</p>
-              <p class="text-sm text-gray-600 mb-4 leading-relaxed">{{ salesProducts[2].desc }}</p>
+              <h3 class="font-bold text-gray-900 dark:text-white text-lg mb-1">{{ salesProducts[2].name }}</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ salesProducts[2].brand }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">{{ salesProducts[2].desc }}</p>
               <div class="flex items-center gap-2">
-                <span class="font-bold text-xl text-gray-900">{{ salesProducts[2].price }}</span>
-                <span class="text-sm text-gray-400 line-through">{{ salesProducts[2].oldPrice }}</span>
+                <span class="font-bold text-xl text-gray-900 dark:text-white">{{ salesProducts[2].price }}</span>
+                <span class="text-sm text-gray-400 dark:text-gray-500 line-through">{{ salesProducts[2].oldPrice }}</span>
               </div>
             </div>
           </div>
 
           <div class="space-y-6 flex flex-col justify-between">
-            <div v-for="product in salesProducts.slice(3, 5)" :key="product.id" :id="'product-'+product.id" class="relative bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition border border-gray-100">
+            <div v-for="product in salesProducts.slice(3, 5)" :key="product.id" :id="'product-'+product.id" class="relative bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition border border-gray-100 dark:border-gray-700">
               <div v-if="(product.stockQuantity ?? 0) <= 0" class="absolute top-3 left-3 bg-red-600 text-white text-[12px] px-2 py-1 rounded">
                 {{ $t('home.out_of_stock') }}
               </div>
-              <div class="bg-gray-100 rounded-lg p-6 mb-4 flex justify-center">
-                <img :src="product.image" :alt="product.name" class="h-32 object-contain mix-blend-multiply">
+              <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-6 mb-4 flex justify-center">
+                <img :src="product.image" :alt="product.name" class="h-32 object-contain mix-blend-multiply dark:mix-blend-normal">
               </div>
-              <h3 class="font-bold text-gray-900 text-sm mb-1">{{ product.name }}</h3>
-              <p class="text-xs text-gray-500 mb-2">{{ product.brand }}</p>
-              <p class="font-bold text-gray-900 text-sm">{{ product.price }}</p>
+              <h3 class="font-bold text-gray-900 dark:text-white text-sm mb-1">{{ product.name }}</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">{{ product.brand }}</p>
+              <p class="font-bold text-gray-900 dark:text-white text-sm">{{ product.price }}</p>
             </div>
           </div>
 
@@ -312,25 +312,25 @@ onMounted(() => {
       </div>
     </section>
 
-    <section class="bg-gray-50 py-16 lg:py-20">
+    <section class="bg-gray-50 dark:bg-gray-800 py-16 lg:py-20 transition-colors">
       <div class="max-w-7xl mx-auto px-4">
-        <div class="bg-[#F9FAFB] rounded-2xl p-8 md:p-12 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-12">
+        <div class="bg-[#F9FAFB] dark:bg-gray-700 rounded-2xl p-8 md:p-12 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-12">
           <div class="w-full md:w-1/2 flex justify-center relative">
             <div class="absolute bg-gray-200 rounded-full h-80 w-80 md:h-[450px] md:w-[450px] -z-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
             <img src="/Photo/afterBestproduct.png" alt="FlexiNote" class="relative z-10 h-80 md:h-[450px] object-contain drop-shadow-xl transform hover:scale-105 transition duration-500">
           </div>
           <div class="w-full md:w-1/2 text-center md:text-left">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{{ $t('home.feature_title') }}</h2>
-            <p class="text-gray-600 mb-6 text-lg leading-relaxed">{{ $t('home.feature_desc') }}</p>
-            <p class="font-medium text-gray-800 mb-2">{{ $t('home.feature_brand') }}</p>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">{{ $t('home.feature_title') }}</h2>
+            <p class="text-gray-600 dark:text-gray-300 mb-6 text-lg leading-relaxed">{{ $t('home.feature_desc') }}</p>
+            <p class="font-medium text-gray-800 dark:text-gray-200 mb-2">{{ $t('home.feature_brand') }}</p>
             <div class="flex items-center justify-center md:justify-start gap-3 mb-8">
               <div class="w-6 h-6 rounded-full bg-[#C49A6C] hover:ring-2 hover:ring-offset-2 hover:ring-[#C49A6C] cursor-pointer"></div>
               <div class="w-6 h-6 rounded-full bg-black cursor-pointer ring-2 ring-offset-2 ring-black transition"></div>
               <div class="w-6 h-6 rounded-full bg-gray-400 cursor-pointer hover:ring-2 hover:ring-offset-2 hover:ring-gray-400 transition"></div>
             </div>
             <div class="flex flex-col md:flex-row items-center gap-6">
-              <span class="text-2xl font-bold text-gray-900">{{ $t('home.feature_price') }}</span>
-              <router-link to="/product-list" class="inline-block px-8 py-3 bg-[#114B5F] text-white font-semibold rounded-lg hover:bg-[#0d3a4b] transition shadow-md cursor-pointer">
+              <span class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('home.feature_price') }}</span>
+              <router-link to="/product-list" class="inline-block px-8 py-3 bg-[#114B5F] dark:bg-[#1A535C] text-white font-semibold rounded-lg hover:bg-[#0d3a4b] dark:hover:bg-[#2A7A8F] transition shadow-md cursor-pointer">
                 {{ $t('home.feature_btn') }}
               </router-link>
             </div>
@@ -346,47 +346,47 @@ onMounted(() => {
         <p>{{ error }}</p>
     </section>
     
-    <section v-else class="py-16 bg-white relative" id="carousel-section">
+    <section v-else class="py-16 bg-white dark:bg-gray-900 relative transition-colors" id="carousel-section">
       <div class="max-w-7xl mx-auto px-4 text-center">
-        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8">{{ $t('home.our_products') }}</h2>
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-8">{{ $t('home.our_products') }}</h2>
 
         <div class="flex justify-center gap-4 mb-10">
-          <button @click="setFilter('All')" :class="activeFilter === 'All' ? 'bg-[#114B5F] text-white' : 'border border-gray-300 text-gray-600 hover:border-[#114B5F] hover:text-[#114B5F]'" class="px-6 py-2 rounded-md font-medium transition-colors">{{ $t('home.filter_all') }}</button>
-          <button @click="setFilter('Latest')" :class="activeFilter === 'Latest' ? 'bg-[#114B5F] text-white' : 'border border-gray-300 text-gray-600 hover:border-[#114B5F] hover:text-[#114B5F]'" class="px-6 py-2 rounded-md font-medium transition-colors">{{ $t('home.filter_latest') }}</button>
-          <button @click="setFilter('Popular')" :class="activeFilter === 'Popular' ? 'bg-[#114B5F] text-white' : 'border border-gray-300 text-gray-600 hover:border-[#114B5F] hover:text-[#114B5F]'" class="px-6 py-2 rounded-md font-medium transition-colors">{{ $t('home.filter_popular') }}</button>
+          <button @click="setFilter('All')" :class="activeFilter === 'All' ? 'bg-[#114B5F] dark:bg-[#1A535C] text-white' : 'border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#114B5F] dark:hover:border-cyan-300 hover:text-[#114B5F] dark:hover:text-cyan-300'" class="px-6 py-2 rounded-md font-medium transition-colors">{{ $t('home.filter_all') }}</button>
+          <button @click="setFilter('Latest')" :class="activeFilter === 'Latest' ? 'bg-[#114B5F] dark:bg-[#1A535C] text-white' : 'border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#114B5F] dark:hover:border-cyan-300 hover:text-[#114B5F] dark:hover:text-cyan-300'" class="px-6 py-2 rounded-md font-medium transition-colors">{{ $t('home.filter_latest') }}</button>
+          <button @click="setFilter('Popular')" :class="activeFilter === 'Popular' ? 'bg-[#114B5F] dark:bg-[#1A535C] text-white' : 'border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#114B5F] dark:hover:border-cyan-300 hover:text-[#114B5F] dark:hover:text-cyan-300'" class="px-6 py-2 rounded-md font-medium transition-colors">{{ $t('home.filter_popular') }}</button>
         </div>
 
         <div class="relative group px-4 md:px-8">
-          <button @click="scrollLeft" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white border border-gray-200 rounded-full shadow-md hover:bg-gray-50 focus:outline-none">
-            <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+          <button @click="scrollLeft" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-full shadow-md hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none">
+            <svg class="w-6 h-6 text-gray-800 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
           </button>
 
           <div ref="productScrollContainer" class="flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 px-2" style="scrollbar-width: none; -ms-overflow-style: none;">
-            <div v-for="product in filteredProducts" :key="product.id" :id="'product-'+product.id" class="min-w-[280px] md:min-w-[300px] snap-center bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition relative">
-              <div class="relative bg-gray-50 rounded-lg p-6 mb-4 h-64 flex items-center justify-center">
+            <div v-for="product in filteredProducts" :key="product.id" :id="'product-'+product.id" class="min-w-[280px] md:min-w-[300px] snap-center bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-4 shadow-sm hover:shadow-md transition relative">
+              <div class="relative bg-gray-50 dark:bg-gray-700 rounded-lg p-6 mb-4 h-64 flex items-center justify-center">
                 <div v-if="(product.stockQuantity ?? 0) <= 0" class="absolute top-3 left-3 bg-red-600 text-white text-[12px] px-2 py-1 rounded">
                   {{ $t('home.out_of_stock') }}
                 </div>
-                <button @click="addToWishlist" class="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition-colors">
+                <button @click="addToWishlist" class="absolute top-3 right-3 text-gray-400 dark:text-gray-500 hover:text-red-500 transition-colors">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                 </button>
-                <img :src="product.image" :alt="product.name" class="h-48 object-contain mix-blend-multiply">
+                <img :src="product.image" :alt="product.name" class="h-48 object-contain mix-blend-multiply dark:mix-blend-normal">
               </div>
               <div class="text-left">
-                <h3 class="font-bold text-gray-900 text-sm mb-1 truncate">{{ product.name }}</h3>
+                <h3 class="font-bold text-gray-900 dark:text-white text-sm mb-1 truncate">{{ product.name }}</h3>
                 <div class="flex text-yellow-400 text-xs mb-3">
                   <span v-for="n in 5" :key="n" :class="n <= product.rating ? 'text-yellow-400' : 'text-gray-300'">★</span>
                 </div>
                 <div class="flex justify-between items-center">
-                  <span class="font-bold text-lg text-gray-900">{{ product.price }}</span>
+                  <span class="font-bold text-lg text-gray-900 dark:text-white">{{ product.price }}</span>
                   <button
                     v-if="(product.stockQuantity ?? 0) > 0"
                     @click="addToCart(product)"
-                    class="px-3 py-1.5 bg-[#114B5F] text-white text-xs font-bold rounded hover:bg-[#0d3a4b] active:scale-95 transition-transform"
+                    class="px-3 py-1.5 bg-[#114B5F] dark:bg-[#1A535C] text-white text-xs font-bold rounded hover:bg-[#0d3a4b] dark:hover:bg-[#2A7A8F] active:scale-95 transition-transform"
                   >
                     {{ $t('home.add_to_cart') }}
                   </button>
-                  <button v-else disabled class="px-3 py-1.5 bg-gray-400 text-white text-xs font-bold rounded opacity-60 cursor-not-allowed">
+                  <button v-else disabled class="px-3 py-1.5 bg-gray-400 dark:bg-gray-600 text-white text-xs font-bold rounded opacity-60 cursor-not-allowed">
                     {{ $t('home.out_of_stock') }}
                   </button>
                 </div>
@@ -394,33 +394,33 @@ onMounted(() => {
             </div>
           </div>
 
-          <button @click="scrollRight" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white border border-gray-200 rounded-full shadow-md hover:bg-gray-50 focus:outline-none">
-            <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          <button @click="scrollRight" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-full shadow-md hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none">
+            <svg class="w-6 h-6 text-gray-800 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
           </button>
         </div>
       </div>
     </section>
 
     <div v-if="showAuthPrompt" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" @click.self="closeAuthPrompt">
-      <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div class="flex border-b">
-          <button class="flex-1 py-3 text-sm font-semibold" :class="activeAuthTab === 'signin' ? 'text-[#114B5F] border-b-2 border-[#114B5F]' : 'text-gray-500'" @click="activeAuthTab = 'signin'">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+        <div class="flex border-b dark:border-gray-700">
+          <button class="flex-1 py-3 text-sm font-semibold" :class="activeAuthTab === 'signin' ? 'text-[#114B5F] dark:text-[#4EB8D4] border-b-2 border-[#114B5F] dark:border-[#4EB8D4]' : 'text-gray-500 dark:text-gray-400'" @click="activeAuthTab = 'signin'">
             {{ $t('modal.tab_signin') }}
           </button>
-          <button class="flex-1 py-3 text-sm font-semibold" :class="activeAuthTab === 'signup' ? 'text-[#114B5F] border-b-2 border-[#114B5F]' : 'text-gray-500'" @click="activeAuthTab = 'signup'">
+          <button class="flex-1 py-3 text-sm font-semibold" :class="activeAuthTab === 'signup' ? 'text-[#114B5F] dark:text-[#4EB8D4] border-b-2 border-[#114B5F] dark:border-[#4EB8D4]' : 'text-gray-500 dark:text-gray-400'" @click="activeAuthTab = 'signup'">
             {{ $t('modal.tab_signup') }}
           </button>
         </div>
         <div class="p-6 space-y-4 text-center">
-          <h3 class="text-lg font-bold text-gray-900">
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white">
              {{ activeAuthTab === 'signup' ? $t('modal.title_signup') : $t('modal.title_signin') }}
           </h3>
-          <p class="text-sm text-gray-600">{{ $t('modal.desc') }}</p>
+          <p class="text-sm text-gray-600 dark:text-gray-300">{{ $t('modal.desc') }}</p>
           <div class="flex flex-col sm:flex-row gap-3 justify-center">
-            <button @click="goToAuthPage(activeAuthTab)" class="flex-1 px-4 py-2.5 rounded-lg text-white bg-[#114B5F] hover:bg-[#0d3a4b] font-semibold">
+            <button @click="goToAuthPage(activeAuthTab)" class="flex-1 px-4 py-2.5 rounded-lg text-white bg-[#114B5F] dark:bg-[#1A535C] hover:bg-[#0d3a4b] dark:hover:bg-[#2A7A8F] font-semibold">
               {{ activeAuthTab === 'signup' ? $t('modal.go_signup') : $t('modal.go_signin') }}
             </button>
-            <button @click="closeAuthPrompt" class="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold">
+            <button @click="closeAuthPrompt" class="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-semibold">
               {{ $t('modal.maybe_later') }}
             </button>
           </div>
@@ -439,8 +439,8 @@ onMounted(() => {
             <h2 class="text-3xl md:text-5xl font-bold text-white">{{ $t('home.contact_us') }}</h2>
           </div>
           <div class="flex w-full max-w-xl gap-3">
-            <input type="email" v-model="footerEmail" :placeholder="$t('home.email_placeholder')" class="w-full px-5 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#114B5F] shadow-lg text-sm">
-            <button @click="handleFooterSubscribe" class="bg-[#114B5F] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#0d3a4b] transition shadow-lg whitespace-nowrap text-sm">
+            <input type="email" v-model="footerEmail" :placeholder="$t('home.email_placeholder')" class="w-full px-5 py-3 rounded-lg text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-[#114B5F] dark:focus:ring-[#4EB8D4] shadow-lg text-sm placeholder-gray-500 dark:placeholder-gray-400">
+            <button @click="handleFooterSubscribe" class="bg-[#114B5F] dark:bg-[#1A535C] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#0d3a4b] dark:hover:bg-[#2A7A8F] transition shadow-lg whitespace-nowrap text-sm">
               {{ $t('home.submit') }}
             </button>
           </div>

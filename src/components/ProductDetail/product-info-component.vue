@@ -2,7 +2,7 @@
 
 <template>
   <div class="space-y-2 text-[16px] leading-tight">
-    <h2 class="text-[32px]">
+    <h2 class="text-[32px] dark:text-white">
       {{ $t(title) }}
     </h2>
 
@@ -11,10 +11,10 @@
       :key="index"
       class="flex"
     >
-      <span class="font-semibold w-32">
+      <span class="font-semibold w-32 dark:text-gray-300">
         {{ item.label }}:
       </span>
-      <span>{{ item.value }}</span>
+      <span class="dark:text-gray-400">{{ item.value }}</span>
     </div>
   </div>
 </template>

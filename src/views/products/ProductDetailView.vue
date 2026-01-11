@@ -1,21 +1,21 @@
 <template>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 bg-white dark:bg-gray-900 transition-colors min-h-screen">
         <!-- Body -->
         <div>
             <div>
-                <h1 class="text-[20px] my-5">
+                <h1 class="text-[20px] my-5 text-gray-900 dark:text-white">
                     {{ breadcrumbText }}
                 </h1>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 <!-- Left side product (image) -->
-                <div class="bg-white rounded-md p-4 h-[520px] lg:h-[600px] lg:sticky lg:top-24">
+                <div class="bg-white dark:bg-gray-800 rounded-md p-4 h-[520px] lg:h-[600px] lg:sticky lg:top-24">
                     <ProductImageComponent :images="productImages" />
                 </div>
 
                 <!-- Right side product (details) -->
-                <div class="bg-[#F5F5F5] rounded-md">
+                <div class="bg-[#F5F5F5] dark:bg-gray-800 rounded-md">
                     <product-detail-card-component
                         :product="detailProduct"
                         :product-info="productInfo"
@@ -26,8 +26,8 @@
 
             <!-- Review Section -->
             <div id="review" class="my-10">
-                <h1 class="text-[36px]">{{ $t('productDetail.review_title') }}</h1>
-                <h3 class="text-[14px]">{{ $t('productDetail.review_subtitle') }}</h3>
+                <h1 class="text-[36px] text-gray-900 dark:text-white">{{ $t('productDetail.review_title') }}</h1>
+                <h3 class="text-[14px] text-gray-600 dark:text-gray-400">{{ $t('productDetail.review_subtitle') }}</h3>
             </div>
 
 
@@ -37,12 +37,12 @@
                 <div class="grid grid-flow-col grid-rows-4 grid-cols-8 col-start-1 col-end-3 h-[600px] sticky top-50">
 
                     <!-- Top Review Summary -->
-                    <div class="row-span-2 row-start-1 col-start-1 col-end-9 bg-[#F5F5F5] rounded-t-md p-6 ">
+                    <div class="row-span-2 row-start-1 col-start-1 col-end-9 bg-[#F5F5F5] dark:bg-gray-800 rounded-t-md p-6 ">
                         <ProductRatingComponent :rating="detailProduct.averageRating" :reviews="detailProduct.reviews" :recommend="recommendCount" />
                     </div>
 
                     <!-- Bottom Rating Distribution Section -->
-                    <div class="row-span-2 row-start-3 col-start-1 col-end-9 bg-[#1A535C] rounded-b-md p-10 text-white ">
+                    <div class="row-span-2 row-start-3 col-start-1 col-end-9 bg-[#1A535C] dark:bg-[#1A535C] rounded-b-md p-10 text-white dark:text-gray-100 ">
                         <rating-graph-component :ratings="ratingData"/>
                     </div>
                 </div>
@@ -51,7 +51,7 @@
                 <!-- right side review -->
                 <div class="col-start-3 col-end-7 grid gap-4 ...">
                     <!-- TOP: Write a Review -->
-                    <div v-if="canWriteReview" class="bg-[#F5F5F5] w-full rounded-md p-6 space-y-5">
+                    <div v-if="canWriteReview" class="bg-[#F5F5F5] dark:bg-gray-800 w-full rounded-md p-6 space-y-5">
                         <write-review-component
                             :userReview="userReview"
                             :currentUserName="currentUserName"
@@ -60,17 +60,17 @@
                             @delete-review="handleDeleteReview"
                         />
                     </div>
-                    <div v-else class="bg-[#F5F5F5] w-full rounded-md p-6">
-                        <div v-if="!authStore.user" class="text-sm text-gray-700">
+                    <div v-else class="bg-[#F5F5F5] dark:bg-gray-800 w-full rounded-md p-6">
+                        <div v-if="!authStore.user" class="text-sm text-gray-700 dark:text-gray-300">
                             {{ $t('productDetail.signin_to_review') }}
                         </div>
                         <div v-else>
-                            <div class="text-sm text-gray-700">
+                            <div class="text-sm text-gray-700 dark:text-gray-300">
                                 {{ $t('productDetail.buy_to_review') }}
                             </div>
                             <router-link
                                 :to="{ name: 'profile', query: { tab: 'reviews' } }"
-                                class="inline-block mt-3 font-medium text-accent hover:underline"
+                                class="inline-block mt-3 font-medium text-[#1A535C] dark:text-cyan-300 hover:underline"
                             >
                                 {{ $t('productDetail.see_bought_products') }}
                             </router-link>
@@ -87,20 +87,20 @@
 
             <div>
                 <div class="flex justify-between items-baseline text-[20px]">
-                    <h1 class="text-[36px] my-15">{{ $t('productDetail.more_products_title') }}</h1>
-                    <button @click="goToProductList" class="text-[#1A535C] hover:underline">{{ $t('productDetail.see_all') }}</button>
+                    <h1 class="text-[36px] my-15 text-gray-900 dark:text-white">{{ $t('productDetail.more_products_title') }}</h1>
+                    <button @click="goToProductList" class="text-[#1A535C] dark:text-cyan-300 hover:underline">{{ $t('productDetail.see_all') }}</button>
                 </div>
                 <div v-if="moreProducts.length > 0" class="flex flex-wrap gap-2">
                     <product-card-component :products="moreProducts" />
                 </div>
-                <div v-else class="text-gray-500 text-center">{{ $t('productDetail.no_similar_products') }}</div>
+                <div v-else class="text-gray-500 dark:text-gray-400 text-center">{{ $t('productDetail.no_similar_products') }}</div>
 
             </div>
 
             <!-- Contact -->
             <div class="flex flex-col items-center my-20 ...">
-                <h1 class="text-[24px] text-[#1A535C] mb-10">{{ $t('productDetail.problem_prompt') }}</h1>
-                <button class="w-[216px] h-[60px] bg-[#1A535C] rounded-sm text-white text-[16px]">
+                <h1 class="text-[24px] text-[#1A535C] dark:text-cyan-300 mb-10">{{ $t('productDetail.problem_prompt') }}</h1>
+                <button class="w-[216px] h-[60px] bg-[#1A535C] dark:bg-[#1A535C] rounded-sm text-white dark:text-gray-100 text-[16px] hover:bg-[#15444a] dark:hover:bg-[#2A7A8F] transition">
                     {{ $t('productDetail.contact_button') }}
                 </button>
             </div>

@@ -24,30 +24,30 @@
             type="text"
             :placeholder="$t('writeReview.placeholder_title')"
             v-model="title"
-            class="w-full h-10 px-3 rounded-sm focus:outline-none bg-white"
+            class="w-full h-10 px-3 rounded-sm focus:outline-none bg-white dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
           />
           <textarea
             :placeholder="$t('writeReview.placeholder_body')"
             v-model="body"
-            class="w-full h-[150px] px-3 py-2 rounded-sm resize-none focus:outline-none bg-white"
+            class="w-full h-[150px] px-3 py-2 rounded-sm resize-none focus:outline-none bg-white dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
           ></textarea>
         </div>
       </div>
 
       <div class="flex items-center gap-4 flex-wrap justify-end mt-4">
-        <div class="flex flex-col text-sm">
+        <div class="flex flex-col text-sm dark:text-gray-300">
           <label class="font-semibold mb-1">{{ $t('writeReview.recommend_prompt') }}</label>
           <drop-down-component v-model="recommendOption" :options="recommendOptions" />
         </div>
 
-        <div class="flex flex-col text-sm">
+        <div class="flex flex-col text-sm dark:text-gray-300">
           <label class="font-semibold mb-1">{{ $t('writeReview.rating_prompt') }}</label>
           <drop-down-component v-model="starOption" :options="starOptions" />
         </div>
 
         <button
           @click="submitReview"
-          class="mt-6 px-6 py-3 bg-[#1A535C] text-white rounded-sm font-semibold"
+          class="mt-6 px-6 py-3 bg-[#1A535C] text-white rounded-sm font-semibold dark:bg-[#1A535C] dark:text-gray-100 dark:hover:bg-[#2A7A8F]"
         >
           {{ $t('writeReview.post_button') }}
         </button>

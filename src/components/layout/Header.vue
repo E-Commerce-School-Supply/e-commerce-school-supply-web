@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { initFlowbite } from 'flowbite'
 import { useAuthStore } from '@/stores/authStore'
 import { useCartStore } from '@/stores/cartStore'
 import { useProductStore } from '@/stores/productStore'
 import { useFavoriteStore } from '@/stores/favoriteStore'
+import { useThemeStore } from '@/stores/themeStore'
 import { useRoute, useRouter } from 'vue-router'
 import  BlankProfile  from '@/assets/images/pfp_blank.jpeg'
 import LangagueSwitcher from '@/components/ui/LangagueSwitcher.vue'
@@ -12,6 +13,7 @@ const authStore = useAuthStore()
 const cartStore = useCartStore()
 const productStore = useProductStore()
 const favoriteStore = useFavoriteStore()
+const themeStore = useThemeStore()
 const router = useRouter()
 const route = useRoute()
 
@@ -104,9 +106,46 @@ function goToProduct(product: any) {
 	router.push({ name: 'product-detail', params: { id: product.id } })
 }
 
+function handleSearchSubmit() {
+	const query = searchQuery.value.trim()
+	isSearchFocused.value = false
+	
+	if (!query) {
+		// If empty, navigate to product list without search query
+		if (route.name === 'Product List') {
+			router.push({ name: 'Product List' })
+		}
+		return
+	}
+	
+	router.push({ name: 'Product List', query: { search: query } })
+}
+
 function handleDocumentClick() {
 	isSearchFocused.value = false
 }
+
+// Sync search query with route when on Product List page
+watch(
+	() => route.query.search,
+	(newSearch) => {
+		if (route.name === 'Product List') {
+			searchQuery.value = typeof newSearch === 'string' ? newSearch : ''
+		}
+	},
+	{ immediate: true }
+)
+
+// Watch search query changes and update route if on Product List page
+watch(searchQuery, (newQuery) => {
+	if (route.name === 'Product List' && !isSearchFocused.value) {
+		const trimmed = newQuery.trim()
+		if (!trimmed && route.query.search) {
+			// Clear search from route when input is empty
+			router.push({ name: 'Product List' })
+		}
+	}
+})
 
 onMounted(() => {
 	initFlowbite()
@@ -128,7 +167,7 @@ onBeforeUnmount(() => {
 
 <template>
 	<header class="sticky top-0 z-50 w-full">
-		<div class="bg-[#114B5F] text-white text-2xs md:text-xs py-2 px-4 relative">
+		<div class="bg-[#114B5F] dark:bg-gray-900 text-white text-2xs md:text-xs py-2 px-4 relative transition-colors">
 			<div class="max-w-7xl mx-auto flex justify-center items-center">
 				<div class="text-center flex gap-2">
 					<span class="opacity-95 font-light tracking-wide">Black Friday Sale For All Pen and Book - OFF 50%!</span>
@@ -137,37 +176,37 @@ onBeforeUnmount(() => {
 			</div>
 		</div>
 
-		<nav class="bg-white border-b border-gray-200 w-full shadow-sm">
+		<nav class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 w-full shadow-sm transition-colors">
 			<div class="max-w-7xl flex flex-wrap items-center justify-between mx-auto p-4 md:px-6 lg:px-8">
 				<router-link to="/" class="flex items-center text-2xl font-bold tracking-tight shrink-0">
-					<span class="text-[#EF4444]">Tov</span><span class="text-gray-900">Rean</span>
+					<span class="text-[#EF4444]">Tov</span><span class="text-gray-900 dark:text-white">Rean</span>
 				</router-link>
 
 				<div
-					class="hidden lg:flex items-center transform space-x-8 text-gray-600 font-medium text-[16px]"
+					class="hidden lg:flex items-center transform space-x-8 text-gray-600 dark:text-gray-300 font-medium text-[16px]"
 				>
-					<router-link to="/" :class="isHome ? 'text-[#114B5F] font-bold' : 'hover:text-[#114B5F] transition-colors'">
+					<router-link to="/" :class="isHome ? 'text-[#114B5F] dark:text-[#4EB8D4] font-bold' : 'hover:text-[#114B5F] dark:hover:text-[#4EB8D4] transition-colors'">
 						{{ $t('common.home') }}
 					</router-link>
 					<router-link
 						to="/product-list"
 						class="block py-2 px-3 rounded"
-						:class="isProducts ? 'text-[#114B5F] font-bold' : 'hover:text-[#114B5F] transition-colors'"
+						:class="isProducts ? 'text-[#114B5F] dark:text-cyan-300 font-bold' : 'hover:text-[#114B5F] dark:hover:text-cyan-300 transition-colors'"
 					>
 						{{ $t('common.products') }}
 					</router-link>
-					<!-- <router-link :to="{ path: '/', hash: '#promotion-section' }" class="hover:text-[#114B5F] transition-colors">
+					<!-- <router-link :to="{ path: '/', hash: '#promotion-section' }" class="hover:text-[#114B5F] dark:hover:text-[#4EB8D4] transition-colors">
 						Promotion
 					</router-link> -->
 					<router-link
 						to="/contact"
-						:class="isContact ? 'text-[#114B5F] font-bold' : 'hover:text-[#114B5F] transition-colors'"
+						:class="isContact ? 'text-[#114B5F] dark:text-cyan-300 font-bold' : 'hover:text-[#114B5F] dark:hover:text-cyan-300 transition-colors'"
 					>
 						{{ $t('common.contact_us') }}
 					</router-link>
 					<router-link
 						to="/about"
-						:class="isAbout ? 'text-[#114B5F] font-bold' : 'hover:text-[#114B5F] transition-colors'"
+						:class="isAbout ? 'text-[#114B5F] dark:text-cyan-300 font-bold' : 'hover:text-[#114B5F] dark:hover:text-cyan-300 transition-colors'"
 					>
 						{{ $t('common.about_us') }}
 					</router-link>
@@ -179,10 +218,11 @@ onBeforeUnmount(() => {
 							type="text"
 							v-model="searchQuery"
 							@focus="onSearchFocus"
+							@keydown.enter="handleSearchSubmit"
 							:placeholder="$t('header.search_placeholder')"
-							class="bg-gray-100 text-sm rounded-full px-5 py-2.5 w-64 focus:outline-none focus:ring-1 focus:ring-[#114B5F] border-none placeholder-gray-500"
+							class="bg-gray-100 dark:bg-gray-700 dark:text-white text-sm rounded-full px-5 py-2.5 w-64 focus:outline-none focus:ring-1 focus:ring-[#114B5F] dark:focus:ring-[#4EB8D4] border-none placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
 						>
-						<button class="absolute right-3 top-2.5 text-gray-500 hover:text-[#114B5F]">
+						<button class="absolute right-3 top-2.5 text-gray-500 dark:text-gray-400 hover:text-[#114B5F] dark:hover:text-cyan-300">
 							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
 									stroke-linecap="round"
@@ -195,28 +235,46 @@ onBeforeUnmount(() => {
 
 						<div
 							v-if="isSearchFocused && searchQuery"
-							class="absolute top-full left-0 w-full mt-2 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden"
+							class="absolute top-full left-0 w-full mt-2 bg-white dark:bg-gray-700 rounded-lg shadow-xl border border-gray-100 dark:border-gray-600 z-50 overflow-hidden"
 						>
 							<ul v-if="searchResults.length > 0" class="max-h-60 overflow-y-auto">
 								<li
 									v-for="item in searchResults"
 									:key="item.id"
 									@click="goToProduct(item)"
-									class="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center gap-3 border-b border-gray-50 last:border-0"
+									class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer flex items-center gap-3 border-b border-gray-50 dark:border-gray-600 last:border-0"
 								>
 									<img :src="item.imageUrl || item.imageURL || '/Photo/ourproduct.png'" class="w-8 h-8 object-contain">
 									<div>
-										<p class="text-sm font-medium text-gray-900">{{ item.name }}</p>
-										<p class="text-xs text-gray-500">${{ Number(item.price || 0).toFixed(2) }}</p>
+										<p class="text-sm font-medium text-gray-900 dark:text-white">{{ item.name }}</p>
+										<p class="text-xs text-gray-500 dark:text-gray-400">${{ Number(item.price || 0).toFixed(2) }}</p>
 									</div>
 								</li>
 							</ul>
-							<div v-else class="px-4 py-3 text-sm text-gray-500 text-center">No products found.</div>
+							<div v-else class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">No products found.</div>
 						</div>
 					</div>
 
 					<div class="flex items-center space-x-5">
-						<button @click="goToFavorites" class="text-gray-800 hover:text-[#EF4444] transition relative">
+						<!-- Theme Toggle Button -->
+						<button @click="themeStore.toggleTheme()" class="text-gray-800 dark:text-gray-200 hover:text-[#114B5F] dark:hover:text-cyan-300 transition">
+							<svg v-if="!themeStore.isDark" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<circle cx="12" cy="12" r="5"></circle>
+								<line x1="12" y1="1" x2="12" y2="3"></line>
+								<line x1="12" y1="21" x2="12" y2="23"></line>
+								<line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+								<line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+								<line x1="1" y1="12" x2="3" y2="12"></line>
+								<line x1="21" y1="12" x2="23" y2="12"></line>
+								<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+								<line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+							</svg>
+							<svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-300">
+								<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+							</svg>
+						</button>
+
+						<button @click="goToFavorites" class="text-gray-800 dark:text-gray-200 hover:text-[#EF4444] transition relative">
 							<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
 									stroke-linecap="round"
@@ -233,7 +291,7 @@ onBeforeUnmount(() => {
 							</span>
 						</button>
 
-						<button @click="navigateToCart" class="text-gray-800 hover:text-[#114B5F] relative transition">
+						<button @click="navigateToCart" class="text-gray-800 dark:text-gray-200 hover:text-[#114B5F] dark:hover:text-cyan-300 relative transition">
 							<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
 									stroke-linecap="round"
@@ -251,8 +309,8 @@ onBeforeUnmount(() => {
 						</button>
 
 						<div class="hidden md:block text-right leading-tight mr-2">
-							<p class="text-[11px] text-gray-500">{{ $t('header.currently') }}</p>
-							<p class="text-sm font-semibold text-gray-800">{{ displayName }}</p>
+							<p class="text-[11px] text-gray-500 dark:text-gray-400">{{ $t('header.currently') }}</p>
+							<p class="text-sm font-semibold text-gray-800 dark:text-white">{{ displayName }}</p>
 						</div>
 
 						
@@ -271,30 +329,30 @@ onBeforeUnmount(() => {
 						<div class="ml-4">
 							<langague-switcher/>
 						</div>
-						<div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-xl w-44" id="user-dropdown">
+						<div class="z-50 hidden my-4 text-base list-none bg-white dark:bg-gray-700 divide-y divide-gray-100 dark:divide-gray-600 rounded-lg shadow-xl w-44" id="user-dropdown">
 							<div class="px-4 py-3">
-								<span class="block text-sm text-gray-900">{{ displayName }}</span>
-								<span class="block text-sm text-gray-500 truncate">{{ displayEmail }}</span>
+								<span class="block text-sm text-gray-900 dark:text-white">{{ displayName }}</span>
+								<span class="block text-sm text-gray-500 dark:text-gray-400 truncate">{{ displayEmail }}</span>
 							</div>
 							<ul class="py-2" aria-labelledby="user-menu-button">
 								<template v-if="isAuthenticated">
 									<li v-if="authStore.user?.role === 'ADMIN'">
-										<router-link :to="{ name: 'Admin Dashboard' }" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 font-medium">
+										<router-link :to="{ name: 'Admin Dashboard' }" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 font-medium">
 											<i class="pi pi-th-large mr-2"></i>{{$t('common.admin_dashboard')}}
 										</router-link>
 									</li>
 									<li>
-										<router-link :to="{ name: 'my-orders' }" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+										<router-link :to="{ name: 'my-orders' }" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
 											{{$t('common.my_orders')}}
 										</router-link>
 									</li>
 									<li>
-										<router-link :to="{ name: 'my-reviews' }" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+										<router-link :to="{ name: 'my-reviews' }" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
 											{{$t('common.review')}}
 										</router-link>
 									</li>
 									<li>
-										<router-link :to="{ name: 'profile', query: { tab: 'profile' } }" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+										<router-link :to="{ name: 'profile', query: { tab: 'profile' } }" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
 											{{$t('common.settings')}}
 										</router-link>
 									</li>
@@ -302,7 +360,7 @@ onBeforeUnmount(() => {
 										<a
 											@click.prevent="handleSignOut"
 											href="#"
-											class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+											class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
 										>
 											{{$t('common.signout')}}
 										</a>
@@ -312,7 +370,7 @@ onBeforeUnmount(() => {
 									<li>
 										<button
 											@click="goToAuthPage('signin')"
-											class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+											class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
 										>
 											{{ $t('common.signin') }}
 										</button>
@@ -320,7 +378,7 @@ onBeforeUnmount(() => {
 									<li>
 										<button
 											@click="goToAuthPage('signup')"
-											class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+											class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
 										>
 											{{ $t('common.signup') }}
 										</button>
@@ -351,10 +409,10 @@ onBeforeUnmount(() => {
 				</div>
 			</div>
 
-			<div class="hidden w-full md:hidden border-t border-gray-100" id="navbar-user">
-				<ul class="flex flex-col font-medium p-4 bg-gray-50 space-y-2">
+			<div class="hidden w-full md:hidden border-t border-gray-100 dark:border-gray-700" id="navbar-user">
+				<ul class="flex flex-col font-medium p-4 bg-gray-50 dark:bg-gray-800 space-y-2">
 					<li>
-						<router-link to="/" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100">{{ $t('common.home') }}</router-link>
+						<router-link to="/" class="block py-2 px-3 text-gray-900 dark:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{{ $t('common.home') }}</router-link>
 					</li>
 					<li>
 						<router-link
@@ -371,20 +429,21 @@ onBeforeUnmount(() => {
 						</router-link>
 					</li> -->
 					<li>
-						<router-link to="/contact" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100">
+						<router-link to="/contact" class="block py-2 px-3 text-gray-900 dark:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
 							{{ $t('common.contact_us') }}
 						</router-link>
 					</li>
 					<li>
-						<router-link to="/about" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100">{{ $t('common.about_us') }}</router-link>
+						<router-link to="/about" class="block py-2 px-3 text-gray-900 dark:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{{ $t('common.about_us') }}</router-link>
 					</li>
-					<li class="mt-2 pt-2 border-t border-gray-200" @click.stop>
-						<input
-							type="text"
-							v-model="searchQuery"
-							@focus="onSearchFocus"
-							:placeholder="$t('header.search_placeholder')"
-							class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#114B5F] focus:border-[#114B5F] block p-2.5"
+				<li class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700" @click.stop>
+					<input
+						type="text"
+						v-model="searchQuery"
+						@focus="onSearchFocus"
+						@keydown.enter="handleSearchSubmit"
+						:placeholder="$t('header.search_placeholder')"
+						class="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-[#114B5F] dark:focus:ring-[#4EB8D4] focus:border-[#114B5F] dark:focus:border-[#4EB8D4] block p-2.5 placeholder-gray-500 dark:placeholder-gray-400"
 						>
 					</li>
 				</ul>

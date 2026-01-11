@@ -6,7 +6,7 @@
                 v-for="(image, index) in images"
                 :key="index"
                 @click="selectImage(index)"
-                class="cursor-pointer border rounded-md overflow-hidden hover:border-[#1A535C] transition bg-white h-20 sm:h-24"
+                class="cursor-pointer border rounded-md overflow-hidden hover:border-[#1A535C] transition bg-white h-20 sm:h-24 dark:bg-gray-700"
                 :class="{ 'border-[#1A535C] border-2': selectedIndex === index }"
             >
                 <img :src="image" :alt="`Product image ${index + 1}`" class="w-full h-full object-cover" />
@@ -15,7 +15,7 @@
 
         <!-- Main Image Display -->
         <div
-            class="bg-white rounded-md overflow-hidden flex items-center justify-center"
+            class="bg-white rounded-md overflow-hidden flex items-center justify-center dark:bg-gray-700"
             :class="images.length > 1 ? 'col-span-6' : 'col-span-8'"
         >
             <img

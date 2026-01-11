@@ -153,7 +153,7 @@ async function submitPasswordChange() {
 </script>
 
 <template>
-  <div class="border border-default border-dashed rounded-base">
+  <div class="border border-default border-dashed rounded-base bg-white dark:bg-gray-800 dark:border-gray-700 transition-colors">
     <div
       class="relative w-full h-48 bg-cover bg-center rounded-base"
       :style="{ backgroundImage: `url(${Banner})` }"
@@ -164,48 +164,48 @@ async function submitPasswordChange() {
         class="absolute -bottom-14 left-10 w-36 h-36 rounded-circle rounded-full border-5 border-white object-cover"
       />
       <div class="absolute top-4 right-4 flex gap-2">
-        <button @click="startEdit" class="text-heading px-4 py-2 bg-neutral-primary box-border border border-transparent focus:ring-4 focus:ring-neutral-tertiary font-medium rounded-base text-sm focus:outline-none hover:bg-accent/70 hover:text-white transition">
+        <button @click="startEdit" class="text-heading px-4 py-2 bg-neutral-primary box-border border border-transparent focus:ring-4 focus:ring-neutral-tertiary font-medium rounded-base text-sm focus:outline-none hover:bg-accent/70 hover:text-white transition dark:text-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-[#1A535C] dark:hover:text-white">
           {{ t('profile.edit') }}
         </button>
-        <button @click="startEditPassword" class="text-heading px-4 py-2 bg-neutral-primary box-border border border-transparent focus:ring-4 focus:ring-neutral-tertiary font-medium rounded-base text-sm focus:outline-none hover:bg-accent/70 hover:text-white  transition">
+        <button @click="startEditPassword" class="text-heading px-4 py-2 bg-neutral-primary box-border border border-transparent focus:ring-4 focus:ring-neutral-tertiary font-medium rounded-base text-sm focus:outline-none hover:bg-accent/70 hover:text-white  transition dark:text-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-[#1A535C] dark:hover:text-white">
           {{ t('profile.change_password') }}
         </button>
       </div>
     </div>
-    <div class="w-full mt-20 px-16 pb-10">
+    <div class="w-full mt-20 px-16 pb-10 text-gray-900 dark:text-gray-100">
       <h1 class="font-bold mt-5 text-xl">{{ t('profile.account_information') }}</h1>
 
 
       <div v-if="isEditing" class="mt-5 max-w-3xl">
         <form @submit.prevent="saveEdit" class="space-y-4">
           <div>
-            <label class="block text-sm text-body mb-1">{{ t('profile.name') }}</label>
-            <input v-model="form.name" class="w-full p-2 border rounded" />
+            <label class="block text-sm text-body mb-1 dark:text-gray-300">{{ t('profile.name') }}</label>
+            <input v-model="form.name" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
           </div>
           <div>
-            <label class="block text-sm text-body mb-1">{{ t('profile.email') }}</label>
-            <input v-model="form.email" class="w-full p-2 border rounded" />
+            <label class="block text-sm text-body mb-1 dark:text-gray-300">{{ t('profile.email') }}</label>
+            <input v-model="form.email" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
           </div>
           <div>
-            <label class="block text-sm text-body mb-1">{{ t('profile.phone_number') }}</label>
-            <input v-model="form.phoneNumber" class="w-full p-2 border rounded" />
+            <label class="block text-sm text-body mb-1 dark:text-gray-300">{{ t('profile.phone_number') }}</label>
+            <input v-model="form.phoneNumber" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
           </div>
           <div>
-            <label class="block text-sm text-body mb-1">{{ t('profile.avatar_url') }}</label>
-            <input v-model="form.avatar" class="w-full p-2 border rounded" />
-            <p class="text-xs text-gray-500 mt-1">{{ t('profile.default_profile_picture_note') }}</p>
+            <label class="block text-sm text-body mb-1 dark:text-gray-300">{{ t('profile.avatar_url') }}</label>
+            <input v-model="form.avatar" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
+            <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">{{ t('profile.default_profile_picture_note') }}</p>
           </div>
           <div>
-            <label class="block text-sm text-body mb-1">{{ t('profile.upload_avatar') }}</label>
-            <input type="file" accept="image/*" @change="onFileChange" class="w-full p-2" />
+            <label class="block text-sm text-body mb-1 dark:text-gray-300">{{ t('profile.upload_avatar') }}</label>
+            <input type="file" accept="image/*" @change="onFileChange" class="w-full p-2 text-gray-900 dark:text-gray-100" />
             <div class="flex gap-2 mt-2">
-              <button type="button" @click="uploadSelectedFile" class="px-4 py-2 bg-[#1A535C] text-white rounded">{{ t('profile.upload') }}</button>
-              <p class="text-xs text-gray-500 flex items-center">{{ t('profile.avatar_url_note') }}</p>
+              <button type="button" @click="uploadSelectedFile" class="px-4 py-2 bg-[#1A535C] text-white rounded hover:bg-[#2A7A8F] transition-colors">{{ t('profile.upload') }}</button>
+              <p class="text-xs text-gray-500 flex items-center dark:text-gray-400">{{ t('profile.avatar_url_note') }}</p>
             </div>
           </div>
           <div class="flex gap-2 justify-end">
-            <button type="button" @click="cancelEdit" class="px-4 py-2 border rounded">{{ t('profile.cancel') }}</button>
-            <button type="submit" class="px-4 py-2 bg-[#1A535C] text-white rounded">{{ t('profile.save') }}</button>
+            <button type="button" @click="cancelEdit" class="px-4 py-2 border rounded dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">{{ t('profile.cancel') }}</button>
+            <button type="submit" class="px-4 py-2 bg-[#1A535C] text-white rounded hover:bg-[#2A7A8F] transition-colors">{{ t('profile.save') }}</button>
           </div>
         </form>
       </div>
@@ -214,20 +214,20 @@ async function submitPasswordChange() {
         <h3 class="font-semibold mb-3">{{ t('profile.change_password') }}</h3>
         <form @submit.prevent="submitPasswordChange" class="space-y-3">
           <div>
-            <label class="block text-sm text-body mb-1">{{ t('profile.old_password') }}</label>
-            <input v-model="oldPassword" type="password" class="w-full p-2 border rounded" />
+            <label class="block text-sm text-body mb-1 dark:text-gray-300">{{ t('profile.old_password') }}</label>
+            <input v-model="oldPassword" type="password" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
           </div>
           <div>
-            <label class="block text-sm text-body mb-1">{{ t('profile.new_password') }}</label>
-            <input v-model="newPassword" type="password" class="w-full p-2 border rounded" />
+            <label class="block text-sm text-body mb-1 dark:text-gray-300">{{ t('profile.new_password') }}</label>
+            <input v-model="newPassword" type="password" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
           </div>
           <div>
-            <label class="block text-sm text-body mb-1">{{ t('profile.confirm_new_password') }}</label>
-            <input v-model="confirmPassword" type="password" class="w-full p-2 border rounded" />
+            <label class="block text-sm text-body mb-1 dark:text-gray-300">{{ t('profile.confirm_new_password') }}</label>
+            <input v-model="confirmPassword" type="password" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
           </div>
           <div class="flex gap-2 justify-end">
-            <button type="button" @click="showPasswordForm = false" class="px-4 py-2 border rounded">{{ t('profile.cancel') }}</button>
-            <button type="submit" class="px-4 py-2 bg-[#1A535C] text-white rounded">{{ t('profile.change') }}</button>
+            <button type="button" @click="showPasswordForm = false" class="px-4 py-2 border rounded dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">{{ t('profile.cancel') }}</button>
+            <button type="submit" class="px-4 py-2 bg-[#1A535C] text-white rounded hover:bg-[#2A7A8F] transition-colors">{{ t('profile.change') }}</button>
           </div>
         </form>
       </div>

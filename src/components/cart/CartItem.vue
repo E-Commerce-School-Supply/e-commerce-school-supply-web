@@ -16,18 +16,18 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="border-b border-neutral-black-100 pb-6 last:border-b-0">
+  <div class="border-b border-neutral-black-100 pb-6 last:border-b-0 dark:border-gray-700">
     <div class="relative sm:grid sm:grid-cols-5 gap-4 items-center">
       <div class="col-span-2">
         <div class="flex gap-10">
           <img :src="item.image" :alt="item.name" class="w-24 h-24 object-cover rounded" />
 
           <div class="flex-1">
-            <h3 class="text-[20px] font-medium mb-2">
+            <h3 class="text-[20px] font-medium mb-2 dark:text-white">
               {{ item.name }}
             </h3>
 
-            <div class="space-y-1 text-xs">
+            <div class="space-y-1 text-xs dark:text-gray-400">
               <p>Item No: {{ item.itemNo }}</p>
               <p>Brand: {{ item.brand }}</p>
               <StarRating :rating="item.rating" :showNumber="true" class="mb-3" />
@@ -36,7 +36,7 @@ const emit = defineEmits<{
         </div>
       </div>
 
-      <div class="flex items-center justify-between col-span-2 ml-20">
+      <div class="flex items-center justify-between col-span-2 ml-20 dark:text-white">
         <span>${{ item.price.toFixed(2) }}</span>
         
         <span>
@@ -51,7 +51,7 @@ const emit = defineEmits<{
 
       <button 
         @click="emit('remove', item.productId)" 
-        class="absolute right-5 top-5 lg:static lg:justify-self-end hover:text-red-500 transition-colors"
+        class="absolute right-5 top-5 lg:static lg:justify-self-end hover:text-red-500 dark:hover:text-red-400 transition-colors"
       >
         <svg class="w-5 h-5 text-neutral-black-500" viewBox="0 0 20 20" fill="currentColor">
           <path

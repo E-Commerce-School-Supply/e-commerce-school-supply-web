@@ -3,8 +3,8 @@ import OrderInfo from './Info/OrderInfo.vue'
 </script>
 
 <template>
-  <div>
-    <h1>My Orders</h1>
+  <div class="dark:text-white transition-colors">
+    <h1 class="dark:text-white">My Orders</h1>
     <OrderInfo />
   </div>
 </template>

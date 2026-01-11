@@ -1,8 +1,8 @@
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white dark:bg-gray-900 transition-colors min-h-screen">
     <div class="mb-6">
-      <h1 class="text-3xl font-bold text-heading">{{ $t('reviews_page.title') }}</h1>
-      <p class="text-body mt-2">{{ $t('reviews_page.subtitle') }}</p>
+      <h1 class="text-3xl font-bold text-heading dark:text-white">{{ $t('reviews_page.title') }}</h1>
+      <p class="text-body mt-2 dark:text-gray-400">{{ $t('reviews_page.subtitle') }}</p>
     </div>
 
     <div v-if="loading" class="text-center py-8">
@@ -10,14 +10,14 @@
     </div>
 
     <div v-else>
-      <div v-if="sortedProducts.length === 0" class="bg-white rounded-lg shadow p-8 text-center">
-        <div class="text-gray-500 mb-4">{{ $t('reviews_page.empty_title') }}</div>
-        <p class="text-sm text-gray-600 mb-4">
+      <div v-if="sortedProducts.length === 0" class="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center transition-colors">
+        <div class="text-gray-500 dark:text-gray-400 mb-4">{{ $t('reviews_page.empty_title') }}</div>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
           {{ $t('reviews_page.empty_subtitle') }}
         </p>
         <router-link
           to="/products"
-          class="inline-block px-6 py-3 bg-accent text-white rounded-base hover:bg-accent/90"
+          class="inline-block px-6 py-3 bg-accent text-white rounded-base hover:bg-accent/90 dark:bg-[#1A535C] dark:hover:bg-[#2A7A8F]"
         >
           {{ $t('orders.start_shopping') }}
         </router-link>
@@ -27,7 +27,7 @@
         <div
           v-for="product in sortedProducts"
           :key="product.id"
-          class="bg-white border border-default rounded-base p-4 flex gap-4 items-center shadow-sm hover:shadow-md transition"
+          class="bg-white border border-default rounded-base p-4 flex gap-4 items-center shadow-sm hover:shadow-md transition dark:bg-gray-800 dark:border-gray-700"
         >
           <img
             v-if="product.imageUrl"
@@ -37,19 +37,19 @@
           />
           <div
             v-else
-            class="w-16 h-16 bg-gray-200 rounded-sm flex items-center justify-center text-gray-400"
+            class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-sm flex items-center justify-center text-gray-400"
           >
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
           <div class="flex-1 min-w-0">
-            <div class="font-medium text-heading truncate">{{ product.name }}</div>
-            <div class="text-xs text-body truncate">{{ product.id }}</div>
+            <div class="font-medium text-heading truncate dark:text-gray-100">{{ product.name }}</div>
+            <div class="text-xs text-body truncate dark:text-gray-300">{{ product.id }}</div>
           </div>
           <button
             @click="goToReview(product.id)"
-            class="px-4 py-2 bg-accent text-white box-border border border-transparent focus:ring-4 focus:ring-neutral-tertiary font-medium rounded-base text-sm focus:outline-none hover:bg-accent/90 transition whitespace-nowrap"
+            class="px-4 py-2 bg-accent text-white box-border border border-transparent focus:ring-4 focus:ring-neutral-tertiary font-medium rounded-base text-sm focus:outline-none hover:bg-accent/90 transition whitespace-nowrap dark:bg-[#1A535C] dark:hover:bg-[#2A7A8F]"
           >
             {{ $t('common.review') }}
           </button>

@@ -23,6 +23,8 @@ const searchQuery = ref('')
 const guestMode = computed(() => sessionStorage.getItem('guestMode') === 'true')
 const isAuthenticated = computed(() => !!authStore.user)
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || ''
+
 const displayName = computed(() => {
 	if (isAuthenticated.value && authStore.user) return authStore.user.username || authStore.user.email || 'User'
 	if (guestMode.value) return 'Guest'
@@ -45,7 +47,7 @@ function isLikelyAvatarUrl(value: unknown): value is string {
 
 const userAvatarSrc = computed(() => {
 	const candidate = authStore.user?.avatarUrl
-	return isLikelyAvatarUrl(candidate) ? candidate.trim() : BlankProfile
+	return isLikelyAvatarUrl(candidate) ? `${API_BASE_URL}${candidate.trim()}` : BlankProfile
 })
 
 const isHome = computed(() => route.name === 'home')

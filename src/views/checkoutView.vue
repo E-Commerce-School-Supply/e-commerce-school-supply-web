@@ -272,9 +272,9 @@
   </div>
 
   <!-- QR overlay shown after clicking Confirm & Pay -->
-  <div v-if="showQR" class="fixed inset-0 z-50 flex items-center justify-center" :style="overlayBackground">
-    <div class="bg-white dark:bg-gray-900 p-12 rounded-3xl w-full max-w-2xl text-center shadow-2xl transition-colors">
-      <h3 class="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">{{ $t('checkout.scan_to_pay') }}</h3>
+  <div v-if="showQR" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-colors">
+    <div class="bg-white p-12 rounded-3xl w-full max-w-2xl text-center shadow-2xl transition-colors">
+      <h3 class="text-2xl font-bold mb-6 text-gray-900">{{ $t('checkout.scan_to_pay') }}</h3>
       <img :src="QRImage" alt="QR" class="mx-auto mb-6 w-72 h-72 md:w-96 md:h-96 object-contain" />
       <div class="mt-4 flex justify-center">
         <button
@@ -290,10 +290,10 @@
   </div>
 
   <!-- Success overlay shown after order is placed -->
-  <div v-if="showSuccess" class="fixed inset-0 z-60 flex items-center justify-center" :style="overlayBackground">
-    <div class="bg-white dark:bg-gray-900 p-8 rounded-3xl w-full max-w-md text-center shadow-2xl transition-colors">
+  <div v-if="showSuccess" class="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-colors" >
+    <div class="bg-white p-8 rounded-3xl w-full max-w-md text-center shadow-2xl transition-colors">
       <div class="flex items-center justify-center mb-4">
-        <div class="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-200 rounded-full p-4">
+        <div class="bg-green-100 text-green-700 rounded-full p-4">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 10-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
           </svg>
@@ -690,7 +690,7 @@ function goToOrders() {
 
 function continueShopping() {
   showSuccess.value = false
-  router.push({ name: 'home' })
+  router.push({ name: 'Product List' })
 }
 
 </script>

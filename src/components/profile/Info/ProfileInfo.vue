@@ -13,6 +13,8 @@ import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
+const API_BASE_URL = import.meta.env.VITE_API_URL as string
+
 interface Props {
   name: string
   role: string
@@ -42,7 +44,7 @@ function isLikelyAvatarUrl(value: unknown): value is string {
 }
 
 const avatarSrc = computed(() => {
-  return isLikelyAvatarUrl(form.avatar) ? form.avatar.trim() : DEFAULT_AVATAR
+  return isLikelyAvatarUrl(form.avatar) ? form.avatar : DEFAULT_AVATAR
 })
 
 const isEditing = ref(false)
@@ -159,7 +161,7 @@ async function submitPasswordChange() {
       :style="{ backgroundImage: `url(${Banner})` }"
     >
       <img
-        :src="avatarSrc"
+        :src="`${API_BASE_URL}${avatarSrc}`"
         alt="profile"
         class="absolute -bottom-14 left-10 w-36 h-36 rounded-circle rounded-full border-5 border-white object-cover"
       />

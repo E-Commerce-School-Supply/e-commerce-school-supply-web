@@ -21,7 +21,7 @@
               >
                 <div
                   class="h-5 w-5 rounded-full border-2 transition-all flex items-center justify-center"
-                  :class="selectedCategory === cat ? 'border-[#1A535C] dark:border-[#4EB8D4] ring-2 ring-offset-2 ring-[#1A535C] dark:ring-[#4EB8D4] dark:ring-offset-gray-900' : 'border-black dark:border-gray-400'"
+                  :class="selectedCategory === cat ? 'border-[#1A535C] dark:border-[#4EB8D4]' : 'border-black dark:border-gray-400'"
                 >
                   <div v-if="selectedCategory === cat" class="h-2.5 w-2.5 rounded-full bg-[#1A535C] dark:bg-cyan-300"></div>
                 </div>
@@ -102,11 +102,15 @@
         <!-- Product List -->
         <div class="col-start-2 col-end-6 ...">
           <div class="flex justify-between mb-10 items-baseline">
-            <h1 class="text-[20px] text-gray-900 dark:text-white">{{ $t('productList.school_products') }}</h1>
+            <h1 class="text-[20px] text-gray-900 dark:text-white">{{ selectedCategory ? `'${selectedCategory}'` : $t('productList.school_products') }}</h1>
             <p class="text-[16px] font-light text-gray-600 dark:text-gray-400">{{ $t('productList.items_count', { count: filteredAllProducts.length }) }}</p>
           </div>
           <div v-if="loading">
             <Spinner/>
+          </div>
+          <div v-else-if ="filteredAllProducts.length === 0" class="text-center">
+              <img src="/src/assets/images/empty.png" alt="No products" class="mx-auto w-[430px] h-[430px] mb-4" />
+              <p class="text-[24px] font-medium text-[#BFBFBF]">{{ $t('productList.no_items') }}</p>
           </div>
           <div v-else class="flex flex-wrap gap-5">
             <product-card-component :products="products" />
@@ -188,7 +192,7 @@ export default {
     const allProducts = ref<Product[]>([])
     const products = ref<Product[]>([])
     const currentPage = ref(1)
-    const itemsPerPage =10
+    const itemsPerPage =12
     const searchQuery = ref('')
     
     const categories = ref<string[]>([

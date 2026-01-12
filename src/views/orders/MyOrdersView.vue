@@ -62,7 +62,7 @@
                 <td class="px-6 py-4">
                   <router-link
                     :to="{ name: 'order-detail', params: { id: order.id || order.orderId } }"
-                    class="font-medium text-accent hover:underline dark:text-[#1A535C]"
+                    class="font-medium text-accent hover:underline "
                   >
                     {{ $t('orders.view_details') }}
                   </router-link>

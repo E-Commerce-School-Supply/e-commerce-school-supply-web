@@ -59,19 +59,19 @@
         <div class="flex items-center w-[90%]">
             <div class="flex items-center">
                     <button
-                    class="w-9 h-10 flex justify-center items-center border rounded-l-sm text-lg font-bold hover:bg-[#1A535C] hover:text-white hover:border-[#1A535C]"
+                    class="w-9 h-10 flex justify-center items-center border rounded-l-sm text-lg font-bold hover:bg-[#1A535C] hover:text-white hover:border-[#1A535C] dark:text-white dark:hover:border-white"
                     @click="decrease"
                     >-</button>
-                    <span class="h-10 w-15 flex justify-center items-center border-y text-lg font-semibold">{{ quantity }}</span>
+                    <span class="h-10 w-15 flex justify-center items-center border-y text-lg font-semibold dark:text-white">{{ quantity }}</span>
                     <button
-                    class="w-9 h-10 flex justify-center items-center border rounded-r-sm text-lg font-bold hover:bg-[#1A535C] hover:text-white hover:border-[#1A535C]"
+                    class="w-9 h-10 flex justify-center items-center border rounded-r-sm text-lg font-bold hover:bg-[#1A535C] hover:text-white hover:border-[#1A535C] dark:text-white dark:hover:border-white"
                     @click="increase"
                     >+</button>
             </div>
 
             <!-- Favorite Button -->
             <button
-                class="w-10 h-10 ml-5 border p-1 rounded-md flex justify-center items-center"
+                class="w-10 h-10 ml-5 border p-1 rounded-md flex justify-center items-center dark:bg-gray-300"
                 @click="toggleFavorite"
             >
                 <img v-if="!isFavorite" src="/src/assets/images/Heart.png" alt="Favorite" />

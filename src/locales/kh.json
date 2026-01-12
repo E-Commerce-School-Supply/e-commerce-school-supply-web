@@ -207,6 +207,7 @@
     "customer_review": "ការវាយតម្លៃអតិថិជន",
     "school_products": "សម្ភារៈសិក្សា",
     "items_count": "{count} មុខ",
+    "no_items": "សូមអភ័យទោស! មិនមានទំនិញ",
     "previous": "មុន",
     "next": "បន្ទាប់",
     "cats": {
@@ -399,5 +400,20 @@
     "message": "មើលទៅអ្នកបានវង្វេងនៅទីនេះ",
     "go_home": "ត្រឡប់ទៅទំព័រដើម",
     "go_back": "ត្រឡប់​ក្រោយ"
+  },
+    "contact": {
+    "title": "ទាក់ទង​មក​ពួក​យើង",
+    "firstName": "នាមខ្លួន",
+    "lastName": "នាមត្រកូល",
+    "email": "អ៊ីមែល",
+    "phone": "លេខទូរស័ព្ទ",
+    "message": "សារ",
+    "messagePlaceholder": "វាយសាររបស់អ្នកនៅទីនេះ...",
+    "send": "ផ្ញើ",
+    "form_submitted": "បានបញ្ជូនសំណុំបែបបទ!",
+    "firstNamePlaceholder": "លីម",
+    "lastNamePlaceholder": "ពុកតយ",
+    "emailPlaceholder": "lucky@gmail.com",
+    "phonePlaceholder": "0123456789"
   }
 }

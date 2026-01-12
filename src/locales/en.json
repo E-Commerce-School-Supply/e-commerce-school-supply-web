@@ -207,6 +207,7 @@
     "customer_review": "Customer Review",
     "school_products": "School Products",
     "items_count": "{count} items",
+    "no_items": "Oops! No items",
     "previous": "Previous",
     "next": "Next",
     "cats": {
@@ -391,5 +392,20 @@
     "message": "Look like you got lost here",
     "go_home": "Go to Back to Home page",
     "go_back": "Go Back"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phone": "Phone Number",
+    "message": "Message",
+    "messagePlaceholder": "Type your message here...",
+    "send": "Send",
+    "form_submitted": "Form submitted!",
+    "firstNamePlaceholder": "Lim",
+    "lastNamePlaceholder": "Phoktoit",
+    "emailPlaceholder": "lucky@gmail.com",
+    "phonePlaceholder": "0123456789"
   }
 }

@@ -1,14 +1,14 @@
 <template>
-  <div class="min-h-screen">
+  <div class="min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors">
 
     <div class="flex justify-around p-10">
 
     <!-- Left side -->
 
     <div>
-      <div class="w-5xl p-8 border rounded-2xl mb-5">
+      <div class="w-5xl p-8 border border-gray-200 dark:border-gray-700 rounded-2xl mb-5 bg-white dark:bg-gray-800 transition-colors">
 
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ $t('checkout.delivery_address') }}</h2>
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">{{ $t('checkout.delivery_address') }}</h2>
 
         <AddDropdown
           :addresses="savedAddresses"
@@ -16,59 +16,59 @@
           class="mb-5"
         />
         <div class="mt-3 mb-5 flex gap-2">
-          <button v-if="selectedAddress && selectedAddress.id" @click="openEdit" class="px-4 py-2 bg-[#1A535C] text-white rounded">{{ $t('checkout.edit_selected_address') }}</button>
-          <button @click="addNewAddress" class="px-4 py-2 border rounded">{{ $t('checkout.add_new_address') }}</button>
+          <button v-if="selectedAddress && selectedAddress.id" @click="openEdit" class="px-4 py-2 bg-[#1A535C] text-white rounded hover:bg-[#2A7A8F] transition-colors">{{ $t('checkout.edit_selected_address') }}</button>
+          <button @click="addNewAddress" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">{{ $t('checkout.add_new_address') }}</button>
         </div>
 
         <!-- Address Detail Section -->
-        <h3 class="mb-4 text-2xl font-bold">{{ $t('checkout.address_detail') }}</h3>
+        <h3 class="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $t('checkout.address_detail') }}</h3>
 
         <div v-if="selectedAddress" class=" grid grid-cols-2 gap-4">
 
           <div>
-            <label class="block text-sm font-medium text-gray-700">{{ $t('checkout.country') }}</label>
-            <input v-model="selectedAddress.country" placeholder="Cambodia" type="text" class="mt-1 w-full px-3 py-2 border rounded-md" />
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">{{ $t('checkout.country') }}</label>
+            <input v-model="selectedAddress.country" placeholder="Cambodia" type="text" class="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors" />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700">{{ $t('checkout.province_city') }}</label>
-            <select v-model="selectedAddress.province" class="mt-1 w-full px-3 py-2 border rounded-md">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">{{ $t('checkout.province_city') }}</label>
+            <select v-model="selectedAddress.province" class="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
               <option value="">{{ $t('checkout.select_province') }}</option>
               <option v-for="p in provinces" :key="p" :value="p">{{ p }}</option>
             </select>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700">{{ $t('checkout.house_number') }}</label>
-            <input v-model="selectedAddress.houseNumber" placeholder="#" type="text" class="mt-1 w-full px-3 py-2 border rounded-md" />
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">{{ $t('checkout.house_number') }}</label>
+            <input v-model="selectedAddress.houseNumber" placeholder="#" type="text" class="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors" />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700">{{ $t('checkout.street') }}</label>
-            <input v-model="selectedAddress.street" placeholder="St." type="text" class="mt-1 w-full px-3 py-2 border rounded-md" />
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">{{ $t('checkout.street') }}</label>
+            <input v-model="selectedAddress.street" placeholder="St." type="text" class="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors" />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700">{{ $t('checkout.address_line_1') }}</label>
-            <input v-model="selectedAddress.addressLine1" placeholder="Address 1"  type="text" class="mt-1 w-full px-3 py-2 border rounded-md" />
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">{{ $t('checkout.address_line_1') }}</label>
+            <input v-model="selectedAddress.addressLine1" placeholder="Address 1"  type="text" class="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors" />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700">{{ $t('checkout.address_line_2') }}</label>
-            <input v-model="selectedAddress.addressLine2" placeholder="Address 2" type="text" class="mt-1 w-full px-3 py-2 border rounded-md" />
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">{{ $t('checkout.address_line_2') }}</label>
+            <input v-model="selectedAddress.addressLine2" placeholder="Address 2" type="text" class="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors" />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700">{{ $t('checkout.zip_code') }}</label>
-            <input v-model="selectedAddress.zipCode" placeholder="000000" type="text" class="mt-1 w-full px-3 py-2 border rounded-md" />
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">{{ $t('checkout.zip_code') }}</label>
+            <input v-model="selectedAddress.zipCode" placeholder="000000" type="text" class="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors" />
           </div>
 
         </div>
       </div>
 
         <!-- Shipping option -->
-        <div class="w-5xl border rounded-2xl p-8 mb-5">
-          <div class="mb-4 text-2xl font-bold">
+        <div class="w-5xl border border-gray-200 dark:border-gray-700 rounded-2xl p-8 mb-5 bg-white dark:bg-gray-800 transition-colors">
+          <div class="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-100">
               {{ $t('checkout.shipping_options') }}
           </div>
 
@@ -91,8 +91,8 @@
         </div>
 
         <!-- Payment option -->
-         <div class="w-5xl border rounded-2xl p-8">
-          <div class="mb-4 text-2xl font-bold">
+         <div class="w-5xl border border-gray-200 dark:border-gray-700 rounded-2xl p-8 bg-white dark:bg-gray-800 transition-colors">
+          <div class="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-100">
               {{ $t('checkout.payment_method') }}
           </div>
 
@@ -116,24 +116,24 @@
             <div v-if="selectedCardment === 'card' && selectedCard" class=" grid grid-cols-1 gap-4">
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">{{ $t('checkout.name_on_card') }}</label>
-                  <input v-model="selectedCard.name" placeholder="Your name" type="text" class="mt-1 w-full px-3 py-2 border rounded-md" />
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">{{ $t('checkout.name_on_card') }}</label>
+                  <input v-model="selectedCard.name" placeholder="Your name" type="text" class="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors" />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">{{ $t('checkout.card_number') }}</label>
-                  <input v-model="selectedCard.cardNum" placeholder="0000 0000 0000 0000" type="text" class="mt-1 w-full px-3 py-2 border rounded-md" />
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">{{ $t('checkout.card_number') }}</label>
+                  <input v-model="selectedCard.cardNum" placeholder="0000 0000 0000 0000" type="text" class="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors" />
                 </div>
 
                 <div class="flex gap-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">{{ $t('checkout.expiration_date') }}</label>
-                    <input v-model="selectedCard.expire" placeholder="00/00" type="text" class="mt-1 w-full px-3 py-2 border rounded-md" />
+                  <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">{{ $t('checkout.expiration_date') }}</label>
+                    <input v-model="selectedCard.expire" placeholder="00/00" type="text" class="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors" />
                   </div>
 
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">{{ $t('checkout.cvv') }}</label>
-                    <input v-model="selectedCard.cvv" placeholder="000" type="text" class="mt-1 w-full px-3 py-2 border rounded-md" />
+                  <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">{{ $t('checkout.cvv') }}</label>
+                    <input v-model="selectedCard.cvv" placeholder="000" type="text" class="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors" />
                   </div>
                 </div>
             </div>
@@ -146,7 +146,7 @@
 
 
     <!-- Right side -->
-    <div class="min-h-screen bg-white p-4">
+    <div class="min-h-screen bg-white dark:bg-gray-900 p-4 transition-colors">
 
       <div class="max-w-4xl">
         <div class="flex flex-col-reverse">
@@ -156,7 +156,7 @@
           <!-- Order Summary Card -->
           <div class="w-full">
               <!-- Title -->
-              <h2 class="text-2xl font-bold mb-8">{{ $t('cart.summary_title') }}</h2>
+              <h2 class="text-2xl font-bold mb-8 text-gray-900 dark:text-gray-100">{{ $t('cart.summary_title') }}</h2>
 
               <!-- Order Items -->
               <div class="space-y-6 pb-6">
@@ -176,20 +176,20 @@
 
                   <!-- Product Details -->
                   <div class="grow">
-                    <h3 class="text-lg font-semibold">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
                       {{ item.name }}
                     </h3>
-                    <p class="text-sm font-light mt-1">
+                    <p class="text-sm font-light mt-1 text-gray-600 dark:text-gray-300">
                       {{ item.color }}
                     </p>
                   </div>
 
                   <!-- Price -->
                   <div class="shrink-0 text-right">
-                    <p class="text-base font-bold">
+                    <p class="text-base font-bold text-gray-900 dark:text-gray-100">
                       ${{ item.price.toFixed(2) }}
                     </p>
-                    <p class="text-sm font-light text-gray-500">
+                    <p class="text-sm font-light text-gray-500 dark:text-gray-300">
                       x{{ item.quantity }}
                     </p>
                   </div>
@@ -197,38 +197,38 @@
               </div>
 
               <!-- Divider -->
-              <hr class="border-2 mb-6" />
+              <hr class="border-2 border-gray-200 dark:border-gray-700 mb-6" />
 
               <!-- Price Breakdown -->
               <div class="space-y-4 mb-6">
-                <div class="flex justify-between items-center text-xl">
+                <div class="flex justify-between items-center text-xl text-gray-900 dark:text-gray-100">
                   <span>{{ $t('cart.subtotal') }}</span>
                   <span>${{ subtotal.toFixed(2) }}</span>
                 </div>
 
-                <div class="flex justify-between items-center text-xl">
+                <div class="flex justify-between items-center text-xl text-gray-900 dark:text-gray-100">
                   <span>{{ $t('checkout.discount') }}</span>
                   <span>-${{ discount.toFixed(2) }}</span>
                 </div>
 
-                <div class="flex justify-between items-center text-xl">
+                <div class="flex justify-between items-center text-xl text-gray-900 dark:text-gray-100">
                   <span>{{ $t('cart.tax') }}</span>
                   <span>${{ tax.toFixed(2) }}</span>
                 </div>
                 
-                <div class="flex justify-between items-center text-xl">
+                <div class="flex justify-between items-center text-xl text-gray-900 dark:text-gray-100">
                   <span>{{ $t('cart.shipping') }}</span>
                   <span>{{ Shipping }}</span>
                 </div>
               </div>
 
               <!-- Divider -->
-              <hr class="border-2 mb-6" />
+              <hr class="border-2 border-gray-200 dark:border-gray-700 mb-6" />
 
               <!-- Total -->
               <div class="flex justify-between items-center mb-8">
-                <span class="text-2xl font-semibold ">{{ $t('cart.total') }}</span>
-                <span class="text-2xl font-semibold ">
+                <span class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $t('cart.total') }}</span>
+                <span class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                   ${{ total.toFixed(2) }}
                 </span>
               </div>
@@ -239,11 +239,11 @@
                   type="text"
                   :placeholder="$t('checkout.discount_code')"
                   v-model="discountCode"
-                  class="grow px-4 py-3 border border-black rounded text-base"
+                  class="grow px-4 py-3 border border-gray-300 dark:border-gray-600 rounded text-base bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
                 />
                 <button
                   @click="handleApplyDiscount"
-                  class="px-6 py-3 bg-[#1A535C] text-white font-medium rounded"
+                  class="px-6 py-3 bg-[#1A535C] text-white font-medium rounded hover:bg-[#2A7A8F] transition-colors"
                 >
                   {{ $t('common.apply') }}
                 </button>
@@ -253,7 +253,7 @@
               <button
                 @click="handleConfirmPayment"
                 :disabled="isProcessing"
-                class="w-full py-4 bg-[#1A535C] text-white font-bold rounded text-base disabled:opacity-60"
+                class="w-full py-4 bg-[#1A535C] text-white font-bold rounded text-base disabled:opacity-60 hover:bg-[#2A7A8F] transition-colors"
               >
                 <span v-if="isProcessing">{{ $t('common.processing') }}</span>
                 <span v-else>{{ $t('checkout.confirm_pay') }} ${{ total.toFixed(2) }}</span>
@@ -265,22 +265,22 @@
   </div>
 
   <!-- Address Edit Modal -->
-  <div v-if="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-    <div class="bg-white w-full max-w-3xl p-6 rounded-lg">
+  <div v-if="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-colors">
+    <div class="bg-white dark:bg-gray-800 w-full max-w-3xl p-6 rounded-lg shadow-xl transition-colors">
       <AddressEdit :address="editingAddress" @save="onAddressSave" @cancel="closeEdit" />
     </div>
   </div>
 
   <!-- QR overlay shown after clicking Confirm & Pay -->
   <div v-if="showQR" class="fixed inset-0 z-50 flex items-center justify-center" :style="overlayBackground">
-    <div class="bg-white p-12 rounded-3xl w-full max-w-2xl text-center shadow-2xl">
-      <h3 class="text-2xl font-bold mb-6">{{ $t('checkout.scan_to_pay') }}</h3>
+    <div class="bg-white dark:bg-gray-900 p-12 rounded-3xl w-full max-w-2xl text-center shadow-2xl transition-colors">
+      <h3 class="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">{{ $t('checkout.scan_to_pay') }}</h3>
       <img :src="QRImage" alt="QR" class="mx-auto mb-6 w-72 h-72 md:w-96 md:h-96 object-contain" />
       <div class="mt-4 flex justify-center">
         <button
           @click="handleDone"
           :disabled="isDoneProcessing"
-          class="px-10 py-4 bg-[#1A535C] text-white rounded-xl text-lg shadow"
+          class="px-10 py-4 bg-[#1A535C] text-white rounded-xl text-lg shadow hover:bg-[#2A7A8F] transition-colors disabled:opacity-60"
         >
           <span v-if="isDoneProcessing">{{ $t('common.processing') }}</span>
           <span v-else>{{ $t('common.done') }}</span>
@@ -291,20 +291,20 @@
 
   <!-- Success overlay shown after order is placed -->
   <div v-if="showSuccess" class="fixed inset-0 z-60 flex items-center justify-center" :style="overlayBackground">
-    <div class="bg-white p-8 rounded-3xl w-full max-w-md text-center shadow-2xl">
+    <div class="bg-white dark:bg-gray-900 p-8 rounded-3xl w-full max-w-md text-center shadow-2xl transition-colors">
       <div class="flex items-center justify-center mb-4">
-        <div class="bg-green-100 text-green-700 rounded-full p-4">
+        <div class="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-200 rounded-full p-4">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 10-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
           </svg>
         </div>
       </div>
-      <h3 class="text-2xl font-bold mb-2">{{ $t('checkout.order_success_title') }}</h3>
-      <p class="text-gray-600 mb-4">{{ $t('checkout.order_success_msg') }}</p>
-      <p class="font-semibold mb-6">{{ $t('cart.total') }}: ${{ successTotal.toFixed(2) }}</p>
+      <h3 class="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">{{ $t('checkout.order_success_title') }}</h3>
+      <p class="text-gray-600 dark:text-gray-300 mb-4">{{ $t('checkout.order_success_msg') }}</p>
+      <p class="font-semibold mb-6 text-gray-900 dark:text-gray-100">{{ $t('cart.total') }}: ${{ successTotal.toFixed(2) }}</p>
       <div class="flex gap-3 justify-center">
-        <button @click="goToOrders" class="px-6 py-3 bg-[#1A535C] text-white rounded-md font-medium">{{ $t('checkout.view_orders') }}</button>
-        <button @click="continueShopping" class="px-6 py-3 bg-gray-100 rounded-md">{{ $t('common.continue_shopping') }}</button>
+        <button @click="goToOrders" class="px-6 py-3 bg-[#1A535C] text-white rounded-md font-medium hover:bg-[#2A7A8F] transition-colors">{{ $t('checkout.view_orders') }}</button>
+        <button @click="continueShopping" class="px-6 py-3 bg-gray-100 dark:bg-gray-800 dark:text-gray-100 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">{{ $t('common.continue_shopping') }}</button>
       </div>
     </div>
   </div>

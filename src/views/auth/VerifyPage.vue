@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { onMounted, onBeforeUnmount } from 'vue'
+
 // Function to move focus to the NEXT input
 const handleInput = (event: Event, nextId: string | null) => {
   const input = event.target as HTMLInputElement
@@ -16,6 +18,20 @@ const handleBackspace = (event: KeyboardEvent, prevId: string | null) => {
     document.getElementById(prevId)?.focus()
   }
 }
+
+// Force light mode for auth pages
+let wasDarkMode = false
+
+onMounted(() => {
+  wasDarkMode = document.documentElement.classList.contains('dark')
+  document.documentElement.classList.remove('dark')
+})
+
+onBeforeUnmount(() => {
+  if (wasDarkMode) {
+    document.documentElement.classList.add('dark')
+  }
+})
 </script>
 
 <template>

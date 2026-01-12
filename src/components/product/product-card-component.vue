@@ -4,7 +4,7 @@
     <div
       v-for="(product, index) in products"
       :key="index"
-      class="bg-white rounded-[20px] overflow-hidden border border-gray-400 hover:-translate-y-1 hover:shadow-lg transition cursor-pointer"
+      class="bg-white dark:bg-gray-800 rounded-[20px] overflow-hidden border border-gray-400 dark:border-gray-700 hover:-translate-y-1 hover:shadow-lg transition cursor-pointer"
       @click="goToDetail(product.id)"
     >
     <!-- Image Section -->
@@ -30,16 +30,16 @@
       </div>
 
       <!-- Heart Icon -->
-      <button @click.stop="toggleLike(product)" class="absolute top-4 right-4 bg-white rounded-full p-2">
+      <button @click.stop="toggleLike(product)" class="absolute top-4 right-4 bg-white dark:bg-gray-500 rounded-full p-2 hover:shadow-md transition">
         <img v-if="!isFavorited(product.id)" src="/src/assets/images/Heart.png" class="w-[27px] h-6" />
         <img v-else src="/src/assets/images/Heart-fill.png" class="w-[27px] h-6" />
       </button>
     </div>
 
     <!-- Info Section -->
-    <div class="p-4 bg-[#F5F5F5] m-2 rounded-[20px]">
+    <div class="p-4 bg-[#F5F5F5] dark:bg-gray-700 m-2 rounded-[20px]">
       <!-- Product Name -->
-      <h1 class="text-[14px] font-bold">{{ product.name }}</h1>
+      <h1 class="text-[14px] font-bold text-gray-900 dark:text-white">{{ product.name }}</h1>
 
       <!-- Rating -->
       <StarRating :rating="product.averageRating" :showNumber="true" class="mb-3" />
@@ -47,10 +47,10 @@
       <!-- Price and Add to Cart -->
       <div class="flex items-end justify-between">
         <div>
-          <h2 class="text-sm text-gray-500">{{ $t('productCard.price') }}</h2>
+          <h2 class="text-sm text-gray-500 dark:text-gray-400">{{ $t('productCard.price') }}</h2>
           <div class="flex items-end">
-            <p class="font-bold text-[24px]">${{ getDiscountedPrice(product) }}</p>
-            <p v-if="product.discount" class="font-bold text-[12px] ml-2 line-through">
+            <p class="font-bold text-[24px] text-gray-900 dark:text-white">${{ getDiscountedPrice(product) }}</p>
+            <p v-if="product.discount" class="font-bold text-[12px] ml-2 line-through text-gray-500 dark:text-gray-400">
               ${{ product.price.toFixed(2) }}
             </p>
           </div>
@@ -69,7 +69,7 @@
           </div>
           <div
             v-else-if="!linkBtn[index]"
-            class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm hover:bg-[#15444a] transition"
+            class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm hover:bg-[#15444a]"
           >
             {{ $t('home.add_to_cart') }}
           </div>
@@ -180,12 +180,12 @@ export default defineComponent({
         // Add item to cart - map product fields correctly
         await cartStore.addToCart({
           productId: product?.id || `product-${index}`,
-          name: product?.name,
+          name: product?.name || 'Unknown Product',
           itemNo: product?.id || `P${index}`,
           brand: product?.brandName || 'TovRean',
           color: product?.color || 'Standard',
           rating: product?.averageRating || 0,
-          price: product?.price,
+          price: product?.price || 0,
           quantity: 1,
           image: product?.imageUrl || '',
         })

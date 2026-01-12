@@ -30,7 +30,6 @@ const productForm = reactive({
   images: [] as string[],
 })
 
-// School product categories with subcategories
 const categories = {
   'Writing Instruments': ['Pens', 'Pencils', 'Markers', 'Highlighters', 'Crayons', 'Chalk'],
   'Paper Products': ['Notebooks', 'Loose Leaf Paper', 'Sticky Notes', 'Index Cards', 'Construction Paper', 'Drawing Paper'],
@@ -43,7 +42,6 @@ const categories = {
   'Health & Safety': ['Hand Sanitizers', 'Masks', 'First Aid Supplies', 'Tissues', 'Wet Wipes'],
 }
 
-// Computed subcategories based on selected main category
 const availableSubCategories = computed(() => {
   if (!productForm.mainCategory || !categories[productForm.mainCategory as keyof typeof categories]) {
     return []
@@ -51,7 +49,6 @@ const availableSubCategories = computed(() => {
   return categories[productForm.mainCategory as keyof typeof categories]
 })
 
-// Load products from backend
 const loadProducts = async () => {
   try {
     loading.value = true
@@ -63,7 +60,6 @@ const loadProducts = async () => {
   }
 }
 
-// Computed property for filtered products
 const filteredProducts = computed(() => {
   if (!searchQuery.value) return products.value
   const query = searchQuery.value.toLowerCase()
@@ -164,14 +160,12 @@ const saveProduct = async () => {
   try {
     loading.value = true
 
-    // Check if user is authenticated
     const token = sessionStorage.getItem('accessToken')
     if (!token) {
       alert('Please login first to ' + (isEditMode.value ? 'update' : 'add') + ' products')
       return
     }
 
-    // Validate required fields
     if (!productForm.name || !productForm.salePrice) {
       alert('Please fill in product name and price')
       loading.value = false
@@ -202,7 +196,7 @@ const saveProduct = async () => {
       alert('Product added successfully!')
     }
 
-    await loadProducts() // Reload products from backend
+    await loadProducts()
     closeAddForm()
   } catch (error: any) {
     console.error('Failed to save product:', error)
@@ -222,7 +216,6 @@ const deleteProduct = async (productId: string) => {
   try {
     loading.value = true
 
-    // Check if user is authenticated
     const token = sessionStorage.getItem('accessToken')
     if (!token) {
       alert('Please login first to delete products')
@@ -230,7 +223,7 @@ const deleteProduct = async (productId: string) => {
     }
 
     await productService.deleteProduct(productId)
-    await loadProducts() // Reload products from backend
+    await loadProducts()
   } catch (error: any) {
     console.error('Failed to delete product:', error)
     if (error.response?.status === 403) {
@@ -243,7 +236,6 @@ const deleteProduct = async (productId: string) => {
   }
 }
 
-// Close dropdown on click outside
 const handleClickOutside = (event: MouseEvent) => {
   const target = event.target as HTMLElement
   if (!target.closest('.relative')) {
@@ -251,7 +243,6 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 }
 
-// Load products on component mount
 onMounted(() => {
   loadProducts()
   document.addEventListener('click', handleClickOutside)
@@ -300,27 +291,27 @@ const isDropdownOpen = (productId: string) => {
 </script>
 
 <template>
-  <div class="bg-white rounded shadow p-6">
+  <div class="bg-white dark:bg-gray-900 rounded shadow p-6 transition-colors">
     <!-- Header Section -->
     <div class="mb-6">
       <div class="flex items-center justify-between mb-2">
-        <h1 class="text-xl font-bold">Product Management</h1>
-        <button @click="openAddForm" class="bg-teal-700 text-white px-4 py-2 rounded text-sm hover:bg-teal-800 flex items-center gap-2">
+        <h1 class="text-xl font-bold dark:text-gray-100">Product Management</h1>
+        <button @click="openAddForm" class="bg-teal-700 text-white px-4 py-2 rounded text-sm hover:bg-teal-800 dark:bg-[#1A535C] dark:hover:bg-[#2A7A8F] flex items-center gap-2">
           <span class="text-lg">+</span> Add New Product
         </button>
       </div>
-      <div class="text-sm text-gray-500">
-        Product Management / <span class="text-teal-700">Add New Product</span>
+      <div class="text-sm text-gray-500 dark:text-gray-300">
+        Product Management / <span class="text-teal-700 dark:text-[#1A535C]">Add New Product</span>
       </div>
     </div>
 
     <!-- Table Container -->
-    <div class="border rounded-lg overflow-hidden">
+    <div class="border rounded-lg overflow-hidden dark:border-gray-700">
       <!-- Table Controls -->
-      <div class="bg-gray-50 border-b px-4 py-3 flex items-center justify-between">
+      <div class="bg-gray-50 dark:bg-gray-800 border-b px-4 py-3 flex items-center justify-between border-default dark:border-gray-700 transition-colors">
         <div class="flex items-center gap-3">
           <span class="text-sm font-medium">All Product</span>
-          <span class="text-sm text-gray-500">{{ products.length }}</span>
+          <span class="text-sm text-gray-500 dark:text-gray-300">{{ products.length }}</span>
         </div>
         <div class="flex items-center gap-3">
           <div class="relative">
@@ -328,29 +319,29 @@ const isDropdownOpen = (productId: string) => {
               v-model="searchQuery"
               type="text"
               placeholder="Search Product..."
-              class="border rounded px-3 py-1.5 pr-8 text-sm w-64"
+              class="border rounded px-3 py-1.5 pr-8 text-sm w-64 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
             />
             <span class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
           </div>
-          <button class="border rounded px-3 py-1.5 text-sm flex items-center gap-1">
+          <button class="border rounded px-3 py-1.5 text-sm flex items-center gap-1 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
             <span>⚙️</span>
           </button>
         </div>
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="text-center py-8 text-gray-500">
+      <div v-if="loading" class="text-center py-8 text-gray-500 dark:text-gray-300">
         Loading products...
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="filteredProducts.length === 0" class="text-center py-8 text-gray-500">
+      <div v-else-if="filteredProducts.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-300">
         No products found
       </div>
 
       <!-- Table -->
       <table v-else class="w-full">
-        <thead class="bg-gray-50 border-b text-xs text-gray-600">
+        <thead class="bg-gray-50 dark:bg-gray-800 border-b text-xs text-gray-600 dark:text-gray-300 border-default dark:border-gray-700">
           <tr>
             <th class="py-3 px-4 text-left w-12">
               <input
@@ -372,8 +363,9 @@ const isDropdownOpen = (productId: string) => {
           <tr
             v-for="product in filteredProducts"
             :key="product.id"
-            class="border-b hover:bg-gray-50"
+            class="border-b hover:bg-gray-50 dark:hover:bg-gray-800 border-default dark:border-gray-700 transition-colors"
           >
+            <!-- Select checkbox -->
             <td class="py-3 px-4">
               <input
                 type="checkbox"
@@ -382,20 +374,30 @@ const isDropdownOpen = (productId: string) => {
                 class="rounded"
               />
             </td>
+
+            <!-- Product image + name -->
             <td class="py-3 px-4">
               <div class="flex items-center gap-3">
                 <img
                   :src="product.imageUrl && product.imageUrl.trim() !== '' ? product.imageUrl : BlankProfile"
                   :alt="product.name"
                   @error="(e) => (e.target as HTMLImageElement).src = BlankProfile"
-                  class="w-10 h-10 rounded object-cover bg-gray-100"
+                  class="w-10 h-10 rounded object-cover bg-gray-100 dark:bg-gray-700"
                 />
-                <span class="font-medium">{{ product.name }}</span>
+                <span class="font-medium dark:text-gray-100">{{ product.name }}</span>
               </div>
             </td>
-            <td class="py-3 px-4 text-gray-600">{{ product.mainCategory || 'N/A' }}</td>
-            <td class="py-3 px-4 text-gray-600">{{ product.stockQuantity || 0 }}</td>
-            <td class="py-3 px-4 font-medium">${{ product.price?.toFixed(2) || '0.00' }}</td>
+
+            <!-- Category -->
+            <td class="py-3 px-4 text-gray-600 dark:text-gray-300">{{ product.mainCategory || 'N/A' }}</td>
+
+            <!-- Stock -->
+            <td class="py-3 px-4 text-gray-600 dark:text-gray-300">{{ product.stockQuantity || 0 }}</td>
+
+            <!-- Price -->
+            <td class="py-3 px-4 font-medium dark:text-gray-100">${{ product.price?.toFixed(2) || '0.00' }}</td>
+
+            <!-- Status -->
             <td class="py-3 px-4">
               <span
                 v-if="(product.stockQuantity ?? 0) > 0"
@@ -410,29 +412,19 @@ const isDropdownOpen = (productId: string) => {
                 Out of stock
               </span>
             </td>
+
+            <!-- Action dropdown -->
             <td class="py-3 px-4">
               <div class="relative">
-                <button
-                  @click.stop="toggleDropdown(product.id!)"
-                  class="text-gray-400 hover:text-gray-600 p-1"
-                >
+                <button @click.stop="toggleDropdown(product.id || '')" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-gray-600">
                   <IconDotsVertical :size="20" />
                 </button>
-                <div
-                  v-if="isDropdownOpen(product.id!)"
-                  class="absolute right-0 bottom-full mb-1 bg-white border rounded shadow-lg z-50 w-36 overflow-hidden"
-                >
-                  <button
-                    @click="openEditForm(product); closeDropdown()"
-                    class="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-700 text-sm flex items-center gap-2"
-                  >
-                    <span>✏️</span> Edit
+                <div v-if="isDropdownOpen(product.id || '')" class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 dark:border-gray-700 border rounded shadow-lg z-10">
+                  <button @click="openEditForm(product); closeDropdown()" class="block w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    Edit
                   </button>
-                  <button
-                    @click="deleteProduct(product.id!); closeDropdown()"
-                    class="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 text-sm flex items-center gap-2 border-t"
-                  >
-                    <span>🗑️</span> Delete
+                  <button @click="deleteProduct(product.id!); closeDropdown()" class="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    Delete
                   </button>
                 </div>
               </div>
@@ -446,39 +438,39 @@ const isDropdownOpen = (productId: string) => {
     <transition name="fade">
       <div
         v-if="showAddForm"
-        class="fixed inset-y-0 right-0 w-full md:w-1/2 lg:w-2/5 bg-white shadow-xl border-l z-50 overflow-auto"
+        class="fixed inset-y-0 right-0 w-full md:w-1/2 lg:w-2/5 bg-white dark:bg-gray-800 shadow-xl border-l dark:border-gray-700 z-50 overflow-auto transition-colors"
       >
         <div class="p-6">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-bold">{{ isEditMode ? 'Edit Product' : 'Add New Product' }}</h2>
-            <button class="text-gray-500 hover:text-gray-700" @click="closeAddForm">✕</button>
+            <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ isEditMode ? 'Edit Product' : 'Add New Product' }}</h2>
+            <button class="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200" @click="closeAddForm">✕</button>
           </div>
 
           <div class="space-y-5">
             <!-- Basic Information -->
             <div class="space-y-4">
-              <h3 class="text-sm font-semibold text-gray-700 border-b pb-2">Basic Information</h3>
+              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 pb-2">Basic Information</h3>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Product Name <span class="text-red-500">*</span></label>
-                <input v-model="productForm.name" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Enter product name" />
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Product Name <span class="text-red-500">*</span></label>
+                <input v-model="productForm.name" type="text" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Enter product name" />
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea v-model="productForm.description" rows="4" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Enter product description"></textarea>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                <textarea v-model="productForm.description" rows="4" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Enter product description"></textarea>
               </div>
             </div>
 
             <!-- Category Information -->
             <div class="space-y-4">
-              <h3 class="text-sm font-semibold text-gray-700 border-b pb-2">Category & Details</h3>
+              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 pb-2">Category & Details</h3>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Main Category <span class="text-red-500">*</span></label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Main Category <span class="text-red-500">*</span></label>
                   <select
                     v-model="productForm.mainCategory"
                     @change="productForm.subCategory = ''"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                   >
                     <option value="">Select Category</option>
                     <option v-for="(subs, category) in categories" :key="category" :value="category">
@@ -487,106 +479,106 @@ const isDropdownOpen = (productId: string) => {
                   </select>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Sub Category</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sub Category</label>
                   <select
                     v-model="productForm.subCategory"
                     :disabled="!productForm.mainCategory"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   >
                     <option value="">Select Sub Category</option>
                     <option v-for="sub in availableSubCategories" :key="sub" :value="sub">
                       {{ sub }}
                     </option>
                   </select>
-                  <p v-if="!productForm.mainCategory" class="text-xs text-gray-500 mt-1">Select main category first</p>
+                  <p v-if="!productForm.mainCategory" class="text-xs text-gray-500 dark:text-gray-400 mt-1">Select main category first</p>
                 </div>
               </div>
 
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                  <input v-model="productForm.type" placeholder="e.g., Ballpoint, Spiral, Canvas" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+                  <input v-model="productForm.type" placeholder="e.g., Ballpoint, Spiral, Canvas" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Size</label>
-                  <input v-model="productForm.size" placeholder="e.g., A4, Small, 15 inch" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Size</label>
+                  <input v-model="productForm.size" placeholder="e.g., A4, Small, 15 inch" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
                 </div>
               </div>
 
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                  <input v-model="productForm.color" placeholder="e.g., Blue, Multicolor, Black" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
+                  <input v-model="productForm.color" placeholder="e.g., Blue, Multicolor, Black" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Material</label>
-                  <input v-model="productForm.material" placeholder="e.g., Paper, Plastic, Canvas" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Material</label>
+                  <input v-model="productForm.material" placeholder="e.g., Paper, Plastic, Canvas" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
                 </div>
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Brand Name</label>
-                <input v-model="productForm.brandName" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Enter brand name" />
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Brand Name</label>
+                <input v-model="productForm.brandName" type="text" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Enter brand name" />
               </div>
             </div>
 
             <!-- Pricing & Inventory -->
             <div class="space-y-4">
-              <h3 class="text-sm font-semibold text-gray-700 border-b pb-2">Pricing & Inventory</h3>
+              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 pb-2">Pricing & Inventory</h3>
               <div class="grid grid-cols-3 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Stock Quantity <span class="text-red-500">*</span></label>
-                  <input v-model.number="productForm.stockQuantity" type="number" min="0" placeholder="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock Quantity <span class="text-red-500">*</span></label>
+                  <input v-model.number="productForm.stockQuantity" type="number" min="0" placeholder="0" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Sale Price ($) <span class="text-red-500">*</span></label>
-                  <input v-model.number="productForm.salePrice" type="number" step="0.01" min="0" placeholder="0.00" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sale Price ($) <span class="text-red-500">*</span></label>
+                  <input v-model.number="productForm.salePrice" type="number" step="0.01" min="0" placeholder="0.00" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Discount (%)</label>
-                  <input v-model.number="productForm.discount" type="number" min="0" max="100" placeholder="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Discount (%)</label>
+                  <input v-model.number="productForm.discount" type="number" min="0" max="100" placeholder="0" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
                 </div>
               </div>
             </div>
 
             <!-- Product Images -->
             <div class="space-y-4">
-              <h3 class="text-sm font-semibold text-gray-700 border-b pb-2">Product Images</h3>
+              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 pb-2">Product Images</h3>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Upload Images</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Images</label>
                 <div
                   @dragover="onDragOver"
                   @drop="onDrop"
-                  class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-teal-500 transition-colors"
+                  class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 text-center hover:border-teal-500 transition-colors"
                 >
                   <div class="space-y-2">
-                    <div class="text-gray-400">
+                    <div class="text-gray-400 dark:text-gray-500">
                       <svg class="mx-auto h-12 w-12" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                         <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                       </svg>
                     </div>
-                    <div class="text-sm text-gray-600">
-                      <label class="relative cursor-pointer bg-white rounded-md font-medium text-teal-600 hover:text-teal-700">
+                    <div class="text-sm text-gray-600 dark:text-gray-300">
+                      <label class="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300">
                         <span>Click to upload</span>
                         <input type="file" multiple accept="image/*" @change="onFilesSelected" class="sr-only" />
                       </label>
-                      <span class="text-gray-500">or drag and drop</span>
+                      <span class="text-gray-500 dark:text-gray-400">or drag and drop</span>
                     </div>
-                    <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF up to 10MB</p>
                   </div>
                 </div>
                 <div v-if="productForm.images.length > 0" class="flex gap-3 mt-4 flex-wrap">
                   <div v-for="(img, idx) in productForm.images" :key="idx" class="relative group">
-                    <img :src="img" class="w-24 h-24 object-cover rounded-lg border-2 border-gray-200" />
+                    <img :src="img" class="w-24 h-24 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-700" />
                     <button @click.prevent="removeImage(idx)" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600">×</button>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div class="flex items-center justify-end gap-3 pt-6 border-t">
-              <button @click="closeAddForm" class="px-6 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-              <button @click="saveProduct" :disabled="loading" class="px-6 py-2.5 bg-teal-700 text-white rounded-lg text-sm font-medium hover:bg-teal-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            <div class="flex items-center justify-end gap-3 pt-6 border-t dark:border-gray-700">
+              <button @click="closeAddForm" class="px-6 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+              <button @click="saveProduct" :disabled="loading" class="px-6 py-2.5 bg-teal-700 dark:bg-[#1A535C] text-white rounded-lg text-sm font-medium hover:bg-teal-800 dark:hover:bg-[#2A7A8F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
                 <span v-if="loading">{{ isEditMode ? 'Updating...' : 'Saving...' }}</span>
                 <span v-else>{{ isEditMode ? 'Update Product' : 'Save Product' }}</span>
               </button>

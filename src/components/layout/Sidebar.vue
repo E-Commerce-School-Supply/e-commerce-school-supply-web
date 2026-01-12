@@ -1,18 +1,18 @@
 <template>
 
 <aside class="col-span-1">
-    <div class="bg-white rounded shadow p-4 mb-6">
-        <h4 class="font-semibold mb-3">{{ $t('profile.manage') }}</h4>
+    <div class="bg-white dark:bg-gray-800 rounded shadow p-4 mb-6 transition-colors">
+        <h4 class="font-semibold mb-3 dark:text-white">{{ $t('profile.manage') }}</h4>
         <ul v-if="isAdmin" class="text-sm space-y-2">
             <li
             @click="activeTab = 'dashboard'"
-            :class="isActive('dashboard')  ? 'text-accent font-medium' : 'text-gray-600 hover:text-accent cursor-pointer'"
+            :class="isActive('dashboard')  ? 'text-accent font-medium dark:text-cyan-300' : 'text-gray-600 hover:text-accent dark:text-gray-400 dark:hover:text-cyan-300 cursor-pointer'"
             >
             Dashboard
             </li>
             <li
             @click="activeTab = 'profile'"
-            :class="isActive('profile')  ? 'text-accent font-medium' : 'text-gray-600 hover:text-accent cursor-pointer'"
+            :class="isActive('profile')  ? 'text-accent font-medium dark:text-cyan-300' : 'text-gray-600 hover:text-accent dark:text-gray-400 dark:hover:text-cyan-300 cursor-pointer'"
             >
             My Profile
             </li>
@@ -20,31 +20,31 @@
         <ul v-else class="text-sm space-y-2">
             <li
             @click="activeTab = 'profile'"
-            :class="isActive('profile') ? 'text-accent font-medium' : 'text-gray-600 hover:text-accent cursor-pointer'"
+            :class="isActive('profile') ? 'text-accent font-medium dark:text-cyan-300' : 'text-gray-600 hover:text-accent dark:text-gray-400 dark:hover:text-cyan-300 cursor-pointer'"
             >
             {{ $t('profile.my_profile') }}
             </li>
             <li
             @click="activeTab = 'address'"
-            :class="isActive('address') ? 'text-accent font-medium' : 'text-gray-600 hover:text-accent cursor-pointer'"
+            :class="isActive('address') ? 'text-accent font-medium dark:text-cyan-300' : 'text-gray-600 hover:text-accent dark:text-gray-400 dark:hover:text-cyan-300 cursor-pointer'"
             >
             {{ $t('profile.my_address') }}
             </li>
             <li
             @click="activeTab = 'payment'"
-            :class="isActive('payment') ? 'text-accent font-medium' : 'text-gray-600 hover:text-accent cursor-pointer'"
+            :class="isActive('payment') ? 'text-accent font-medium dark:text-cyan-300' : 'text-gray-600 hover:text-accent dark:text-gray-400 dark:hover:text-cyan-300 cursor-pointer'"
             >
             {{ $t('profile.payment_options') }}
             </li>
         </ul>
     </div>
 
-    <div v-if="isAdmin" class="bg-white rounded shadow p-4">
-        <h4 class="font-semibold mb-3">Management</h4>
+    <div v-if="isAdmin" class="bg-white dark:bg-gray-800 rounded shadow p-4 transition-colors">
+        <h4 class="font-semibold mb-3 dark:text-white">Management</h4>
         <ul class="text-sm space-y-2">
             <li
             @click="activeTab = 'userManagement'"
-            :class="isActive('userManagement') ? 'text-accent font-medium' : 'cursor-pointer text-gray-600 hover:text-accent'">
+            :class="isActive('userManagement') ? 'text-accent font-medium dark:text-cyan-300' : 'cursor-pointer text-gray-600 hover:text-accent dark:text-gray-400 dark:hover:text-cyan-300'">
             User Management
             </li>
             <li

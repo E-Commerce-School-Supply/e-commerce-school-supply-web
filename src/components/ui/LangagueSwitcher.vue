@@ -1,7 +1,7 @@
 <template>
   <button 
     @click="toggleLanguage" 
-    class="flex items-center gap-2 cursor-pointer hover:text-[#114B5F] transition-colors"
+    class="flex items-center gap-2 cursor-pointer hover:text-[#114B5F] transition-colors dark:text-gray-300"
     :disabled="isLoading"
     type="button"
   >

@@ -1,21 +1,21 @@
 <template>
   <!-- Overall Rating (Rating + Stars + Reviews) -->
-  <div class="flex flex-col justify-start space-y-1 m-5">
-    <h2 class="text-[20px]">{{ $t('productRating.overall') }}</h2>
+  <div class="flex flex-col justify-start space-y-1 m-5 dark:bg-gray-800 p-4 rounded-md">
+    <h2 class="text-[20px] dark:text-white">{{ $t('productRating.overall') }}</h2>
     <div class="flex items-center">
-      <h2 class="text-[96px]">{{ rating.toFixed(1) }}</h2>
+      <h2 class="text-[96px] dark:text-white">{{ rating.toFixed(1) }}</h2>
 
       <div class="ml-5">
         <!-- Stars Row -->
         <StarRating :rating="rating" />
 
         <!-- Reviews Count -->
-        <span class="text-gray-600 text-sm">{{ $t('productRating.reviews', { count: reviews }) }}</span>                 
+        <span class="text-gray-600 text-sm dark:text-gray-400">{{ $t('productRating.reviews', { count: reviews }) }}</span>                 
       </div>
     </div>
 
     <!-- Recommendation Line -->
-    <span class="text-gray-600 text-[14px] mt-1">
+    <span class="text-gray-600 text-[14px] mt-1 dark:text-gray-400">
       {{ $t('productRating.recommendation', { recommendCount: recommend, reviewCount: reviews }) }}
     </span>
   </div>

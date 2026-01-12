@@ -5,6 +5,8 @@
 @plugin "flowbite/plugin";
 @source "../node_modules/flowbite";
 
+@custom-variant dark (.dark &);
+
 @theme {
   --font-quicksand: 'Quicksand', sans-serif;
   --font-lato: 'Lato', sans-serif;

@@ -1,15 +1,15 @@
 <template>
-    <div class="rounded-md p-8 space-y-6">
+    <div class="rounded-md p-8 space-y-6 dark:bg-gray-800">
 
         <!-- Product Name -->
-        <h1 class="text-[36px] font-bold leading-tight">
+        <h1 class="text-[36px] font-bold leading-tight dark:text-white">
             {{ product.name }}
         </h1>
 
         <!-- Rating + Reviews + Stock -->
-        <div class="flex items-center gap-2 text-gray-600 text-sm">
+        <div class="flex items-center gap-2 text-gray-600 text-sm dark:text-gray-400">
             <div class="flex items-center mb-3 text-[#FF6B6B]">
-                <span class="mr-2 font-semibold text-gray-800">{{ (product.rating ?? 0).toFixed(1) }}</span>
+                <span class="mr-2 font-semibold text-gray-800 dark:text-gray-200">{{ (product.rating ?? 0).toFixed(1) }}</span>
                 <span class="text-[20px]">
                     <template v-for="n in 5" :key="n">
                         <span v-if="n <= Math.floor(product.rating ?? 0)">★</span>
@@ -17,8 +17,8 @@
                         <span v-else>☆</span>
                     </template>
                 </span>
-                <span class="text-black">{{$t("productDetailCard.reviews", {count: product.reviews})}}</span>
-                <span class="mx-1 text-black">|</span>
+                <span class="text-black dark:text-gray-300">{{$t("productDetailCard.reviews", {count: product.reviews})}}</span>
+                <span class="mx-1 text-black dark:text-gray-300">|</span>
                 <span v-if="product.stock > 0" class="text-green-500 font-medium">{{ $t("productDetailCard.in_stock", {count: product.stock}) }}</span>
                 <span v-else class="text-red-500 font-medium">{{$t("productDetailCard.out_of_stock")}}</span>
             </div>
@@ -35,15 +35,15 @@
             </div>
         </div>
 
-        <div class="w-[90%] h-[1.5px] bg-gray-300"></div>
+        <div class="w-[90%] h-[1.5px] bg-gray-300 dark:bg-gray-700"></div>
 
         <!-- Product Info -->
         <ProductInfoComponent :info="productInfo" />
 
         <!-- Product Description -->
         <div class="space-y-1">
-            <h2 class="text-[32px]">{{ $t("productDetailCard.description") }}</h2>
-            <p class="text-[#5E5B5B] text-[20px] leading-relaxed text-balance break-normal">
+            <h2 class="text-[32px] dark:text-white">{{ $t("productDetailCard.description") }}</h2>
+            <p class="text-[#5E5B5B] text-[20px] leading-relaxed text-balance break-normal dark:text-gray-300">
                 {{ product.description }}
             </p>
         </div>

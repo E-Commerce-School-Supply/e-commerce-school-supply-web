@@ -8,7 +8,7 @@ const props = defineProps<{
 
 <template>
   <div class="flex items-center text-[#FF6B6B]">
-    <span v-if="showNumber" class="mr-2 font-semibold text-gray-800">
+    <span v-if="showNumber" class="mr-2 font-semibold text-gray-800 dark:text-gray-200">
       {{ rating?.toFixed(1) }}
     </span>
 

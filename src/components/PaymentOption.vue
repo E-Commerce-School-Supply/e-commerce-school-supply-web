@@ -1,13 +1,13 @@
 <template>
   <div
-    class="flex w-full h-[102px] items-center justify-between p-4 border rounded-lg cursor-pointer"
-    :class="{ 'border-[#1A535C] bg-[#1A535C]': selected }"
+    class="flex w-full h-[102px] items-center justify-between p-4 border rounded-lg cursor-pointer bg-white dark:bg-gray-800 dark:border-gray-700 transition-colors"
+    :class="{ 'border-[#1A535C] bg-[#1A535C] text-white': selected }"
     @click="emitPay('select')"
   >
     <!-- Radio Button -->
     <div class="flex items-center gap-4">
       <div
-        class="w-5 h-5 rounded-full border-2 border-gray-400 flex items-center justify-center"
+        class="w-5 h-5 rounded-full border-2 border-gray-400 flex items-center justify-center dark:border-gray-500"
         :class="{ 'border-white': selected }"
       >
         <div
@@ -18,9 +18,9 @@
 
       <!-- Label and Description -->
       <div>
-        <p class="font-semibold text-black" :class="{'text-white':selected}">
+        <p class="font-semibold text-black dark:text-gray-100" :class="{'text-white':selected}">
           {{ label }}</p>
-        <p class="text-sm text-gray-500" :class="{'text-white':selected}">
+        <p class="text-sm text-gray-500 dark:text-gray-300" :class="{'text-white':selected}">
           {{ description }}</p>
       </div>
     </div>

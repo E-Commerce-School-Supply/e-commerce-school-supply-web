@@ -1,18 +1,18 @@
 ﻿<template>
-  <div class="favorites-page max-w-8xl mx-auto">
+  <div class="favorites-page max-w-8xl mx-auto bg-white dark:bg-gray-900 transition-colors min-h-screen">
     <div class="container">
-      <div class="page-header">
-        <h1>{{ $t('favorites.title') }}</h1>
-        <p class="subtitle">{{ $t('favorites.items_count', { count: favorites.length }) }}</p>
+      <div class="page-header dark:text-white">
+        <h1 class="dark:text-white">{{ $t('favorites.title') }}</h1>
+        <p class="subtitle dark:text-gray-400">{{ $t('favorites.items_count', { count: favorites.length }) }}</p>
       </div>
       <div v-if="loading" class="loading">
         <Spinner/>
       </div>
-      <div v-else-if="favorites.length === 0" class="empty-state">
-        <i class="pi pi-heart" style="font-size: 4rem; color: #ccc"></i>
-        <h2>{{ $t('favorites.empty_title') }}</h2>
-        <p>{{ $t('favorites.empty_subtitle') }}</p>
-        <button @click="goToProducts" class="btn-primary">{{ $t('favorites.browse_products') }}</button>
+      <div v-else-if="favorites.length === 0" class="empty-state dark:bg-gray-800 dark:text-white">
+        <i class="pi pi-heart" style="font-size: 4rem; color: #ccc; opacity: 0.5"></i>
+        <h2 class="dark:text-white">{{ $t('favorites.empty_title') }}</h2>
+        <p class="dark:text-gray-400">{{ $t('favorites.empty_subtitle') }}</p>
+        <button @click="goToProducts" class="btn-primary dark:bg-[#1A535C] dark:hover:bg-[#2A7A8F]">{{ $t('favorites.browse_products') }}</button>
       </div>
       <div v-else >
         

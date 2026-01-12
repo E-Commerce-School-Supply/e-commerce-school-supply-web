@@ -3,7 +3,7 @@ import LangagueSwitcher from '@/components/ui/LangagueSwitcher.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useToastStore } from '@/stores/toastStore'
 import type { LoginCredentials } from '@/types/auth'
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
@@ -52,6 +52,20 @@ const continueAsGuest = () => {
   sessionStorage.setItem('guestMode', 'true')
   router.push({ name: 'home' })
 }
+
+// Force light mode for auth pages
+let wasDarkMode = false
+
+onMounted(() => {
+  wasDarkMode = document.documentElement.classList.contains('dark')
+  document.documentElement.classList.remove('dark')
+})
+
+onBeforeUnmount(() => {
+  if (wasDarkMode) {
+    document.documentElement.classList.add('dark')
+  }
+})
 </script>
 
 <template>

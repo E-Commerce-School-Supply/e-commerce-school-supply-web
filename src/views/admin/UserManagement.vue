@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { IconDotsVertical } from '@tabler/icons-vue'
 import adminService, { type User } from '@/services/adminService'
 import defaultPf from '@/assets/images/pfp_blank.jpeg'
+
+const API_BASE_URL = import.meta.env.VITE_API_URL as string
+const { t } = useI18n()
 const users = ref<User[]>([])
 const selectedUsers = ref<string[]>([])
 const loading = ref(true)
@@ -16,12 +20,12 @@ const fetchUsers = async () => {
     const data = await adminService.getAllUsers()
     users.value = data.map((user) => ({
       ...user,
-      // Provide fallback avatar using initials or gravatar
-      avatarUrl: user.avatarUrl || defaultPf,
+      // Provide fallback avatar using API base URL or default image
+      avatarUrl: user.avatarUrl && user.avatarUrl.trim() !== '' ? `${API_BASE_URL}${user.avatarUrl}` : defaultPf,
     }))
   } catch (err) {
     console.error('Failed to fetch users:', err)
-    error.value = 'Failed to load users'
+    error.value = t('admin.user_management.error_loading')
   } finally {
     loading.value = false
   }
@@ -58,57 +62,24 @@ const isSelected = (userId: string) => {
 const formatDateTime = (value?: string) => {
   if (!value) return 'N/A'
 
-  // Try ISO or timestamp first
-  const direct = tryParseDate(value)
-  if (direct) return format(direct)
+  try {
+    // Try parsing as ISO date or timestamp
+    const date = new Date(value)
+    if (!isNaN(date.getTime())) {
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    }
+  } catch (e) {
+    console.error('Date parsing error:', e)
+  }
 
-  // Try relative strings like "2 days ago"
-  const relative = parseRelativeDate(value)
-  if (relative) return format(relative)
-
+  // Return original value if parsing fails
   return value
-}
-
-const tryParseDate = (val: string) => {
-  // Numeric timestamp
-  if (/^\d+$/.test(val.trim())) {
-    const num = Number(val)
-    const d = new Date(num)
-    return Number.isNaN(d.getTime()) ? null : d
-  }
-  const d = new Date(val)
-  return Number.isNaN(d.getTime()) ? null : d
-}
-
-const parseRelativeDate = (val: string) => {
-  const match = val.trim().match(/^(\d+)\s+(minute|hour|day|week|month|year)s?\s+ago$/i)
-  if (!match) return null
-  const amount = Number(match[1])
-  const unit = match[2].toLowerCase()
-  if (Number.isNaN(amount)) return null
-
-  const now = Date.now()
-  const unitMs: Record<string, number> = {
-    minute: 60 * 1000,
-    hour: 60 * 60 * 1000,
-    day: 24 * 60 * 60 * 1000,
-    week: 7 * 24 * 60 * 60 * 1000,
-    month: 30 * 24 * 60 * 60 * 1000,
-    year: 365 * 24 * 60 * 60 * 1000,
-  }
-  const delta = unitMs[unit]
-  if (!delta) return null
-  return new Date(now - amount * delta)
-}
-
-const format = (date: Date) => {
-  return date.toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
 }
 </script>
 
@@ -116,12 +87,12 @@ const format = (date: Date) => {
   <div class="min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors">
     <!-- Main Content -->
     <div class="flex-1 bg-white dark:bg-gray-800 dark:border dark:border-gray-700 rounded shadow p-6 transition-colors">
-      <h1 class="text-xl font-bold mb-6 dark:text-gray-100">User Management</h1>
+      <h1 class="text-xl font-bold mb-6 dark:text-gray-100">{{ $t('admin.user_management.title') }}</h1>
 
       <!-- Error Message -->
       <div v-if="error" class="mb-4 p-4 bg-red-100 text-red-700 rounded">
-        {{ error }}
-        <button @click="fetchUsers" class="ml-2 underline font-semibold">Retry</button>
+        {{ $t('admin.user_management.error_loading') }}
+        <button @click="fetchUsers" class="ml-2 underline font-semibold">{{ $t('common.apply') }}</button>
       </div>
 
       <!-- Users Table -->
@@ -129,7 +100,7 @@ const format = (date: Date) => {
         <!-- Table Header -->
         <div class="bg-gray-50 dark:bg-gray-800 border-b px-4 py-3 flex items-center justify-between border-default dark:border-gray-700 transition-colors">
           <div class="flex items-center gap-2">
-            <span class="text-sm font-medium">All Users</span>
+            <span class="text-sm font-medium">{{ $t('admin.user_management.all_users') }}</span>
             <span class="text-sm text-gray-500 dark:text-gray-300">{{ users.length }}</span>
           </div>
           <button
@@ -149,7 +120,7 @@ const format = (date: Date) => {
                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
               />
             </svg>
-            {{ loading ? 'Refreshing...' : 'Refresh' }}
+            {{ loading ? $t('admin.user_management.refreshing') : $t('admin.user_management.refresh') }}
           </button>
         </div>
 
@@ -157,7 +128,7 @@ const format = (date: Date) => {
         <div v-if="loading && users.length === 0" class="p-8 text-center text-gray-500 dark:text-gray-300">
           <div class="inline-block">
             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mb-2"></div>
-            Loading users...
+            {{ $t('admin.user_management.loading') }}
           </div>
         </div>
 
@@ -174,10 +145,10 @@ const format = (date: Date) => {
                   :disabled="users.length === 0"
                 />
               </th>
-              <th class="px-4 py-3 text-left font-medium">Username</th>
-              <th class="px-4 py-3 text-left font-medium">Email</th>
-              <th class="px-4 py-3 text-left font-medium">Last Login</th>
-              <th class="px-4 py-3 text-left font-medium">Action</th>
+              <th class="px-4 py-3 text-left font-medium">{{ $t('admin.user_management.username') }}</th>
+              <th class="px-4 py-3 text-left font-medium">{{ $t('admin.user_management.email') }}</th>
+              <th class="px-4 py-3 text-left font-medium">{{ $t('admin.user_management.last_login') }}</th>
+              <th class="px-4 py-3 text-left font-medium">{{ $t('admin.user_management.actions') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -211,7 +182,7 @@ const format = (date: Date) => {
             <!-- Empty State -->
             <tr v-if="users.length === 0">
               <td colspan="5" class="px-4 py-8 text-center text-gray-500 dark:text-gray-300">
-                No users found
+                {{ $t('admin.user_management.no_users') }}
               </td>
             </tr>
           </tbody>

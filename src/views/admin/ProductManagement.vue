@@ -111,7 +111,11 @@ const openEditForm = (product: Product) => {
   productForm.stockQuantity = product.stockQuantity || 0
   productForm.salePrice = product.price || 0
   productForm.discount = product.discount || 0
-  productForm.images = product.imageUrl ? [product.imageUrl] : []
+  productForm.images = Array.isArray(product.images) && product.images.length > 0
+    ? [...product.images]
+    : product.imageUrl
+      ? [product.imageUrl]
+      : []
   showAddForm.value = true
 }
 
@@ -176,6 +180,8 @@ const saveProduct = async () => {
       return
     }
 
+    const primaryImage = productForm.images[0] || BlankProfile
+
     const productData = {
       name: productForm.name || 'Untitled Product',
       description: productForm.description,
@@ -189,7 +195,9 @@ const saveProduct = async () => {
       stockQuantity: productForm.stockQuantity,
       price: productForm.salePrice,
       discount: productForm.discount,
-      imageUrl: productForm.images.length > 0 ? productForm.images[0] : BlankProfile,
+      // Send both the new images array and the legacy imageUrl for backward compatibility
+      images: [...productForm.images],
+      imageUrl: primaryImage,
     }
 
     if (isEditMode.value && editingProductId.value) {
@@ -292,6 +300,14 @@ const closeDropdown = () => {
 const isDropdownOpen = (productId: string) => {
   return openDropdown.value === productId
 }
+
+const resolveProductImage = (product: Product) => {
+  const raw = (product.images && product.images[0]) || product.imageUrl || (product as any).imageURL || ''
+  const cleaned = typeof raw === 'string' ? raw.trim() : ''
+  if (!cleaned) return BlankProfile
+  if (cleaned.startsWith('/')) return `${API_BASE_URL}${cleaned}`
+  return cleaned
+}
 </script>
 
 <template>
@@ -383,7 +399,7 @@ const isDropdownOpen = (productId: string) => {
             <td class="py-3 px-4">
               <div class="flex items-center gap-3">
                 <img
-                  :src="product.imageUrl && product.imageUrl.trim() !== '' ? `${API_BASE_URL}${product.imageUrl}` : BlankProfile"
+                  :src="resolveProductImage(product)"
                   :alt="product.name"
                   @error="(e) => (e.target as HTMLImageElement).src = BlankProfile"
                   class="w-10 h-10 rounded object-cover bg-gray-100 dark:bg-gray-700"

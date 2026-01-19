@@ -20,6 +20,7 @@
                         :product="detailProduct"
                         :product-info="productInfo"
                         :product-colors="productColors"
+                        :average-rating="averageRating"
                     />
                 </div>
             </div>
@@ -38,11 +39,11 @@
 
                     <!-- Top Review Summary -->
                     <div class="row-span-2 row-start-1 col-start-1 col-end-9 bg-[#F5F5F5] dark:bg-gray-800 rounded-t-md p-6 ">
-                        <ProductRatingComponent :rating="detailProduct.averageRating" :reviews="detailProduct.reviews" :recommend="recommendCount" />
+                        <ProductRatingComponent :rating="averageRating" :reviews="productReviews.length" :recommend="recommendCount" />
                     </div>
 
                     <!-- Bottom Rating Distribution Section -->
-                    <div class="row-span-2 row-start-3 col-start-1 col-end-9 bg-[#1A535C] dark:bg-[#1A535C] rounded-b-md p-10 text-white dark:text-gray-100 ">
+                    <div class="row-span-2 row-start-3 col-start-1 col-end-9 bg-[#1A535C] rounded-b-md p-6 text-white dark:text-gray-100 ">
                         <rating-graph-component :ratings="ratingData"/>
                     </div>
                 </div>
@@ -58,6 +59,8 @@
                             :profilePic="currentUserAvatar"
                             @submit-review="handleSubmitReview"
                             @delete-review="handleDeleteReview"
+                            @cancel-edit="handleCancelEdit"
+                            @edit-review="handleEditReview"
                         />
                     </div>
                     <div v-else class="bg-[#F5F5F5] dark:bg-gray-800 w-full rounded-md p-6">
@@ -79,7 +82,7 @@
 
                     <!-- User comment-->
                     <div>
-                        <ReviewsComponent :reviews="productReviews" :initial-visible-count="6"/>
+                        <ReviewsComponent :reviews="reviewsForList" :initial-visible-count="6"/>
                     </div>
 
                 </div>
@@ -163,9 +166,17 @@ import { useI18n } from "vue-i18n";
 
             const backendProduct = ref<Product | null>(null)
 
+            const selectImages = (p: Product | null | undefined) => {
+                const list = Array.isArray(p?.images) ? p!.images.filter(Boolean) : []
+                const legacy = typeof p?.imageUrl === 'string' && p.imageUrl.trim() ? [p.imageUrl] : []
+                return list.length > 0 ? list : legacy
+            }
+
             const detailProduct = computed(() => {
                 const p = backendProduct.value
                 const stock = Number(p?.stockQuantity ?? 0)
+                const images = selectImages(p)
+                const firstImage = resolveBackendUrl(images[0])
                 return {
                     id: p?.id ?? '',
                     name: p?.name ?? '',
@@ -176,7 +187,7 @@ import { useI18n } from "vue-i18n";
                     description: p?.description ?? '',
                     discount: (p?.discount ?? null) as number | null,
                     stock,
-                    imageUrl: resolveBackendUrl(p?.imageUrl),
+                    imageUrl: firstImage,
                 }
             })
 
@@ -217,8 +228,18 @@ import { useI18n } from "vue-i18n";
 
             const productImages = computed(() => {
                 const p = backendProduct.value
-                const url = resolveBackendUrl(p?.imageUrl)
-                return url ? [url] : ['']
+                const imgs = selectImages(p)
+                // Deduplicate while preserving order to avoid showing the first image twice
+                const seen = new Set<string>()
+                const resolved = imgs
+                    .map(resolveBackendUrl)
+                    .filter((url) => {
+                        if (!url) return false
+                        if (seen.has(url)) return false
+                        seen.add(url)
+                        return true
+                    })
+                return resolved.length > 0 ? resolved : ['']
             })
 
             // Show up to 12 products in the "More product you may like" section
@@ -325,9 +346,11 @@ import { useI18n } from "vue-i18n";
             const currentUserName = computed(() => authStore.user?.username || authStore.user?.email || 'User')
             const currentUserAvatar = computed(() => {
                 const candidate = authStore.user?.avatarUrl
-                if (typeof candidate === 'string' && /^(https?:\/\/|data:image\/|blob:|\/|\.{1,2}\/)/.test(candidate.trim())) {
-                    return resolveBackendUrl(candidate)
-                }
+                const s = typeof candidate === 'string' ? candidate.trim() : ''
+                if (!s) return BlankProfile
+                // Prefix API base for relative paths like "/avatars/..."
+                if (s.startsWith('/')) return resolveBackendUrl(s)
+                if (/^(https?:\/\/|data:image\/|blob:|\.{1,2}\/)/.test(s)) return s
                 return BlankProfile
             })
 
@@ -349,7 +372,21 @@ import { useI18n } from "vue-i18n";
             })
 
             const userReview = ref<Review | null>(null);
+            const originalUserReview = ref<Review | null>(null);
             const reviewsLoading = ref(false);
+
+            // Editing state: true when userReview is hidden and we have an original copy
+            const isEditing = computed(() => !!originalUserReview.value && !userReview.value)
+
+            // Ensure the user's comment remains visible in the list while editing
+            const reviewsForList = computed(() => {
+                const list = [...productReviews.value]
+                if (isEditing.value && originalUserReview.value) {
+                    const exists = list.some(r => r.id === originalUserReview.value?.id)
+                    if (!exists) list.unshift(originalUserReview.value)
+                }
+                return list
+            })
 
             const handleSubmitReview = async (review: Review) => {
                 try {
@@ -366,7 +403,9 @@ import { useI18n } from "vue-i18n";
                         verified: canWriteReview.value,
                     }
 
+                    console.log('📝 Submitting review for product:', productId)
                     const savedReview = await productService.submitReview(productId, payload)
+                    console.log('✅ Review saved by backend:', savedReview)
 
                     // Update local state
                     userReview.value = {
@@ -380,12 +419,27 @@ import { useI18n } from "vue-i18n";
                         verified: savedReview.verified || canWriteReview.value,
                         date: savedReview.createdAt || new Date().toISOString(),
                     }
+                    console.log('✅ Local review state updated')
+
+                    // Small delay to ensure backend has persisted the review
+                    await new Promise(resolve => setTimeout(resolve, 500))
 
                     // Reload reviews and product to update rating
+                    console.log('🔄 Reloading reviews and product data...')
                     await Promise.all([
-                        loadReviews(),
+                        loadReviews(true),  // Skip user review fetch since we just submitted
                         loadProductByRoute(),
                     ])
+                    console.log('✅ Reviews and product data reloaded')
+
+                    // Update ProductStore so ProductListView sees the new rating
+                    if (backendProduct.value) {
+                        await productStore.updateProduct(productId, {
+                            ...backendProduct.value,
+                            averageRating: backendProduct.value.averageRating,
+                        })
+                        console.log('✅ ProductStore updated with new rating')
+                    }
                 } catch (e) {
                     console.error('Failed to submit review', e)
                 }
@@ -403,12 +457,39 @@ import { useI18n } from "vue-i18n";
                         loadReviews(),
                         loadProductByRoute(),
                     ])
+
+                    // Update ProductStore so ProductListView sees the new rating
+                    const productId = String(route.params.id || '').trim()
+                    if (backendProduct.value && productId) {
+                        await productStore.updateProduct(productId, {
+                            ...backendProduct.value,
+                            averageRating: backendProduct.value.averageRating,
+                        })
+                        console.log('✅ ProductStore updated after review deletion')
+                    }
                 } catch (e) {
                     console.error('Failed to delete review', e)
                 }
             };
 
-            async function loadReviews() {
+            const handleEditReview = () => {
+                                console.log('🔄 handleEditReview called, current userReview:', userReview.value);
+                // Store the original review before editing (for cancel)
+                if (userReview.value) {
+                    originalUserReview.value = { ...userReview.value };
+                    // Temporarily hide the review card by setting to null
+                    userReview.value = null;
+                                    console.log('✅ userReview set to null, form should show');
+                }
+            };
+
+            const handleCancelEdit = (review: any) => {
+                // Restore the review that was being edited
+                userReview.value = originalUserReview.value;
+                originalUserReview.value = null;
+            };
+
+            async function loadReviews(skipUserReviewLoad = false) {
                 const productId = String(route.params.id || '').trim()
                 if (!productId) return
 
@@ -429,13 +510,22 @@ import { useI18n } from "vue-i18n";
                         date: r.createdAt || r.updatedAt || new Date().toISOString(),
                     }))
 
-                    // Load user's review if logged in
-                    if (authStore.user?.id) {
+                    // Skip loading user's review if just submitted (already set locally)
+                    if (skipUserReviewLoad) {
+                        console.log('⏭️ Skipping user review fetch (just submitted)')
+                        return
+                    }
+
+                    // Load user's review if logged in - backend expects username from JWT
+                    const userId = authStore.user?.username || authStore.user?.email || authStore.user?.id
+                    if (userId) {
                         try {
+                            console.log('🔍 Loading user review for:', { productId, userId })
                             const userReviewData = await productService.getUserReviewForProduct(
                                 productId,
-                                authStore.user.id
+                                userId
                             )
+                            console.log('✅ User review loaded:', userReviewData)
                             userReview.value = {
                                 id: userReviewData.id,
                                 profile: resolveBackendUrl(userReviewData.userAvatar),
@@ -447,10 +537,45 @@ import { useI18n } from "vue-i18n";
                                 verified: userReviewData.verified || false,
                                 date: userReviewData.createdAt || new Date().toISOString(),
                             }
-                        } catch (e) {
-                            // User hasn't written a review yet
-                            userReview.value = null
+                        } catch (e: any) {
+                            // 404 means user hasn't written a review yet
+                            // BUT also check if the review exists in the productReviews list
+                            // (in case GET endpoint is broken but POST worked)
+                            if (e.status === 404) {
+                                console.log('ℹ️ GET endpoint returned 404, checking product reviews list...')
+                                
+                                // Find user's review in the loaded reviews list
+                                const userReviewInList = reviews.find((r: any) => 
+                                    r.userId === userId || 
+                                    r.userId === authStore.user?.username ||
+                                    r.userId === authStore.user?.email ||
+                                    r.userId === authStore.user?.id
+                                )
+                                
+                                if (userReviewInList) {
+                                    console.log('✅ Found user review in product reviews list:', userReviewInList)
+                                    userReview.value = {
+                                        id: userReviewInList.id,
+                                        profile: resolveBackendUrl(userReviewInList.userAvatar),
+                                        name: userReviewInList.userName || currentUserName.value,
+                                        title: userReviewInList.title,
+                                        body: userReviewInList.body,
+                                        rating: userReviewInList.rating,
+                                        recommend: userReviewInList.recommend,
+                                        verified: userReviewInList.verified || false,
+                                        date: userReviewInList.createdAt || new Date().toISOString(),
+                                    }
+                                } else {
+                                    console.log('ℹ️ No review found - user can write new review')
+                                    userReview.value = null
+                                }
+                            } else {
+                                console.error('❌ Failed to load user review:', e)
+                                userReview.value = null
+                            }
                         }
+                    } else {
+                        console.log('ℹ️ User not logged in, skipping review load')
                     }
                 } catch (e) {
                     console.error('Failed to load reviews', e)
@@ -512,7 +637,12 @@ import { useI18n } from "vue-i18n";
                 currentUserAvatar,
                 breadcrumbText,
                 recommendCount,
-                userReview
+                averageRating,
+                userReview,
+                originalUserReview,
+                handleEditReview,
+                handleCancelEdit,
+                reviewsForList
             }
         }
     }

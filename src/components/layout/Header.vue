@@ -80,6 +80,14 @@ function navigateToCart() {
 	router.push({ name: 'cart' })
 }
 
+function resolveProductImage(product: any) {
+	const raw = (Array.isArray(product?.images) && product.images[0]) || product?.imageUrl || product?.imageURL || product?.image || ''
+	const cleaned = typeof raw === 'string' ? raw.trim() : ''
+	if (!cleaned) return '/Photo/ourproduct.png'
+	if (cleaned.startsWith('/')) return `${String(API_BASE_URL).replace(/\/$/, '')}${cleaned}`
+	return cleaned
+}
+
 function goToAuthPage(tab: 'signin' | 'signup') {
 	router.push({ name: tab })
 }
@@ -246,7 +254,7 @@ onBeforeUnmount(() => {
 									@click="goToProduct(item)"
 									class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer flex items-center gap-3 border-b border-gray-50 dark:border-gray-600 last:border-0"
 								>
-									<img :src="item.imageUrl || item.imageURL || '/Photo/ourproduct.png'" class="w-8 h-8 object-contain">
+									<img :src="resolveProductImage(item)" class="w-8 h-8 object-contain">
 									<div>
 										<p class="text-sm font-medium text-gray-900 dark:text-white">{{ item.name }}</p>
 										<p class="text-xs text-gray-500 dark:text-gray-400">${{ Number(item.price || 0).toFixed(2) }}</p>

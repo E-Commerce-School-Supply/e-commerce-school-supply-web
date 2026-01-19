@@ -358,6 +358,14 @@ let categoryChart: any = null
 const topProducts = ref<any[]>([])
 const lowStockItems = ref<any[]>([])
 const categoryData = ref<any>({})
+
+const resolveProductImage = (p: any) => {
+  const raw = (Array.isArray(p?.images) && p.images[0]) || p?.imageUrl || p?.imageURL || ''
+  const cleaned = typeof raw === 'string' ? raw.trim() : ''
+  if (!cleaned) return BlankProfile
+  if (cleaned.startsWith('/')) return `${String(API_BASE_URL).replace(/\/$/, '')}${cleaned}`
+  return cleaned
+}
 const monthlySalesData = ref<any[]>([])
 
 const handleSignOut = async () => {
@@ -440,7 +448,7 @@ const fetchDashboardStats = async () => {
         rating: p.rating || '0.0',
         stockQuantity: p.stockQuantity || 0,
         status: (p.stockQuantity || 0) > 0 ? 'In stock' : 'Out of stock',
-        image: p.imageUrl || BlankProfile
+        image: resolveProductImage(p)
       }))
       .sort((a: any, b: any) => b.sales - a.sales)
       .slice(0, 5)
@@ -459,7 +467,7 @@ const fetchDashboardStats = async () => {
           quantity: qty,
           percentage: Math.round(percentage),
           alertLevel: qty < 20 ? 'critical' : 'low',
-          image: p.imageUrl || BlankProfile
+          image: resolveProductImage(p)
         }
       })
 

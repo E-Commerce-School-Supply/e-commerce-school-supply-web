@@ -378,7 +378,9 @@
     "placeholder_body": "Write your comments...",
     "recommend_prompt": "Recommend this product?",
     "rating_prompt": "Rating",
-    "post_button": "Post your review"
+    "post_button": "Post your review",
+    "update_button": "Update review",
+    "cancel_button": "Cancel"
   },
   "aboutUs": {
     "title": "About Us",

@@ -9,7 +9,8 @@ interface CartItem {
   rating: number
   price: number
   quantity: number
-  image: string
+  image?: string
+  images?: string[]
 }
 
 interface Cart {

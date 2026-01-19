@@ -2,25 +2,25 @@
   <div class="bg-white dark:bg-gray-900 rounded shadow p-6 transition-colors">
     <div class="mb-6">
       <div class="flex items-center justify-between mb-2">
-        <h1 class="text-xl font-bold dark:text-gray-100">Order Management</h1>
+        <h1 class="text-xl font-bold dark:text-gray-100">{{ $t('admin.order_management.title') }}</h1>
       </div>
-      <div class="text-sm text-gray-500 dark:text-gray-300">All Orders / <span class="text-teal-700 dark:text-[#1A535C]">Order Management</span></div>
+      <div class="text-sm text-gray-500 dark:text-gray-300">{{ $t('admin.sidebar.order_management') }} / <span class="text-teal-700 dark:text-[#1A535C]">{{ $t('admin.order_management.title') }}</span></div>
     </div>
 
     <div class="border rounded-lg overflow-hidden dark:border-gray-700">
       <div class="bg-gray-50 dark:bg-gray-800 border-b border-default dark:border-gray-700 px-4 py-3 flex items-center justify-between transition-colors">
         <div class="flex items-center gap-3">
-          <span class="text-sm font-medium">All Orders</span>
+          <span class="text-sm font-medium">{{ $t('admin.order_management.all_orders') }}</span>
           <span class="text-sm text-gray-500 dark:text-gray-300">{{ orders.length }}</span>
         </div>
 
         <div class="flex items-center gap-3">
           <div class="relative">
-            <input v-model="search" type="text" placeholder="search for customer" class="border rounded px-3 py-1.5 pr-8 text-sm w-64 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100" />
+            <input v-model="search" type="text" :placeholder="$t('admin.order_management.search_customer')" class="border rounded px-3 py-1.5 pr-8 text-sm w-64 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100" />
             <span class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
           </div>
           <button @click="toggleEmailSort" class="border rounded px-3 py-1.5 text-sm bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
-            Sort email: {{ emailSort === 'asc' ? 'A–Z' : emailSort === 'desc' ? 'Z–A' : 'Off' }}
+            {{ $t('admin.order_management.sort_email') }}: {{ emailSort === 'asc' ? 'A–Z' : emailSort === 'desc' ? 'Z–A' : 'Off' }}
           </button>
         </div>
       </div>
@@ -31,12 +31,12 @@
             <th class="py-3 px-4 text-left w-12">
               <input type="checkbox" class="rounded" />
             </th>
-            <th class="py-3 px-4 text-left">Order ID</th>
-            <th class="py-3 px-4 text-left">Customer's Email</th>
-            <th class="py-3 px-4 text-left">Total</th>
-            <th class="py-3 px-4 text-left">Method</th>
-            <th class="py-3 px-4 text-left">Date</th>
-            <th class="py-3 px-4 text-left">Action</th>
+            <th class="py-3 px-4 text-left">{{ $t('admin.order_management.order_id') }}</th>
+            <th class="py-3 px-4 text-left">{{ $t('admin.order_management.customer_email') }}</th>
+            <th class="py-3 px-4 text-left">{{ $t('admin.order_management.total') }}</th>
+            <th class="py-3 px-4 text-left">{{ $t('admin.order_management.method') }}</th>
+            <th class="py-3 px-4 text-left">{{ $t('admin.order_management.date') }}</th>
+            <th class="py-3 px-4 text-left">{{ $t('admin.order_management.action') }}</th>
           </tr>
         </thead>
         <tbody class="text-sm">
@@ -48,7 +48,7 @@
             <td class="py-3 px-4 text-gray-600 dark:text-gray-300">{{ order.method }}</td>
             <td class="py-3 px-4 text-gray-600 dark:text-gray-300">{{ order.date }}</td>
             <td class="py-3 px-4">
-              <button @click="open(order)" class="text-teal-700 dark:text-[#1A535C] hover:underline">View</button>
+              <button @click="open(order)" class="text-teal-700 dark:text-[#1A535C] hover:underline">{{ $t('admin.order_management.view') }}</button>
             </td>
           </tr>
         </tbody>
@@ -56,13 +56,13 @@
 
       <!-- Pagination -->
       <div class="p-4 flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
-        <div>Showing {{ startIndex + 1 }} to {{ endIndex }} of {{ sorted.length }} entries</div>
+        <div>{{ $t('admin.order_management.showing') }} {{ startIndex + 1 }} {{ $t('admin.order_management.to') }} {{ endIndex }} {{ $t('admin.order_management.of') }} {{ sorted.length }} {{ $t('admin.order_management.entries') }}</div>
         <div class="flex items-center gap-2">
           <button
             @click="prevPage"
             :disabled="currentPage === 1"
             :class="currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'"
-            class="px-3 py-1 border rounded dark:border-gray-700 dark:text-gray-200">Previous</button>
+            class="px-3 py-1 border rounded dark:border-gray-700 dark:text-gray-200">{{ $t('admin.order_management.previous') }}</button>
           <button
             v-for="page in displayPages"
             :key="page"
@@ -73,7 +73,7 @@
             @click="nextPage"
             :disabled="currentPage === totalPages"
             :class="currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'"
-            class="px-3 py-1 border rounded dark:border-gray-700 dark:text-gray-200">Next</button>
+            class="px-3 py-1 border rounded dark:border-gray-700 dark:text-gray-200">{{ $t('admin.order_management.next') }}</button>
         </div>
       </div>
     </div>
@@ -82,18 +82,18 @@
     <div v-if="showDetail" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div class="bg-white dark:bg-gray-800 dark:text-gray-100 rounded-lg shadow-lg w-full max-w-lg p-6">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold">Order Details</h2>
-          <button @click="close" class="text-gray-500 hover:text-gray-700">✕</button>
+          <h2 class="text-lg font-semibold">{{ $t('admin.order_management.order_details') }}</h2>
+          <button @click="close" class="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100">✕</button>
         </div>
         <div v-if="selected" class="space-y-2 text-sm">
-          <div><span class="font-medium">Order ID:</span> {{ selected.id }}</div>
-          <div><span class="font-medium">Customer:</span> {{ selected.customerEmail || selected.customerName }}</div>
-          <div><span class="font-medium">Total:</span> ${{ selected.total.toFixed(2) }}</div>
-          <div><span class="font-medium">Method:</span> {{ selected.method }}</div>
-          <div><span class="font-medium">Date:</span> {{ selected.date }}</div>
+          <div><span class="font-medium">{{ $t('admin.order_management.order_id') }}:</span> {{ selected.id }}</div>
+          <div><span class="font-medium">{{ $t('admin.order_management.customer') }}:</span> {{ selected.customerEmail || selected.customerName }}</div>
+          <div><span class="font-medium">{{ $t('admin.order_management.total') }}:</span> ${{ selected.total.toFixed(2) }}</div>
+          <div><span class="font-medium">{{ $t('admin.order_management.method') }}:</span> {{ selected.method }}</div>
+          <div><span class="font-medium">{{ $t('admin.order_management.date') }}:</span> {{ selected.date }}</div>
         </div>
         <div class="mt-6 flex justify-end">
-          <button @click="close" class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700">Close</button>
+          <button @click="close" class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 dark:hover:bg-gray-600">{{ $t('admin.order_management.close') }}</button>
         </div>
       </div>
     </div>
@@ -102,7 +102,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import adminService from '@/services/adminService'
+
+const { t } = useI18n()
 
 interface Order {
   id: string

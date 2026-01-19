@@ -83,7 +83,7 @@
                 >
                   <div
                     class="h-5 w-5 rounded-full border-2 transition-all flex items-center justify-center"
-                    :class="selectedMinRating === r ? 'border-[#1A535C] dark:border-[#4EB8D4] ring-2 ring-offset-2 ring-[#1A535C] dark:ring-[#4EB8D4] dark:ring-offset-gray-900' : 'border-black dark:border-gray-400'"
+                    :class="selectedMinRating === r ? 'border-[#1A535C] dark:border-[#4EB8D4] ring-[#1A535C] dark:ring-[#4EB8D4] dark:ring-offset-gray-900' : 'border-black dark:border-gray-400'"
                   >
                     <div v-if="selectedMinRating === r" class="h-2.5 w-2.5 rounded-full bg-[#1A535C] dark:bg-cyan-300"></div>
                   </div>
@@ -189,10 +189,8 @@ export default {
   setup() {
     const productStore = useProductStore()
     const route = useRoute()
-    const allProducts = ref<Product[]>([])
-    const products = ref<Product[]>([])
     const currentPage = ref(1)
-    const itemsPerPage =12
+    const itemsPerPage = 12
     const searchQuery = ref('')
     
     const categories = ref<string[]>([
@@ -226,48 +224,27 @@ export default {
     })
 
     const {loading, error} = storeToRefs(productStore);
-    const loadProducts = async () => {
-      productStore.loading = true
-      try {
-        await productStore.fetchProducts()
-        // Map backend products to match the component's expected format
-        allProducts.value = productStore.products.map((product) => ({
-          id: product.id,
-          imageUrl: product.imageUrl || 'https://via.placeholder.com/300x300?text=No+Image',
-          name: product.name,
-          price: product.price,
-          averageRating: product.averageRating || 0,
-          discount: product.discount || null,
-          stockQuantity: product.stockQuantity ?? 0,
-          status: (product.stockQuantity ?? 0) > 0 ? 'In Stock' : 'Out of stock',
-          mainCategory: product.mainCategory,
-          subCategory: product.subCategory,
-          type: product.type,
-        }))
 
-        const computedMax = Math.max(
-          100,
-          ...allProducts.value.map((p) => Number(p.price ?? 0)),
-        )
-        priceMaxLimit.value = Math.ceil(computedMax)
-        priceMin.value = 0
-        priceMax.value = priceMaxLimit.value
-
-        updatePaginatedProducts()
-      } catch (err: unknown) {
-        console.error('Failed to load products:', err)
-        const message = err instanceof Error ? err.message : 'Failed to Fetch Data.'
-        productStore.error = message
-      } finally {
-        productStore.loading = false;
+    const resolveProductImage = (product: Product) => {
+      const raw = (product.images && product.images[0]) || product.imageUrl || (product as any).imageURL || ''
+      const cleaned = typeof raw === 'string' ? raw.trim() : ''
+      const placeholder = 'https://via.placeholder.com/300x300?text=No+Image'
+      if (!cleaned) return placeholder
+      if (cleaned.startsWith('/')) {
+        const base = import.meta.env.VITE_API_URL || ''
+        return `${String(base).replace(/\/$/, '')}${cleaned}`
       }
+      return cleaned
     }
 
-    const updatePaginatedProducts = () => {
-      const start = (currentPage.value - 1) * itemsPerPage
-      const end = start + itemsPerPage
-      products.value = filteredAllProducts.value.slice(start, end)
-    }
+    // Map backend products - now reactive to store changes
+    const allProducts = computed(() => {
+      return productStore.products.map((product) => ({
+        ...product,
+        imageUrl: resolveProductImage(product),
+        status: ((product.stockQuantity ?? 0) > 0 ? 'In Stock' : 'Out of stock') as 'In Stock' | 'Out of stock',
+      }))
+    })
 
     const filteredAllProducts = computed(() => {
       const selected = selectedCategory.value?.toLowerCase() || null
@@ -303,14 +280,45 @@ export default {
       })
     })
 
+    const products = computed(() => {
+      const start = (currentPage.value - 1) * itemsPerPage
+      const end = start + itemsPerPage
+      return filteredAllProducts.value.slice(start, end)
+    })
+
     const totalPages = () => {
       return Math.ceil(filteredAllProducts.value.length / itemsPerPage)
+    }
+
+    const loadProducts = async () => {
+      productStore.loading = true
+      try {
+        await productStore.fetchProducts()
+        // allProducts (computed) will automatically update from productStore.products
+        // Update price limits based on new products
+        if (productStore.products.length > 0) {
+          const computedMax = Math.max(
+            100,
+            ...productStore.products.map((p) => Number(p.price ?? 0)),
+          )
+          priceMaxLimit.value = Math.ceil(computedMax)
+        }
+        priceMin.value = 0
+        priceMax.value = priceMaxLimit.value
+
+        currentPage.value = 1
+      } catch (err: unknown) {
+        console.error('Failed to load products:', err)
+        const message = err instanceof Error ? err.message : 'Failed to Fetch Data.'
+        productStore.error = message
+      } finally {
+        productStore.loading = false;
+      }
     }
 
     const selectCategory = (category: string) => {
       selectedCategory.value = selectedCategory.value === category ? null : category
       currentPage.value = 1
-      updatePaginatedProducts()
     }
 
     const onPriceMinInput = () => {
@@ -327,7 +335,6 @@ export default {
 
     watch([selectedCategory, priceMin, priceMax, selectedMinRating, searchQuery], () => {
       currentPage.value = 1
-      updatePaginatedProducts()
     })
 
     // Watch for search query from route
@@ -342,7 +349,6 @@ export default {
     const goToPage = (page: number) => {
       if (page >= 1 && page <= totalPages()) {
         currentPage.value = page
-        updatePaginatedProducts()
         window.scrollTo({ top: 0, behavior: 'auto' })
       }
     }

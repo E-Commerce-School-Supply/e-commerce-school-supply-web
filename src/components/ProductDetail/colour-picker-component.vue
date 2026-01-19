@@ -9,7 +9,7 @@
                 v-for="(color, index) in colors"
                 :key="index"
                 @click="selectColor(index)"
-                class="w-8 h-8 rounded-full border-2 transition-all"
+                class="w-6 h-6 rounded-full border-2 transition-all"
                 :style="{ backgroundColor: color }"
                 :class="{ 'ring-2 ring-offset-2 ring-[#1A535C] dark:ring-offset-gray-900': selectedColorIndex === index }"
                 :title="`Color ${index + 1}`"

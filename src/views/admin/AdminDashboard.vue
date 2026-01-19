@@ -5,9 +5,12 @@
       <div class="max-w-7xl mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Admin Dashboard</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $t('admin.dashboard') }}</h1>
           </div>
           <div class="flex items-center space-x-4">
+            <!-- Language Switcher -->
+            <LangagueSwitcher />
+            
             <!-- Theme Toggle -->
             <button
               @click="themeStore.toggleTheme()"
@@ -19,9 +22,9 @@
               <IconMoon v-else :size="20" class="text-gray-200" />
             </button>
 
-            <span class="text-gray-700 dark:text-gray-200">Welcome, Admin</span>
+            <span class="text-gray-700 dark:text-gray-200">{{ $t('admin.welcome_admin') }}</span>
             <button @click="handleSignOut" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
-              Sign Out
+              {{ $t('admin.sign_out') }}
             </button>
           </div>
         </div>
@@ -30,7 +33,7 @@
 
     <!-- Breadcrumb + content -->
     <div class="max-w-7xl mx-auto px-6 py-6">
-      <div class="text-xs text-gray-500 dark:text-gray-300 mb-4">Home / My Account</div>
+      <div class="text-xs text-gray-500 dark:text-gray-300 mb-4">{{ $t('admin.breadcrumb') }}</div>
 
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- Admin Sidebar -->
@@ -45,7 +48,7 @@
                   : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
               ]"
             >
-              Dashboard
+              {{ $t('admin.sidebar.dashboard') }}
             </button>
             <button
               @click="currentTab = 'profile'"
@@ -56,7 +59,7 @@
                   : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
               ]"
             >
-              My Profile
+              {{ $t('admin.sidebar.my_profile') }}
             </button>
             <button
               @click="currentTab = 'userManagement'"
@@ -67,7 +70,7 @@
                   : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
               ]"
             >
-              User Management
+              {{ $t('admin.sidebar.user_management') }}
             </button>
             <button
               @click="currentTab = 'productManagement'"
@@ -78,7 +81,7 @@
                   : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
               ]"
             >
-              Product Management
+              {{ $t('admin.sidebar.product_management') }}
             </button>
             <button
               @click="currentTab = 'orderManagement'"
@@ -89,7 +92,7 @@
                   : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
               ]"
             >
-              Order Management
+              {{ $t('admin.sidebar.order_management') }}
             </button>
             <button
               @click="currentTab = 'reviewManagement'"
@@ -100,7 +103,7 @@
                   : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
               ]"
             >
-              Review Management
+              {{ $t('admin.sidebar.review_management') }}
             </button>
           </nav>
         </aside>
@@ -140,7 +143,7 @@
               <!-- Total Sales -->
               <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition-colors">
                 <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-sm font-medium text-gray-500 dark:text-gray-300">Total Sales</h3>
+                  <h3 class="text-sm font-medium text-gray-500 dark:text-gray-300">{{ $t('admin.stats.total_sales') }}</h3>
                   <div class="w-10 h-10 bg-red-50 dark:bg-[#1A535C]/20 rounded-full flex items-center justify-center">
                     <i class="pi pi-dollar text-red-500 dark:text-[#38b8cc]"></i>
                   </div>
@@ -151,7 +154,7 @@
               <!-- Total Orders -->
               <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition-colors">
                 <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-sm font-medium text-gray-500 dark:text-gray-300">Total Orders</h3>
+                  <h3 class="text-sm font-medium text-gray-500 dark:text-gray-300">{{ $t('admin.stats.total_orders') }}</h3>
                   <div class="w-10 h-10 bg-red-50 dark:bg-[#1A535C]/20 rounded-full flex items-center justify-center">
                     <i class="pi pi-shopping-cart text-red-500 dark:text-[#38b8cc]"></i>
                   </div>
@@ -162,7 +165,7 @@
               <!-- Total Products -->
               <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition-colors">
                 <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-sm font-medium text-gray-500 dark:text-gray-300">Total Products</h3>
+                  <h3 class="text-sm font-medium text-gray-500 dark:text-gray-300">{{ $t('admin.stats.total_products') }}</h3>
                   <div class="w-10 h-10 bg-red-50 dark:bg-[#1A535C]/20 rounded-full flex items-center justify-center">
                     <i class="pi pi-box text-red-500 dark:text-[#38b8cc]"></i>
                   </div>
@@ -175,7 +178,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <!-- Daily Sales Trend -->
               <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition-colors">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Daily Sales Trend (Last 30 Days)</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ $t('admin.charts.daily_sales') }}</h3>
                 <div style="height: 300px;">
                   <canvas ref="salesChartCanvas"></canvas>
                 </div>
@@ -183,7 +186,7 @@
 
               <!-- Total Product by Category -->
               <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition-colors ">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Total Product by Category</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ $t('admin.charts.product_by_category') }}</h3>
                 <div style="height: 300px;">
                   <canvas ref="categoryChartCanvas"></canvas>
                 </div>
@@ -195,21 +198,21 @@
               <!-- Top Sale Products -->
               <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition-colors">
                 <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Top Sale Products</h3>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $t('admin.tables.top_sale_products') }}</h3>
                   <button class="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <i class="pi pi-filter mr-1"></i> <span class="text-gray-700 dark:text-gray-200">Filter</span>
+                    <i class="pi pi-filter mr-1"></i> <span class="text-gray-700 dark:text-gray-200">{{ $t('admin.tables.filter') }}</span>
                   </button>
                 </div>
                 <div class="overflow-x-auto">
                   <table class="w-full">
                     <thead>
                       <tr class="border-b border-gray-200 dark:border-gray-700">
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300">Product</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300">Category</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300">Price</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300">Total Sales</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300">Units Sold</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300">Stock</th>
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300">{{ $t('admin.tables.product') }}</th>
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300">{{ $t('admin.tables.category') }}</th>
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300">{{ $t('admin.tables.price') }}</th>
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300">{{ $t('admin.tables.total_sales') }}</th>
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300">{{ $t('admin.tables.units_sold') }}</th>
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300">{{ $t('admin.tables.stock') }}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -245,14 +248,14 @@
 
               <!-- Low Stock Alert -->
               <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition-colors">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Low Stock Alert</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ $t('admin.alerts.low_stock') }}</h3>
                 <div class="space-y-4">
                   <div v-for="item in lowStockItems" :key="item.id" class="space-y-2">
                     <div class="flex items-center space-x-3">
                       <img :src="item.image" :alt="item.name" class="w-10 h-10 object-cover rounded border border-gray-200 dark:border-gray-700">
                       <div class="flex-1">
                         <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ item.quantity }} left in stock</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ item.quantity }} {{ $t('admin.alerts.left_in_stock') }}</p>
                       </div>
                     </div>
                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -270,7 +273,7 @@
                         item.alertLevel === 'critical' ? 'text-red-600 dark:text-red-300' : 'text-yellow-600 dark:text-yellow-200'
                       ]">
                         <i class="pi pi-exclamation-circle mr-1"></i>
-                        {{ item.alertLevel === 'critical' ? 'Critical' : 'Low Stock' }}
+                        {{ item.alertLevel === 'critical' ? $t('admin.alerts.critical') : $t('admin.alerts.low_stock_label') }}
                       </span>
                       <span class="ml-auto text-gray-500 dark:text-gray-300">{{ item.percentage }}%</span>
                     </div>
@@ -288,7 +291,7 @@
     <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-8 transition-colors">
       <div class="max-w-7xl mx-auto px-6 py-4">
         <div class="text-center text-gray-600 dark:text-gray-300 text-sm">
-          © 2025 E-Commerce Admin Panel. All rights reserved.
+          {{ $t('admin.footer.copyright') }}
         </div>
       </div>
     </footer>
@@ -301,16 +304,20 @@ import UserManagement from './UserManagement.vue'
 import ProductManagement from './ProductManagement.vue'
 import OrderManagement from './OrderManagement.vue'
 import ReviewManagement from './ReviewManagement.vue'
-import { ref, onMounted, watch } from 'vue'
+import LangagueSwitcher from '@/components/ui/LangagueSwitcher.vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
 import { IconSun, IconMoon } from '@tabler/icons-vue'
+import { useI18n } from 'vue-i18n'
 import Chart from 'chart.js/auto'
 import adminService from '@/services/adminService'
 import { productService } from '@/services/productService'
 import orderService from '@/services/orderService'
 import BlankProfile from '@/assets/images/pfp_blank.jpeg'
+
+const API_BASE_URL = import.meta.env.VITE_API_URL as string
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -318,9 +325,22 @@ const themeStore = useThemeStore()
 const currentTab = ref('dashboard')
 
 // Admin Info
-const adminName = ref(authStore.user?.username || 'Admin')
-const adminRole = ref(authStore.user?.role || 'Administrator')
-const userAvatarSrc = authStore.user?.avatarUrl || BlankProfile
+const adminName = computed(() => authStore.user?.username || 'Admin')
+const adminRole = computed(() => authStore.user?.role || 'Administrator')
+
+// Avatar cache-busting timestamp - updates only when avatar URL changes
+const avatarTimestamp = ref(new Date().getTime())
+watch(() => authStore.user?.avatarUrl, () => {
+  avatarTimestamp.value = new Date().getTime()
+})
+
+const userAvatarSrc = computed(() => {
+  const avatarUrl = authStore.user?.avatarUrl
+  if (avatarUrl && avatarUrl.trim() !== '') {
+    return `${API_BASE_URL}${avatarUrl}?t=${avatarTimestamp.value}`
+  }
+  return BlankProfile
+})
 
 // Dashboard Stats
 const totalSales = ref(0)
@@ -338,6 +358,14 @@ let categoryChart: any = null
 const topProducts = ref<any[]>([])
 const lowStockItems = ref<any[]>([])
 const categoryData = ref<any>({})
+
+const resolveProductImage = (p: any) => {
+  const raw = (Array.isArray(p?.images) && p.images[0]) || p?.imageUrl || p?.imageURL || ''
+  const cleaned = typeof raw === 'string' ? raw.trim() : ''
+  if (!cleaned) return BlankProfile
+  if (cleaned.startsWith('/')) return `${String(API_BASE_URL).replace(/\/$/, '')}${cleaned}`
+  return cleaned
+}
 const monthlySalesData = ref<any[]>([])
 
 const handleSignOut = async () => {
@@ -420,7 +448,7 @@ const fetchDashboardStats = async () => {
         rating: p.rating || '0.0',
         stockQuantity: p.stockQuantity || 0,
         status: (p.stockQuantity || 0) > 0 ? 'In stock' : 'Out of stock',
-        image: p.imageUrl || BlankProfile
+        image: resolveProductImage(p)
       }))
       .sort((a: any, b: any) => b.sales - a.sales)
       .slice(0, 5)
@@ -439,7 +467,7 @@ const fetchDashboardStats = async () => {
           quantity: qty,
           percentage: Math.round(percentage),
           alertLevel: qty < 20 ? 'critical' : 'low',
-          image: p.imageUrl || BlankProfile
+          image: resolveProductImage(p)
         }
       })
 

@@ -12,6 +12,8 @@ export interface Product {
   stockQuantity?: number
   price: number
   discount?: number | null
+  // Prefer the new multi-image field; fall back to legacy single url when needed
+  images?: string[]
   imageUrl?: string
   status?: 'In Stock' | 'Out of stock'
   rating?: number | 0

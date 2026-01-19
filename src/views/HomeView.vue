@@ -14,6 +14,7 @@ const productStore = useProductStore()
 const cartStore = useCartStore()
 const router = useRouter()
 const { t } = useI18n() // Destructure t function
+const API_BASE_URL = import.meta.env.VITE_API_URL || ''
 
 // --- STATE ---
 const cartCount = ref(0)
@@ -62,7 +63,8 @@ const addToCart = async (product: any) => {
       rating: product.rating || 4.5,
       price: parseFloat(product.price.replace('$', '')),
       quantity: 1,
-      image: product.image,
+      image: resolveProductImage(product),
+      images: Array.isArray(product.images) && product.images.length > 0 ? product.images : [resolveProductImage(product)],
     })
     cartCount.value++
     // Use t() for alert
@@ -80,10 +82,19 @@ const addToWishlist = () => {
 const isMongoId = (id: any) => typeof id === 'string' && /^[a-fA-F0-9]{24}$/.test(id)
 const getObjectIdTime = (id: string) => (isMongoId(id) ? parseInt(id.substring(0, 8), 16) * 1000 : 0)
 
+const resolveProductImage = (product: any) => {
+  const raw = (Array.isArray(product?.images) && product.images[0]) || product?.imageUrl || product?.imageURL || product?.image || '/Photo/ourproduct.png'
+  const cleaned = typeof raw === 'string' ? raw.trim() : ''
+  if (!cleaned) return '/Photo/ourproduct.png'
+  if (cleaned.startsWith('/')) return `${String(API_BASE_URL).replace(/\/$/, '')}${cleaned}`
+  return cleaned
+}
+
 // --- ACTIONS: DATA FETCHING ---
 const mapProductToViewModel = (product: any, index: number, type: 'sales' | 'carousel', tags?: string[]) => {
   const isFeatured = type === 'sales' && index === 2
   const priceFormatted = `$${Number(product.price).toFixed(2)}`
+  const image = resolveProductImage(product)
 
   return {
     id: product.id || (100 + index),
@@ -94,7 +105,8 @@ const mapProductToViewModel = (product: any, index: number, type: 'sales' | 'car
     oldPrice: product.discount
       ? `$${(product.price / (1 - product.discount / 100)).toFixed(2)}`
       : null,
-    image: product.imageUrl || '/Photo/ourproduct.png',
+    image,
+    images: Array.isArray(product.images) ? product.images : undefined,
     stockQuantity: product.stockQuantity ?? 0,
     status: product.status || (product.stockQuantity > 0 ? 'In Stock' : 'Out of stock'),
     reviewCount: Number(product.reviewCount || 0),

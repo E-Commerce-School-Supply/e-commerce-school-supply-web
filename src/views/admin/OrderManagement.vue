@@ -8,15 +8,15 @@
     </div>
 
     <div class="border rounded-lg overflow-hidden dark:border-gray-700">
-      <div class="bg-gray-50 dark:bg-gray-800 border-b border-default dark:border-gray-700 px-4 py-3 flex items-center justify-between transition-colors">
+      <div class="bg-gray-50 dark:bg-gray-800 border-b border-default dark:border-gray-700 px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-3 transition-colors">
         <div class="flex items-center gap-3">
           <span class="text-sm font-medium">{{ $t('admin.order_management.all_orders') }}</span>
           <span class="text-sm text-gray-500 dark:text-gray-300">{{ orders.length }}</span>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex flex-col sm:flex-row items-center gap-3">
           <div class="relative">
-            <input v-model="search" type="text" :placeholder="$t('admin.order_management.search_customer')" class="border rounded px-3 py-1.5 pr-8 text-sm w-64 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100" />
+            <input v-model="search" type="text" :placeholder="$t('admin.order_management.search_customer')" class="border rounded px-3 py-1.5 pr-8 text-sm w-full sm:w-64 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100" />
             <span class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"><IconSearch size="16"/></span>
           </div>
           <button @click="toggleEmailSort" class="border rounded px-3 py-1.5 text-sm bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
@@ -25,37 +25,40 @@
         </div>
       </div>
 
-      <table class="w-full">
-        <thead class="bg-gray-50 dark:bg-gray-800 border-b text-xs text-gray-600 dark:text-gray-300 border-default dark:border-gray-700">
-          <tr>
-            <th class="py-3 px-4 text-left w-12">
-              <input type="checkbox" class="rounded" />
-            </th>
-            <th class="py-3 px-4 text-left">{{ $t('admin.order_management.order_id') }}</th>
-            <th class="py-3 px-4 text-left">{{ $t('admin.order_management.customer_email') }}</th>
-            <th class="py-3 px-4 text-left">{{ $t('admin.order_management.total') }}</th>
-            <th class="py-3 px-4 text-left">{{ $t('admin.order_management.method') }}</th>
-            <th class="py-3 px-4 text-left">{{ $t('admin.order_management.date') }}</th>
-            <th class="py-3 px-4 text-left">{{ $t('admin.order_management.action') }}</th>
-          </tr>
-        </thead>
-        <tbody class="text-sm">
-          <tr v-for="order in paginatedOrders" :key="order.id" class="border-b hover:bg-gray-50 dark:hover:bg-gray-800 border-default dark:border-gray-700 transition-colors">
-            <td class="py-3 px-4"><input type="checkbox" class="rounded" /></td>
-            <td class="py-3 px-4 font-medium dark:text-gray-100">{{ order.id }}</td>
-            <td class="py-3 px-4 text-gray-600 dark:text-gray-300">{{ order.customerEmail || order.customerName }}</td>
-            <td class="py-3 px-4 dark:text-gray-200">${{ order.total.toFixed(2) }}</td>
-            <td class="py-3 px-4 text-gray-600 dark:text-gray-300">{{ order.method }}</td>
-            <td class="py-3 px-4 text-gray-600 dark:text-gray-300">{{ order.date }}</td>
-            <td class="py-3 px-4">
-              <button @click="open(order)" class="text-teal-700 dark:text-[#1A535C] hover:underline">{{ $t('admin.order_management.view') }}</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50 dark:bg-gray-800 border-b text-xs text-gray-600 dark:text-gray-300 border-default dark:border-gray-700 md:table-header-group hidden">
+            <tr>
+              <th class="py-3 px-4 text-left w-12">
+                <input type="checkbox" class="rounded" />
+              </th>
+              <th class="py-3 px-4 text-left">{{ $t('admin.order_management.order_id') }}</th>
+              <th class="py-3 px-4 text-left">{{ $t('admin.order_management.customer_email') }}</th>
+              <th class="py-3 px-4 text-left">{{ $t('admin.order_management.total') }}</th>
+              <th class="py-3 px-4 text-left">{{ $t('admin.order_management.method') }}</th>
+              <th class="py-3 px-4 text-left">{{ $t('admin.order_management.date') }}</th>
+              <th class="py-3 px-4 text-left">{{ $t('admin.order_management.action') }}</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm">
+            <tr v-for="order in paginatedOrders" :key="order.id" class="border-b hover:bg-gray-50 dark:hover:bg-gray-800 border-default dark:border-gray-700 transition-colors flex flex-col md:table-row">
+              <td class="py-3 px-4 flex justify-between items-center md:table-cell"><span class="font-bold md:hidden">Select</span><input type="checkbox" class="rounded" /></td>
+              <td class="py-3 px-4 font-medium dark:text-gray-100 flex justify-between items-center md:table-cell"><span class="font-bold md:hidden">{{ $t('admin.order_management.order_id') }}</span>{{ order.id }}</td>
+              <td class="py-3 px-4 text-gray-600 dark:text-gray-300 flex justify-between items-center md:table-cell"><span class="font-bold md:hidden">{{ $t('admin.order_management.customer_email') }}</span>{{ order.customerEmail || order.customerName }}</td>
+              <td class="py-3 px-4 dark:text-gray-200 flex justify-between items-center md:table-cell"><span class="font-bold md:hidden">{{ $t('admin.order_management.total') }}</span>${{ order.total.toFixed(2) }}</td>
+              <td class="py-3 px-4 text-gray-600 dark:text-gray-300 flex justify-between items-center md:table-cell"><span class="font-bold md:hidden">{{ $t('admin.order_management.method') }}</span>{{ order.method }}</td>
+              <td class="py-3 px-4 text-gray-600 dark:text-gray-300 flex justify-between items-center md:table-cell"><span class="font-bold md:hidden">{{ $t('admin.order_management.date') }}</span>{{ order.date }}</td>
+              <td class="py-3 px-4 flex justify-between items-center md:table-cell">
+                <span class="font-bold md:hidden">{{ $t('admin.order_management.action') }}</span>
+                <button @click="open(order)" class="text-teal-700 dark:text-[#1A535C] hover:underline">{{ $t('admin.order_management.view') }}</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <!-- Pagination -->
-      <div class="p-4 flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
+      <div class="p-4 flex flex-col md:flex-row items-center justify-between text-sm text-gray-600 dark:text-gray-300 gap-4">
         <div>{{ $t('admin.order_management.showing') }} {{ startIndex + 1 }} {{ $t('admin.order_management.to') }} {{ endIndex }} {{ $t('admin.order_management.of') }} {{ sorted.length }} {{ $t('admin.order_management.entries') }}</div>
         <div class="flex items-center gap-2">
           <button
@@ -79,7 +82,7 @@
     </div>
 
     <!-- Details Modal -->
-    <div v-if="showDetail" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div v-if="showDetail" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
       <div class="bg-white dark:bg-gray-800 dark:text-gray-100 rounded-lg shadow-lg w-full max-w-lg p-6">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-semibold">{{ $t('admin.order_management.order_details') }}</h2>

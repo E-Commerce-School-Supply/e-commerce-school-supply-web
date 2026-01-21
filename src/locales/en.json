@@ -468,6 +468,8 @@
       "refresh": "Refresh",
       "refreshing": "Refreshing...",
       "search_placeholder": "Search users...",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
       "select_all": "Select All",
       "username": "Username",
       "email": "Email",

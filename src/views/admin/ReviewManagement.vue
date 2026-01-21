@@ -8,7 +8,7 @@
     </div>
 
     <!-- Stats Summary -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <div class="bg-blue-50 dark:bg-blue-900/40 p-4 rounded-lg">
         <div class="text-sm text-gray-600 dark:text-gray-200">{{ $t('admin.review_management.total_reviews') }}</div>
         <div class="text-2xl font-bold text-blue-600 dark:text-blue-300">{{ reviews.length }}</div>
@@ -29,23 +29,23 @@
 
     <!-- Filters and Search -->
     <div class="border rounded-lg overflow-hidden dark:border-gray-700">
-      <div class="bg-gray-50 dark:bg-gray-800 border-b px-4 py-3 flex items-center justify-between border-default dark:border-gray-700 transition-colors">
+      <div class="bg-gray-50 dark:bg-gray-800 border-b px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4 border-default dark:border-gray-700 transition-colors">
         <div class="flex items-center gap-3">
           <span class="text-sm font-medium">{{ $t('admin.review_management.all_reviews') }}</span>
           <span class="text-sm text-gray-500 dark:text-gray-300">{{ filtered.length }}</span>
         </div>
 
-        <div class="flex items-center gap-3">
-          <div class="relative">
+        <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+          <div class="relative w-full sm:w-auto">
             <input
               v-model="search"
               type="text"
               :placeholder="$t('admin.review_management.search_placeholder')"
-              class="border rounded px-3 py-1.5 pr-8 text-sm w-64 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+              class="border rounded px-3 py-1.5 pr-8 text-sm w-full sm:w-64 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
             />
-            <span class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+            <span class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"><IconSearch size="16"/></span>
           </div>
-          <select v-model="filterRating" class="border rounded px-3 py-1.5 text-sm bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
+          <select v-model="filterRating" class="border rounded px-3 py-1.5 text-sm w-full sm:w-40 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
             <option value="">{{ $t('admin.review_management.all_ratings') }}</option>
             <option value="5">{{ $t('admin.review_management.stars_5') }}</option>
             <option value="4">{{ $t('admin.review_management.stars_4') }}</option>
@@ -53,7 +53,7 @@
             <option value="2">{{ $t('admin.review_management.stars_2') }}</option>
             <option value="1">{{ $t('admin.review_management.stars_1') }}</option>
           </select>
-          <button @click="loadReviews" class="px-3 py-1.5 bg-teal-700 text-white rounded text-sm hover:bg-teal-800 dark:bg-[#1A535C] dark:hover:bg-[#2A7A8F]">
+          <button @click="loadReviews" class="px-3 py-1.5 bg-teal-700 text-white rounded text-sm hover:bg-teal-800 dark:bg-[#1A535C] dark:hover:bg-[#2A7A8F] w-full sm:w-auto">
             {{ $t('admin.review_management.refresh') }}
           </button>
         </div>
@@ -67,63 +67,78 @@
         {{ $t('admin.review_management.no_reviews') }}
       </div>
 
-      <table v-else class="w-full">
-        <thead class="bg-gray-50 dark:bg-gray-800 border-b text-xs text-gray-600 dark:text-gray-300 border-default dark:border-gray-700">
-          <tr>
-            <th class="py-3 px-4 text-left w-12">
-              <input type="checkbox" class="rounded" />
-            </th>
-            <th class="py-3 px-4 text-left">{{ $t('admin.review_management.product') }}</th>
-            <th class="py-3 px-4 text-left">{{ $t('admin.review_management.user') }}</th>
-            <th class="py-3 px-4 text-left">{{ $t('admin.review_management.rating') }}</th>
-            <th class="py-3 px-4 text-left">{{ $t('admin.review_management.review') }}</th>
-            <th class="py-3 px-4 text-left">{{ $t('admin.review_management.date') }}</th>
-            <th class="py-3 px-4 text-left">{{ $t('admin.review_management.action') }}</th>
-          </tr>
-        </thead>
-        <tbody class="text-sm">
-          <tr v-for="review in paginatedReviews" :key="review.id" class="border-b hover:bg-gray-50 dark:hover:bg-gray-800 border-default dark:border-gray-700 transition-colors">
-            <td class="py-3 px-4"><input type="checkbox" class="rounded" /></td>
-            <td class="py-3 px-4">
-              <div class="font-medium text-gray-900 dark:text-gray-100">{{ getProductName(review.productId) }}</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">ID: {{ review.productId }}</div>
-            </td>
-            <td class="py-3 px-4">
-              <div class="font-medium text-gray-900 dark:text-gray-100">{{ review.userName || review.userId }}</div>
-              <div v-if="review.verified" class="text-xs text-green-500">✓ {{ $t('admin.review_management.verified') }}</div>
-            </td>
-            <td class="py-3 px-4">
-              <div class="flex items-center gap-1">
-                <span v-for="i in 5" :key="i" :class="i <= review.rating ? 'text-yellow-400' : 'text-gray-300'">★</span>
-                <span class="ml-1 text-gray-600 dark:text-gray-300">({{ review.rating }})</span>
-              </div>
-              <div v-if="review.recommend" class="text-xs text-green-600 mt-1">{{ $t('admin.review_management.recommends') }}</div>
-            </td>
-            <td class="py-3 px-4">
-              <div class="max-w-md">
-                <div v-if="review.title" class="font-medium text-gray-900 dark:text-gray-100 mb-1 truncate">{{ review.title }}</div>
-                <div class="text-gray-600 dark:text-gray-300 line-clamp-2">{{ review.body || $t('admin.review_management.no_comment') }}</div>
-              </div>
-            </td>
-            <td class="py-3 px-4 text-gray-600 dark:text-gray-300">{{ formatDate(review.createdAt) }}</td>
-            <td class="py-3 px-4">
-              <button
-                @click="openDetail(review)"
-                class="text-teal-700 dark:text-[#1A535C] hover:underline mr-3">
-                {{ $t('admin.review_management.view') }}
-              </button>
-              <button
-                @click="deleteReview(review.id)"
-                class="text-red-600 hover:underline">
-                {{ $t('admin.review_management.delete') }}
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div v-else class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50 dark:bg-gray-800 border-b text-xs text-gray-600 dark:text-gray-300 border-default dark:border-gray-700 hidden md:table-header-group">
+            <tr>
+              <th class="py-3 px-4 text-left w-12">
+                <input type="checkbox" class="rounded" />
+              </th>
+              <th class="py-3 px-4 text-left">{{ $t('admin.review_management.product') }}</th>
+              <th class="py-3 px-4 text-left">{{ $t('admin.review_management.user') }}</th>
+              <th class="py-3 px-4 text-left">{{ $t('admin.review_management.rating') }}</th>
+              <th class="py-3 px-4 text-left">{{ $t('admin.review_management.review') }}</th>
+              <th class="py-3 px-4 text-left">{{ $t('admin.review_management.date') }}</th>
+              <th class="py-3 px-4 text-left">{{ $t('admin.review_management.action') }}</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm">
+            <tr v-for="review in paginatedReviews" :key="review.id" class="border-b hover:bg-gray-50 dark:hover:bg-gray-800 border-default dark:border-gray-700 transition-colors flex flex-col md:table-row">
+              <td class="py-3 px-4 flex justify-between items-center md:table-cell"><span class="font-bold md:hidden">Select</span><input type="checkbox" class="rounded" /></td>
+              <td class="py-3 px-4 flex justify-between items-center md:table-cell">
+                <span class="font-bold md:hidden">{{ $t('admin.review_management.product') }}</span>
+                <div class="md:w-full md:max-w-sm">
+                  <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ getProductName(review.productId) }}</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400 truncate">ID: {{ review.productId }}</div>
+                </div>
+              </td>
+              <td class="py-3 px-4 flex justify-between items-center md:table-cell">
+                <span class="font-bold md:hidden">{{ $t('admin.review_management.user') }}</span>
+                <div>
+                  <div class="font-medium text-gray-900 dark:text-gray-100">{{ review.userName || review.userId }}</div>
+                  <div v-if="review.verified" class="text-xs text-green-500">✓ {{ $t('admin.review_management.verified') }}</div>
+                </div>
+              </td>
+              <td class="py-3 px-4 flex justify-between items-center md:table-cell">
+                <span class="font-bold md:hidden">{{ $t('admin.review_management.rating') }}</span>
+                <div>
+                  <div class="flex items-center gap-1">
+                    <span v-for="i in 5" :key="i" :class="i <= review.rating ? 'text-yellow-400' : 'text-gray-300'">★</span>
+                    <span class="ml-1 text-gray-600 dark:text-gray-300">({{ review.rating }})</span>
+                  </div>
+                  <div v-if="review.recommend" class="text-xs text-green-600 mt-1">{{ $t('admin.review_management.recommends') }}</div>
+                </div>
+              </td>
+              <td class="py-3 px-4 flex justify-between items-center md:table-cell">
+                <span class="font-bold md:hidden">{{ $t('admin.review_management.review') }}</span>
+                <div class="md:w-full md:max-w-sm">
+                  <div v-if="review.title" class="font-medium text-gray-900 dark:text-gray-100 mb-1 truncate">{{ review.title }}</div>
+                  <div class="text-gray-600 dark:text-gray-300 line-clamp-2 truncate">{{ review.body || $t('admin.review_management.no_comment') }}</div>
+                </div>
+              </td>
+              <td class="py-3 px-4 text-gray-600 dark:text-gray-300 flex justify-between items-center md:table-cell"><span class="font-bold md:hidden">{{ $t('admin.review_management.date') }}</span>{{ formatDate(review.createdAt) }}</td>
+              <td class="py-3 px-4 flex justify-between items-center md:table-cell">
+                <span class="font-bold md:hidden">{{ $t('admin.review_management.action') }}</span>
+                <div>
+                  <button
+                    @click="openDetail(review)"
+                    class="text-teal-700 dark:text-[#1A535C] hover:underline mr-3">
+                    {{ $t('admin.review_management.view') }}
+                  </button>
+                  <button
+                    @click="deleteReview(review.id)"
+                    class="text-red-600 hover:underline">
+                    {{ $t('admin.review_management.delete') }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <!-- Pagination -->
-      <div class="p-4 flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
+      <div class="p-4 flex flex-col md:flex-row items-center justify-between text-sm text-gray-600 dark:text-gray-300 gap-4">
         <div>{{ $t('admin.review_management.showing') }} {{ startIndex + 1 }} {{ $t('admin.review_management.to') }} {{ endIndex }} {{ $t('admin.review_management.of') }} {{ filtered.length }} {{ $t('admin.review_management.entries') }}</div>
         <div class="flex items-center gap-2">
           <button
@@ -147,7 +162,7 @@
     </div>
 
     <!-- Review Detail Modal -->
-    <div v-if="showDetail" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div v-if="showDetail" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
       <div class="bg-white dark:bg-gray-800 dark:text-gray-100 rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[80vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-semibold">{{ $t('admin.review_management.detail_title') }}</h2>
@@ -180,7 +195,7 @@
             <label class="text-sm font-medium text-gray-600">{{ $t('admin.review_management.review') }}</label>
             <div class="text-gray-900 whitespace-pre-wrap mt-1">{{ selectedReview.body || $t('admin.review_management.no_comment_provided') }}</div>
           </div>
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="text-sm font-medium text-gray-600">{{ $t('admin.review_management.posted') }}</label>
               <div class="text-gray-900">{{ formatDate(selectedReview.createdAt) }}</div>
@@ -191,13 +206,13 @@
             </div>
           </div>
         </div>
-        <div class="mt-6 flex justify-end gap-3">
+        <div class="mt-6 flex flex-col sm:flex-row justify-end gap-3">
           <button
             @click="deleteReview(selectedReview?.id)"
-            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 w-full sm:w-auto">
             {{ $t('admin.review_management.delete_review') }}
           </button>
-          <button @click="closeDetail" class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900">
+          <button @click="closeDetail" class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900 w-full sm:w-auto">
             {{ $t('admin.review_management.close') }}
           </button>
         </div>
@@ -210,6 +225,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import axios from 'axios'
+import { IconSearch } from '@tabler/icons-vue'
 
 const { t } = useI18n()
 

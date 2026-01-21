@@ -1,35 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-100 dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 transition-colors">
-    <!-- Admin Header -->
-    <header class="bg-white dark:bg-gray-800 shadow-sm transition-colors">
-      <div class="max-w-7xl mx-auto px-6 py-4">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-4">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $t('admin.dashboard') }}</h1>
-          </div>
-          <div class="flex items-center space-x-4">
-            <!-- Language Switcher -->
-            <LangagueSwitcher />
-            
-            <!-- Theme Toggle -->
-            <button
-              @click="themeStore.toggleTheme()"
-              class="p-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              :aria-label="themeStore.isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-              title="Toggle theme"
-            >
-              <IconSun v-if="!themeStore.isDark" :size="20" class="text-gray-700" />
-              <IconMoon v-else :size="20" class="text-gray-200" />
-            </button>
-
-            <span class="text-gray-700 dark:text-gray-200">{{ $t('admin.welcome_admin') }}</span>
-            <button @click="handleSignOut" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
-              {{ $t('admin.sign_out') }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
+ 
 
     <!-- Breadcrumb + content -->
     <div class="max-w-7xl mx-auto px-6 py-6">
@@ -37,7 +8,7 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- Admin Sidebar -->
-        <aside class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 transition-colors">
+        <aside class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 transition-colors lg:col-span-1">
           <nav class="space-y-1">
             <button
               @click="currentTab = 'dashboard'"
@@ -109,7 +80,7 @@
         </aside>
 
         <!-- Main content -->
-        <main class="col-span-3 space-y-6">
+        <main class="lg:col-span-3 space-y-6">
           <!-- Show Admin Profile when profile tab is active -->
           <AdminProfile v-if="currentTab === 'profile'" />
 
@@ -216,13 +187,13 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="product in topProducts" :key="product.id" class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <tr v-for="product in topProducts" :key="product.id" class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 flex flex-col sm:table-row">
                         <td class="py-3 px-4">
                           <div class="flex items-center space-x-3">
                             <img :src="product.image" :alt="product.name" class="w-12 h-12 object-cover rounded border border-gray-200 dark:border-gray-700">
-                            <div>
-                              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ product.name }}</div>
-                              <div class="text-xs text-gray-500 dark:text-gray-400">ID: {{ product.id }}</div>
+                            <div class="w-44 mr-5">
+                              <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ product.name }}</div>
+                              <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ product.description }}</div>
                             </div>
                           </div>
                         </td>
@@ -286,30 +257,21 @@
           </main>
       </div>
     </div>
-
-    <!-- Admin Footer -->
-    <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-8 transition-colors">
-      <div class="max-w-7xl mx-auto px-6 py-4">
-        <div class="text-center text-gray-600 dark:text-gray-300 text-sm">
-          {{ $t('admin.footer.copyright') }}
-        </div>
-      </div>
-    </footer>
   </div>
 </template>
 
 <script setup lang="ts">
+import AdminHeader from '@/components/admin/AdminHeader.vue'
+import AdminFooter from '@/components/admin/AdminFooter.vue'
 import AdminProfile from './AdminProfile.vue'
 import UserManagement from './UserManagement.vue'
 import ProductManagement from './ProductManagement.vue'
 import OrderManagement from './OrderManagement.vue'
 import ReviewManagement from './ReviewManagement.vue'
-import LangagueSwitcher from '@/components/ui/LangagueSwitcher.vue'
 import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
-import { IconSun, IconMoon } from '@tabler/icons-vue'
 import { useI18n } from 'vue-i18n'
 import Chart from 'chart.js/auto'
 import adminService from '@/services/adminService'
@@ -441,6 +403,7 @@ const fetchDashboardStats = async () => {
       .map((p: any) => ({
         id: p.id,
         name: p.name || 'Unknown',
+        description: p.description || '',
         category: p.mainCategory || 'N/A',
         price: (p.price || 0).toFixed(2),
         sales: productSales[p.id] || 0,

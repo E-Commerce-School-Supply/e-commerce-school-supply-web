@@ -143,6 +143,23 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function fetchUser() {
+    if (token.value) {
+      try {
+        const res = await authService.getProfile()
+        user.value = {
+          ...res.data,
+          avatarUrl: res.data.avatarUrl || ''
+        }
+        sessionStorage.setItem('user', JSON.stringify(user.value))
+      } catch (error) {
+        console.error('Failed to fetch user profile:', error)
+        // Token might be invalid, so log out
+        logout()
+      }
+    }
+  }
+
   return {
     user,
     login,
@@ -151,5 +168,6 @@ export const useAuthStore = defineStore('auth', () => {
     updateProfile,
     changePassword,
     uploadAvatar,
+    fetchUser
   }
 })

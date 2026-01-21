@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { IconDotsVertical } from '@tabler/icons-vue'
+import { IconDotsVertical, IconSearch } from '@tabler/icons-vue'
 import { productService } from '@/services/productService'
 import type { Product } from '@/types/product'
 import BlankProfile from '@/assets/images/pfp_blank.jpeg'
@@ -17,6 +17,16 @@ const showAddForm = ref(false)
 const isEditMode = ref(false)
 const editingProductId = ref<string | null>(null)
 const openDropdown = ref<string | null>(null)
+const selectedFile = ref<File | null>(null);
+
+interface ProductImage {
+  id: string;        // Unique ID for v-for key
+  preview: string;   // The URL to show in <img> (Base64 or Server URL)
+  file?: File;       // The raw file to upload (only for new images)
+}
+
+
+const productImages = ref<ProductImage[]>([])
 
 const productForm = reactive({
   name: '',
@@ -86,7 +96,7 @@ const resetForm = () => {
   productForm.stockQuantity = 0
   productForm.salePrice = 0
   productForm.discount = 0
-  productForm.images = []
+  productImages.value = [] // Clear previews
   isEditMode.value = false
   editingProductId.value = null
 }
@@ -97,6 +107,7 @@ const openAddForm = () => {
 }
 
 const openEditForm = (product: Product) => {
+  resetForm() // Reset previews first
   isEditMode.value = true
   editingProductId.value = product.id || null
   productForm.name = product.name || ''
@@ -111,11 +122,18 @@ const openEditForm = (product: Product) => {
   productForm.stockQuantity = product.stockQuantity || 0
   productForm.salePrice = product.price || 0
   productForm.discount = product.discount || 0
-  productForm.images = Array.isArray(product.images) && product.images.length > 0
-    ? [...product.images]
-    : product.imageUrl
-      ? [product.imageUrl]
-      : []
+  
+  // Populate previews from existing product images
+  const existingImages = (Array.isArray(product.images) && product.images.length > 0)
+    ? product.images
+    : (product.imageUrl ? [product.imageUrl] : [])
+
+  productImages.value = existingImages.map(url => ({
+    id: url, // Use URL as a temporary unique ID
+    preview: resolveProductImage({ ...product, imageUrl: url, images: [] }), // Use resolver for full URL
+    file: undefined // No raw file for existing images
+  }))
+
   showAddForm.value = true
 }
 
@@ -123,10 +141,11 @@ const closeAddForm = () => {
   showAddForm.value = false
 }
 
-const onFilesSelected = (e: Event) => {
-  const input = e.target as HTMLInputElement
-  if (!input.files) return
-  processFiles(input.files)
+const onFilesSelected = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+    if (target.files) {
+      processFiles(target.files);
+    }
 }
 
 const processFiles = (files: FileList) => {
@@ -139,9 +158,17 @@ const processFiles = (files: FileList) => {
       alert('Image size should be less than 10MB')
       return
     }
+
+    // Create a local preview and store the file
     const reader = new FileReader()
     reader.onload = () => {
-      if (typeof reader.result === 'string') productForm.images.push(reader.result)
+      if (typeof reader.result === 'string') {
+        productImages.value.push({
+          id: Date.now() + Math.random().toString(), // Temp ID
+          preview: reader.result,
+          file: file // <--- Store the file here!
+        })
+      }
     }
     reader.readAsDataURL(file)
   })
@@ -161,7 +188,7 @@ const onDrop = (e: DragEvent) => {
 }
 
 const removeImage = (index: number) => {
-  productForm.images.splice(index, 1)
+  productImages.value.splice(index, 1)
 }
 
 const saveProduct = async () => {
@@ -174,13 +201,47 @@ const saveProduct = async () => {
       return
     }
 
+    // Separate new files from existing image URLs
+    const newFiles = productImages.value.map(img => img.file).filter((file): file is File => !!file)
+    const existingImageUrls = productImages.value
+      .filter(img => !img.file) // Keep all non-file-based images
+      .map(img => {
+        // The goal is to store the relative path, e.g., /products/image.jpg
+        // If the preview URL is a full URL, strip the origin.
+        try {
+          const url = new URL(img.preview)
+          if (url.origin === API_BASE_URL || window.location.origin) {
+            return url.pathname // This gives /products/....
+          }
+        } catch (e) {
+          // Not a full URL, assume it's already a relative path
+        }
+        return img.preview
+      })
+
+    // Upload new files and get their URLs
+    const uploadedImageUrls = []
+    for (const file of newFiles) {
+      try {
+        // productService.uploadImage is expected to return the relative path, e.g., /products/new-image.jpg
+        const imageUrl = await productService.uploadImage(file)
+        uploadedImageUrls.push(imageUrl)
+      } catch (uploadError) {
+        console.error('Failed to upload an image:', uploadError)
+        alert('An error occurred while uploading an image. Please try again.')
+        loading.value = false
+        return
+      }
+    }
+
+    // Combine existing and newly uploaded image URLs
+    const allImageUrls = [...existingImageUrls, ...uploadedImageUrls]
+
     if (!productForm.name || !productForm.salePrice) {
       alert('Please fill in product name and price')
       loading.value = false
       return
     }
-
-    const primaryImage = productForm.images[0] || BlankProfile
 
     const productData = {
       name: productForm.name || 'Untitled Product',
@@ -195,9 +256,8 @@ const saveProduct = async () => {
       stockQuantity: productForm.stockQuantity,
       price: productForm.salePrice,
       discount: productForm.discount,
-      // Send both the new images array and the legacy imageUrl for backward compatibility
-      images: [...productForm.images],
-      imageUrl: primaryImage,
+      images: allImageUrls, // Send the final combined list of image URLs
+      imageUrl: allImageUrls[0] || '' // For legacy support
     }
 
     if (isEditMode.value && editingProductId.value) {
@@ -265,10 +325,10 @@ onBeforeUnmount(() => {
 })
 
 const toggleSelectAll = () => {
-  if (selectedProducts.value.length === filteredProducts.value.length) {
+  if (selectedProducts.value.length === paginatedProducts.value.length) {
     selectedProducts.value = []
   } else {
-    selectedProducts.value = filteredProducts.value.map((p) => p.id!)
+    selectedProducts.value = paginatedProducts.value.map((p) => p.id!)
   }
 }
 
@@ -308,6 +368,58 @@ const resolveProductImage = (product: Product) => {
   if (cleaned.startsWith('/')) return `${API_BASE_URL}${cleaned}`
   return cleaned
 }
+
+// Pagination refs and computed properties
+const currentPage = ref(1)
+const itemsPerPage = 10
+
+const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage))
+
+const startIndex = computed(() => (currentPage.value - 1) * itemsPerPage)
+const endIndex = computed(() => Math.min(startIndex.value + itemsPerPage, filteredProducts.value.length))
+
+const paginatedProducts = computed(() => {
+  return filteredProducts.value.slice(startIndex.value, endIndex.value)
+})
+
+const displayPages = computed(() => {
+  const pages: number[] = []
+  const total = totalPages.value
+  const current = currentPage.value
+
+  // Show max 5 page numbers
+  let start = Math.max(1, current - 2)
+  let end = Math.min(total, start + 4)
+
+  // Adjust start if we're near the end
+  if (end - start < 4) {
+    start = Math.max(1, end - 4)
+  }
+
+  for (let i = start; i <= end; i++) {
+    pages.push(i)
+  }
+
+  return pages
+})
+
+const goToPage = (page: number) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+  }
+}
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+  }
+}
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--
+  }
+}
 </script>
 
 <template>
@@ -341,11 +453,11 @@ const resolveProductImage = (product: Product) => {
               placeholder="Search Product..."
               class="border rounded px-3 py-1.5 pr-8 text-sm w-64 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
             />
-            <span class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+            <span class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"><IconSearch size="16"/></span>
           </div>
-          <button class="border rounded px-3 py-1.5 text-sm flex items-center gap-1 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
+          <!-- <button class="border rounded px-3 py-1.5 text-sm flex items-center gap-1 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
             <span>⚙️</span>
-          </button>
+          </button> -->
         </div>
       </div>
 
@@ -355,7 +467,7 @@ const resolveProductImage = (product: Product) => {
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="filteredProducts.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-300">
+      <div v-else-if="paginatedProducts.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-300">
         {{ $t('admin.product_management.no_products') }}
       </div>
 
@@ -366,7 +478,7 @@ const resolveProductImage = (product: Product) => {
             <th class="py-3 px-4 text-left w-12">
               <input
                 type="checkbox"
-                :checked="selectedProducts.length === filteredProducts.length && filteredProducts.length > 0"
+                :checked="selectedProducts.length === paginatedProducts.length && paginatedProducts.length > 0"
                 @change="toggleSelectAll"
                 class="rounded"
               />
@@ -381,7 +493,7 @@ const resolveProductImage = (product: Product) => {
         </thead>
         <tbody class="text-sm">
           <tr
-            v-for="product in filteredProducts"
+            v-for="product in paginatedProducts"
             :key="product.id"
             class="border-b hover:bg-gray-50 dark:hover:bg-gray-800 border-default dark:border-gray-700 transition-colors"
           >
@@ -452,6 +564,28 @@ const resolveProductImage = (product: Product) => {
           </tr>
         </tbody>
       </table>
+      <!-- Pagination -->
+      <div class="p-4 flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
+        <div>{{ $t('admin.order_management.showing') }} {{ startIndex + 1 }} {{ $t('admin.order_management.to') }} {{ endIndex }} {{ $t('admin.order_management.of') }} {{ filteredProducts.length }} {{ $t('admin.order_management.entries') }}</div>
+        <div class="flex items-center gap-2">
+          <button
+            @click="prevPage"
+            :disabled="currentPage === 1"
+            :class="currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'"
+            class="px-3 py-1 border rounded dark:border-gray-700 dark:text-gray-200">{{ $t('admin.order_management.previous') }}</button>
+          <button
+            v-for="page in displayPages"
+            :key="page"
+            @click="goToPage(page)"
+            :class="page === currentPage ? 'bg-gray-800 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-800'"
+            class="px-3 py-1 border rounded dark:border-gray-700 dark:text-gray-200">{{ page }}</button>
+          <button
+            @click="nextPage"
+            :disabled="currentPage === totalPages"
+            :class="currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'"
+            class="px-3 py-1 border rounded dark:border-gray-700 dark:text-gray-200">{{ $t('admin.order_management.next') }}</button>
+        </div>
+      </div>
     </div>
 
     <!-- Add / Edit Drawer -->
@@ -580,16 +714,16 @@ const resolveProductImage = (product: Product) => {
                     <div class="text-sm text-gray-600 dark:text-gray-300">
                       <label class="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300">
                         <span>{{ $t('admin.product_management.form.click_to_upload') }}</span>
-                        <input type="file" multiple accept="image/*" @change="onFilesSelected" class="sr-only" />
+                        <input type="file" multiple accept="image/*" @change="onFilesSelected" @click="($event.target as HTMLInputElement).value = ''" class="sr-only" />
                       </label>
                       <span class="text-gray-500 dark:text-gray-400">{{ $t('admin.product_management.form.or_drag') }}</span>
                     </div>
                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('admin.product_management.form.file_info') }}</p>
                   </div>
                 </div>
-                <div v-if="productForm.images.length > 0" class="flex gap-3 mt-4 flex-wrap">
-                  <div v-for="(img, idx) in productForm.images" :key="idx" class="relative group">
-                    <img :src="img" class="w-24 h-24 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-700" />
+                <div v-if="productImages.length > 0" class="flex gap-3 mt-4 flex-wrap">
+                  <div v-for="(img, idx) in productImages" :key="img.id" class="relative group">
+                    <img :src="img.preview" class="w-24 h-24 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-700" />
                     <button @click.prevent="removeImage(idx)" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600">×</button>
                   </div>
                 </div>

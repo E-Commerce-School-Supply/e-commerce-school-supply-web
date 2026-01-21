@@ -14,6 +14,18 @@ export const productService = {
     return response.data
   },
 
+  async uploadImage(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // The backend returns: { "url": "/uploads/products/..." }
+    const response = await apiClient.post<{ url: string }>('/api/products/upload-image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data', // Explicitly tell Axios this is a file upload
+      },
+    });
+    return response.data.url;
+  },  
   // Create a new product
   async createProduct(product: Partial<Product>): Promise<Product> {
     const response = await apiClient.post('/api/products', product)
@@ -22,7 +34,7 @@ export const productService = {
 
   // Update a product
   async updateProduct(id: string, product: Partial<Product>): Promise<Product> {
-    const response = await apiClient.put(`/api/products/${id}`, product)
+    const response = await apiClient.patch(`/api/products/${id}`, product)
     return response.data
   },
 

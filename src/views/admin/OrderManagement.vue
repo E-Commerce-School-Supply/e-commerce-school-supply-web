@@ -17,7 +17,7 @@
         <div class="flex items-center gap-3">
           <div class="relative">
             <input v-model="search" type="text" :placeholder="$t('admin.order_management.search_customer')" class="border rounded px-3 py-1.5 pr-8 text-sm w-64 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100" />
-            <span class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+            <span class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"><IconSearch size="16"/></span>
           </div>
           <button @click="toggleEmailSort" class="border rounded px-3 py-1.5 text-sm bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
             {{ $t('admin.order_management.sort_email') }}: {{ emailSort === 'asc' ? 'A–Z' : emailSort === 'desc' ? 'Z–A' : 'Off' }}
@@ -104,6 +104,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import adminService from '@/services/adminService'
+import { IconSearch } from '@tabler/icons-vue'
 
 const { t } = useI18n()
 

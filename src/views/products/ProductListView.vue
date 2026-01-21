@@ -242,6 +242,8 @@ export default {
       return productStore.products.map((product) => ({
         ...product,
         imageUrl: resolveProductImage(product),
+        averageRating: Number(product.averageRating ?? 0),
+        rating: Number(product.averageRating ?? 0),
         status: ((product.stockQuantity ?? 0) > 0 ? 'In Stock' : 'Out of stock') as 'In Stock' | 'Out of stock',
       }))
     })

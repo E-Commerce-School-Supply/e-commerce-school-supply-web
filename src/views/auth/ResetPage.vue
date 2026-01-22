@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 
 const form = ref({
   password: '',
@@ -34,6 +34,20 @@ const handleRegister = () => {
   console.log('Form Submitted:', form.value)
   alert('Account reset successfully!')
 }
+
+// Force light mode for auth pages
+let wasDarkMode = false
+
+onMounted(() => {
+  wasDarkMode = document.documentElement.classList.contains('dark')
+  document.documentElement.classList.remove('dark')
+})
+
+onBeforeUnmount(() => {
+  if (wasDarkMode) {
+    document.documentElement.classList.add('dark')
+  }
+})
 </script>
 
 <template>

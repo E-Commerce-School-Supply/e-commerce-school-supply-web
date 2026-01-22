@@ -1,16 +1,16 @@
 <template>
   <!-- Header: Total reviews + Sort -->
-  <div class="flex items-center justify-between h-[70px] border-b border-gray-300 bg-[#F5F5F5] px-6">
-    <h2 class="text-xl font-bold">{{ reviews.length }} Reviews</h2>
+  <div class="flex items-center justify-between h-[70px] border-b border-gray-300 bg-[#F5F5F5] px-6 dark:bg-gray-800 dark:border-gray-700">
+    <h2 class="text-xl font-bold dark:text-white">{{ $t("reviews.title", {count: reviews.length}) }}</h2>
 
-    <div class="flex items-center gap-2 text-sm">
-      <span class="font-semibold text-nowrap">Sort by:</span>
+    <div class="flex items-center gap-2 text-sm dark:text-gray-300">
+      <span class="font-semibold text-nowrap">{{ $t("reviews.sortBy") }}</span>
       <drop-down-component v-model="sortOption" :options="sortOptions" />
     </div>
   </div>
 
   <!-- Review List -->
-  <div  class="bg-[#F5F5F5] w-full rounded-sm p-10 space-y-6">
+  <div  class="bg-[#F5F5F5] w-full rounded-sm p-10 space-y-6 dark:bg-gray-800">
     <review-card-component
       v-if="reviews.length > 0"
       v-for="(review, index) in visibleReviews"
@@ -23,21 +23,21 @@
       <button
         v-if="visibleCount < sortedReviews.length"
         @click="seeMore()"
-        class="px-6 py-2 bg-[#1A535C] text-white rounded-sm font-semibold"
+        class="px-6 py-2 bg-[#1A535C] text-white rounded-sm font-semibold dark:bg-[#1A535C] dark:text-gray-100 dark:hover:bg-[#2A7A8F]"
       >
-        See More
+        {{ $t('reviews.seeMore') }}
       </button>
 
       <button
         v-if="visibleCount > initialVisibleCount"
         @click="showLess()"
-        class="px-6 py-2 bg-[#1A535C] text-white rounded-sm font-semibold"
+        class="px-6 py-2 bg-[#1A535C] text-white rounded-sm font-semibold dark:bg-[#1A535C] dark:text-gray-100 dark:hover:bg-[#2A7A8F]"
       >
-        Show Less
+        {{ $t('reviews.showLess') }}
       </button>
     </div>
-    <div v-if="reviews.length === 0" class="w-full justify-center flex text-[24px]  text-red-500">
-        <h1>There are no comment here!!</h1>
+    <div v-if="reviews.length === 0" class="w-full justify-center flex text-[24px] text-red-500 dark:text-red-400">
+        <h1>{{ $t('reviews.noComments') }}</h1>
     </div>
   </div>
 

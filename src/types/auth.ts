@@ -5,7 +5,7 @@ export interface AuthResponse {
   email: string
   role: string
   phoneNumber: string | null
-  avatarUrl?: string
+  avatarUrl: string // Make it non-optional with default empty string
 }
 export interface LoginCredentials {
   email: string

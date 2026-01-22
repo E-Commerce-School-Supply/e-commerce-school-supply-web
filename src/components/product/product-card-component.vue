@@ -1,19 +1,19 @@
 <template>
   <!-- Product grid -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full">
     <div
       v-for="(product, index) in products"
       :key="index"
-      class="w-full bg-white rounded-[20px] overflow-hidden border border-gray-400 hover:-translate-y-1 hover:shadow-lg transition cursor-pointer"
+      class="bg-white dark:bg-gray-800 rounded-[20px] overflow-hidden border border-gray-400 dark:border-gray-700 hover:-translate-y-1 hover:shadow-lg transition cursor-pointer"
       @click="goToDetail(product.id)"
     >
-      <!-- Image Section -->
-      <div class="relative flex justify-center items-center h-40">
-        <img
-          :src="product.imageUrl"
-          :alt="product.name"
-          class="w-full h-full object-contain px-6"
-        />
+    <!-- Image Section -->
+    <div class="relative flex justify-center items-center h-40">
+      <img
+        :src="product.imageUrl"
+        :alt="product.name"
+        class="w-full max-h-40 object-contain"
+      />
 
       <!-- Discount -->
       <div
@@ -26,43 +26,31 @@
       <!-- Out of stock badge -->
       <div v-if="(product.stockQuantity ?? 0) <= 0"
            class="absolute bottom-4 left-4 bg-red-600 text-white text-[12px] px-2 py-1 rounded">
-        Out of stock
+        {{ $t('home.out_of_stock') }}
       </div>
 
       <!-- Heart Icon -->
-      <button @click.stop="toggleLike(product)" class="absolute top-4 right-4 bg-white rounded-full p-2">
+      <button @click.stop="toggleLike(product)" class="absolute top-4 right-4 bg-white dark:bg-gray-500 rounded-full p-2 hover:shadow-md transition">
         <img v-if="!isFavorited(product.id)" src="/src/assets/images/Heart.png" class="w-[27px] h-6" />
         <img v-else src="/src/assets/images/Heart-fill.png" class="w-[27px] h-6" />
       </button>
     </div>
 
-      <!-- Info Section -->
-      <div class="p-4 bg-[#F5F5F5] m-2 rounded-[20px]">
-        <!-- Product Name -->
-        <h1 class="text-[14px] font-bold">{{ product.name }}</h1>
+    <!-- Info Section -->
+    <div class="p-4 bg-[#F5F5F5] dark:bg-gray-700 m-2 rounded-[20px]">
+      <!-- Product Name -->
+      <h1 class="text-[14px] font-bold text-gray-900 dark:text-white">{{ product.name }}</h1>
 
       <!-- Rating -->
-      <div class="flex items-center mb-3 text-[#FF6B6B]">
-        <span class="mr-2 font-semibold text-gray-800">{{ (product.averageRating || product.rating || 0).toFixed(1) }}</span>
-        <span class="text-[20px]">
-          <template v-for="n in 5" :key="n">
-            <span v-if="n <= Math.floor(product.averageRating || product.rating || 0)">★</span>
-            <!-- full star -->
-            <span v-else-if="n - (product.averageRating || product.rating || 0) <= 0.5">⯪</span>
-            <!-- half star -->
-            <span v-else>☆</span>
-            <!-- empty star -->
-          </template>
-        </span>
-      </div>
+      <StarRating :rating="product.averageRating" :showNumber="true" class="mb-3" />
 
       <!-- Price and Add to Cart -->
       <div class="flex items-end justify-between">
         <div>
-          <h2 class="text-sm text-gray-500">Price</h2>
+          <h2 class="text-sm text-gray-500 dark:text-gray-400">{{ $t('productCard.price') }}</h2>
           <div class="flex items-end">
-            <p class="font-bold text-[24px]">${{ getDiscountedPrice(product) }}</p>
-            <p v-if="product.discount" class="font-bold text-[12px] ml-2 line-through">
+            <p class="font-bold text-[24px] text-gray-900 dark:text-white">${{ getDiscountedPrice(product) }}</p>
+            <p v-if="product.discount" class="font-bold text-[12px] ml-2 line-through text-gray-500 dark:text-gray-400">
               ${{ product.price.toFixed(2) }}
             </p>
           </div>
@@ -77,23 +65,23 @@
             v-if="(product.stockQuantity ?? 0) <= 0"
             class="w-full h-full flex justify-center items-center rounded-sm bg-gray-400 opacity-60 cursor-not-allowed"
           >
-            Out of stock
+            {{ $t('home.out_of_stock') }}
           </div>
           <div
             v-else-if="!linkBtn[index]"
-            class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm hover:bg-[#15444a] transition"
+            class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm hover:bg-[#15444a]"
           >
-            Add to Cart
+            {{ $t('home.add_to_cart') }}
           </div>
           <div
             v-else
             class="bg-[#C3C3C3] w-full h-full flex justify-center items-center rounded-sm"
           >
-            Added {{ addedQuantity[index] }}
+            {{ $t('productCard.added_quantity', { count: addedQuantity[index] }) }}
           </div>
         </button>
       </div>
-      </div>
+    </div>
     </div>
   </div>
 </template>
@@ -106,10 +94,15 @@ import { useRouter } from 'vue-router'
 import { defineComponent, ref, watch, computed, onMounted } from 'vue'
 import { useFavoriteStore } from '@/stores/favoriteStore'
 import { useToastStore } from '@/stores/toastStore'
+import StarRating from '../ui/StarRating.vue'
+import { useI18n } from 'vue-i18n'
+
 
 export default defineComponent({
   name: 'product-card-component',
-
+  components: {
+    StarRating,
+  },
   props: {
     products: {
       type: Array as () => Product[],
@@ -125,6 +118,7 @@ export default defineComponent({
     const toast = useToastStore();
     const isAuthenticated = computed(() => !!authStore.user)
 
+    const { t } = useI18n();
     // Create reactive arrays to track like and add-to-cart states for each product
     const linkBtn = ref<boolean[]>([])
     const addedQuantity = ref<number[]>([])
@@ -137,18 +131,18 @@ export default defineComponent({
 
     const toggleLike = async (product: Product) => {
       if (!isAuthenticated.value) {
-        alert('Please sign in to add favorites')
+        alert(t('productCard.alert_signin_favorite'))
         return
       }
-
+  
       if (!product.id) return
 
       if (isFavorited(product.id)) {
-        toast.showToast('Item deleted from your favorites list.', 'error')
+        toast.showToast(t('productCard.toast_favorite_deleted'), 'error')
         await favStore.deleteFavorite(product.id)
       } else {
         await favStore.addFavorite(product) // Ensure backend expects ID
-        toast.showToast('Item saved to your favorites list.', 'success')
+        toast.showToast(t('productCard.toast_favorite_saved'), 'success')
       }
     }
     // Initialize arrays when products prop changes
@@ -177,24 +171,23 @@ export default defineComponent({
 
     const btnLink = async (index: number) => {
       if (!isAuthenticated.value) {
-        alert('Please sign in first to add items to your cart')
+        alert(t('productCard.alert_signin_cart'))
         return
       }
 
       const product = props.products[index]
-      if (!product) return
       try {
         // Add item to cart - map product fields correctly
         await cartStore.addToCart({
-          productId: product.id || `product-${index}`,
-          name: product.name ?? 'Unknown product',
-          itemNo: product.id || `P${index}`,
-          brand: product.brandName || 'TovRean',
-          color: product.color || 'Standard',
-          rating: 0,
-          price: product.price ?? 0,
+          productId: product?.id || `product-${index}`,
+          name: product?.name || 'Unknown Product',
+          itemNo: product?.id || `P${index}`,
+          brand: product?.brandName || 'TovRean',
+          color: product?.color || 'Standard',
+          rating: product?.averageRating || 0,
+          price: product?.price || 0,
           quantity: 1,
-          image: product.imageUrl || '',
+          image: product?.imageUrl || '',
         })
         linkBtn.value[index] = true
         addedQuantity.value[index] = (addedQuantity.value[index] || 0) + 1

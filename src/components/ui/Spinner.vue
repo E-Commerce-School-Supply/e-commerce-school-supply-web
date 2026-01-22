@@ -8,7 +8,7 @@
         </svg>
         <span class="sr-only">Loading...</span>
     </div>
-    <span class="text-accent font-bold text-lg">Loading...</span>
+    <span class="text-accent font-bold text-lg">{{ $t('common.loading') }}</span>
 
 </div>
 

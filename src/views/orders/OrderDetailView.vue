@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import orderService from '@/services/orderService'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const order = ref<any | null>(null)
 const loading = ref(false)
 const id = route.params.id as string
@@ -30,7 +32,7 @@ onMounted(async () => {
 
 // Helper to format address objects or strings into an array of lines
 const formatAddress = (addr: any) => {
-  if (!addr) return ['Not provided']
+  if (!addr) return [t('order_detail.not_provided')]
   if (typeof addr === 'string') return [addr]
   if (Array.isArray(addr)) return addr
 
@@ -66,40 +68,40 @@ const itemImage = (it: any) => {
 </script>
 
 <template>
-  <div class="p-6">
-    <div v-if="loading">Loading order...</div>
-    <div v-else-if="!order">Order not found.</div>
-    <div v-else class="relative">
+  <div class="p-6 bg-white dark:bg-gray-900 min-h-screen transition-colors">
+    <div v-if="loading" class="text-gray-700 dark:text-gray-300">{{ $t('order_detail.loading') }}</div>
+    <div v-else-if="!order" class="text-gray-700 dark:text-gray-300">{{ $t('order_detail.not_found') }}</div>
+    <div v-else class="relative text-gray-900 dark:text-gray-100">
       <div class="mb-6 flex items-center justify-between">
-        <h1 class="text-2xl font-semibold">Order: {{ order.id || order.orderId }}</h1>
+        <h1 class="text-2xl font-semibold">{{ $t('order_detail.title') }}: {{ order.id || order.orderId }}</h1>
         <div>
-          <button @click="$router.back()" class="px-4 py-2 border rounded-base">Back</button>
+          <button @click="$router.back()" class="px-4 py-2 border rounded-base bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">{{ $t('order_detail.back') }}</button>
         </div>
       </div>
 
-      <div class="border border-default rounded-base p-6 bg-white shadow-sm">
+      <div class="border border-default dark:border-gray-700 rounded-base p-6 bg-white dark:bg-gray-800 shadow-sm transition-colors">
         <div class="grid grid-cols-2 gap-6">
           <!-- Left: summary -->
           <div class="col-span-1">
-            <h2 class="font-medium mb-3">Summary</h2>
-            <div class="text-sm text-[#6B6B6B]">
-              <div class="mb-3"><strong>Status:</strong> <span class="ml-2">{{ order.status || order.orderStatus || '—' }}</span></div>
-              <div class="mb-3"><strong>Total:</strong> <span class="ml-2">${{ (order.total || order.amount || 0).toFixed(2) }}</span></div>
-              <div class="mb-3"><strong>Date:</strong> <span class="ml-2">{{ new Date(order.createdAt || order.date || Date.now()).toLocaleString() }}</span></div>
-              <div class="mb-3"><strong>Payment:</strong> <span class="ml-2">{{ order.paymentMethod || order.method || '—' }}</span></div>
+            <h2 class="font-medium mb-3">{{ $t('order_detail.summary') }}</h2>
+            <div class="text-sm text-[#6B6B6B] dark:text-gray-300">
+              <div class="mb-3"><strong>{{ $t('order_detail.status') }}:</strong> <span class="ml-2">{{ order.status || order.orderStatus || '—' }}</span></div>
+              <div class="mb-3"><strong>{{ $t('order_detail.total') }}:</strong> <span class="ml-2">${{ (order.total || order.amount || 0).toFixed(2) }}</span></div>
+              <div class="mb-3"><strong>{{ $t('order_detail.date') }}:</strong> <span class="ml-2">{{ new Date(order.createdAt || order.date || Date.now()).toLocaleString() }}</span></div>
+              <div class="mb-3"><strong>{{ $t('order_detail.payment') }}:</strong> <span class="ml-2">{{ order.paymentMethod || order.method || '—' }}</span></div>
             </div>
           </div>
 
           <!-- Middle: shipping / billing (if available) -->
           <div class="col-span-1">
-            <h2 class="font-medium mb-3">Addresses</h2>
-            <div class="text-sm text-[#6B6B6B]">
-              <div class="mb-2"><strong>Shipping:</strong></div>
+            <h2 class="font-medium mb-3">{{ $t('order_detail.addresses') }}</h2>
+            <div class="text-sm text-[#6B6B6B] dark:text-gray-300">
+              <div class="mb-2"><strong>{{ $t('order_detail.shipping') }}:</strong></div>
               <div class="mb-4">
                 <div v-for="(line, i) in formatAddress(order.shippingAddress || order.address)" :key="i">{{ line }}</div>
               </div>
 
-              <div class="mb-2"><strong>Billing:</strong></div>
+              <div class="mb-2"><strong>{{ $t('order_detail.billing') }}:</strong></div>
               <div>
                 <div v-for="(line, i) in formatAddress(order.billingAddress || order.billing)" :key="i">{{ line }}</div>
               </div>
@@ -110,28 +112,28 @@ const itemImage = (it: any) => {
         </div>
 
         <div class="mt-6">
-          <h3 class="font-medium mb-3">Items</h3>
+          <h3 class="font-medium mb-3">{{ $t('order_detail.items') }}</h3>
           <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left">
-              <thead class="text-sm bg-[#F7F7F7]">
+            <table class="w-full text-sm text-left text-gray-900 dark:text-gray-100">
+              <thead class="text-sm bg-[#F7F7F7] dark:bg-gray-700">
                 <tr>
-                  <th class="px-4 py-3">Item</th>
-                  <th class="px-4 py-3">Qty</th>
-                  <th class="px-4 py-3">Price</th>
+                  <th class="px-4 py-3">{{ $t('order_detail.item') }}</th>
+                  <th class="px-4 py-3">{{ $t('order_detail.qty') }}</th>
+                  <th class="px-4 py-3">{{ $t('order_detail.price') }}</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(it, idx) in (order.items || order.orderItems || [])" :key="idx" class="border-t">
+                <tr v-for="(it, idx) in (order.items || order.orderItems || [])" :key="idx" class="border-t border-gray-200 dark:border-gray-700">
                   <td class="px-4 py-3">
                     <div class="flex items-center gap-3">
                       <img :src="itemImage(it)" alt="item" class="w-16 h-16 object-cover rounded-sm" />
                       <div>
                         <div class="font-medium">{{ it.name || it.productName }}</div>
-                        <div class="text-xs text-[#6B6B6B]">{{ it.sku || it.productId || '' }}</div>
+                        <div class="text-xs text-[#6B6B6B] dark:text-gray-400">{{ it.sku || it.productId || '' }}</div>
                       </div>
                     </div>
                   </td>
-                  <td class="px-4 py-3 text-center">{{ it.quantity || it.qty || 1 }}</td>
+                  <td class="px-4 py-3">{{ it.quantity || it.qty || 1 }}</td>
                   <td class="px-4 py-3">${{ (it.price || it.unitPrice || 0).toFixed(2) }}</td>
                 </tr>
               </tbody>

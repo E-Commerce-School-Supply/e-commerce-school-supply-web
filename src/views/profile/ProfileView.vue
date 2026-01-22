@@ -53,9 +53,9 @@ watch(defaultTab, (nextDefault) => {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 p-6 bg-white dark:bg-gray-900 transition-colors min-h-screen">
     <Sidebar v-model="currentTab"/>
-
+    
     <div class="col-span-3">
       <div v-if="currentTab  === 'profile' && authStore.user">
         <MyProfile :user-detail="authStore.user" />

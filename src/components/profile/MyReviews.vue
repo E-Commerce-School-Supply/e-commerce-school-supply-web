@@ -82,25 +82,25 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="border border-default border-dashed rounded-base p-5">
-    <h1 class="mb-5">Review</h1>
-    <div v-if="loading" class="text-sm text-gray-500">Loading purchased products...</div>
+  <div class="border border-default border-dashed rounded-base p-5 bg-white dark:bg-gray-800 dark:border-gray-700 transition-colors">
+    <h1 class="mb-5 dark:text-white">Review</h1>
+    <div v-if="loading" class="text-sm text-gray-500 dark:text-gray-400">Loading purchased products...</div>
     <div v-else>
-      <div v-if="sortedProducts.length === 0" class="text-sm text-gray-500">No purchased products found.</div>
+      <div v-if="sortedProducts.length === 0" class="text-sm text-gray-500 dark:text-gray-400">No purchased products found.</div>
       <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div
           v-for="p in sortedProducts"
           :key="p.id"
-          class="bg-white border border-default rounded-base p-4 flex gap-4 items-center"
+          class="bg-white dark:bg-gray-700 border border-default dark:border-gray-600 rounded-base p-4 flex gap-4 items-center transition-colors"
         >
           <img v-if="p.imageUrl" :src="p.imageUrl" alt="product" class="w-16 h-16 object-cover rounded-sm" />
           <div class="flex-1 min-w-0">
-            <div class="font-medium text-heading truncate">{{ p.name }}</div>
-            <div class="text-xs text-body truncate">{{ p.id }}</div>
+            <div class="font-medium text-heading truncate dark:text-gray-100">{{ p.name }}</div>
+            <div class="text-xs text-body truncate dark:text-gray-400">{{ p.id }}</div>
           </div>
           <button
             @click="goToReview(p.id)"
-            class="px-4 py-2 bg-neutral-primary box-border border border-transparent focus:ring-4 focus:ring-neutral-tertiary font-medium rounded-base text-sm focus:outline-none hover:bg-accent/70 hover:text-white transition"
+            class="px-4 py-2 bg-neutral-primary box-border border border-transparent focus:ring-4 focus:ring-neutral-tertiary font-medium rounded-base text-sm focus:outline-none hover:bg-accent/70 hover:text-white dark:bg-[#1A535C] dark:hover:bg-[#2A7A8F] transition"
           >
             Review
           </button>

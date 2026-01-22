@@ -17,8 +17,8 @@ defineOptions({
                 <router-link to="/" class="flex items-center text-2xl font-bold tracking-tight mb-4">
                     <span class="text-[#EF4444]">Tov</span><span class="text-white">Rean</span>
                 </router-link>
-                <h3 class="font-semibold text-sm mb-1">Subscribe</h3>
-                <p class="text-2xs text-gray-300 mb-2">Get 10% off with your first order</p>
+                <h3 class="font-semibold text-sm mb-1">{{ $t('footer.subscribe') }}</h3>
+                <p class="text-2xs text-gray-300 mb-2">{{ $t('footer.subscribe_desc') }}</p>
                 <div class="relative max-w-[180px]">
                     <input type="email"  placeholder="Enter your email" class="w-full bg-transparent border border-white/30 rounded px-2 py-1.5 text-xs text-white placeholder-gray-400 focus:outline-none focus:border-white">
                     <button class="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:text-[#EF4444] transition">
@@ -28,7 +28,7 @@ defineOptions({
             </div>
 
             <div>
-                <h3 class="font-bold text-base mb-3">Support</h3>
+                <h3 class="font-bold text-base mb-3">{{ $t('footer.support') }}</h3>
                 <ul class="space-y-2 text-xs text-gray-300 font-light">
                     <li>Techno, Phnom Penh<br>Cambodia</li>
                     <li>tov-rean168@gmail.com</li>
@@ -37,29 +37,29 @@ defineOptions({
             </div>
 
             <div>
-                <h3 class="font-bold text-base mb-3">Account</h3>
+                <h3 class="font-bold text-base mb-3">{{ $t('footer.account') }}</h3>
                 <ul class="space-y-2 text-xs text-gray-300 font-light">
-                    <li><router-link to="/profile" class="hover:text-white hover:underline transition">My account</router-link></li>
-                    <li><router-link to="/signin" class="hover:text-white hover:underline transition">Login / Sign up</router-link></li>
-                    <li><router-link to="/cart" class="hover:text-white hover:underline transition">Cart</router-link></li>
-                    <li><router-link to="/profile" class="hover:text-white hover:underline transition">Favorite</router-link></li>
-                    <li><a href="/product-list" class="hover:text-white hover:underline transition cursor-pointer">Shop</a></li>
+                    <li><router-link to="/profile" class="hover:text-white hover:underline transition">{{ $t('footer.my_account') }}</router-link></li>
+                    <li><router-link to="/signin" class="hover:text-white hover:underline transition">{{ $t('footer.login_signup') }}</router-link></li>
+                    <li><router-link to="/cart" class="hover:text-white hover:underline transition">{{ $t('footer.cart') }}</router-link></li>
+                    <li><router-link to="/profile" class="hover:text-white hover:underline transition">{{ $t('footer.favorite') }}</router-link></li>
+                    <li><a href="/product-list" class="hover:text-white hover:underline transition cursor-pointer">{{ $t('footer.shop') }}</a></li>
                 </ul>
             </div>
 
             <div>
-                <h3 class="font-bold text-base mb-3">Quick Link</h3>
+                <h3 class="font-bold text-base mb-3">{{ $t('footer.quick_link') }}</h3>
                 <ul class="space-y-2 text-xs text-gray-300 font-light">
-                    <li><router-link to="/about" class="hover:text-white hover:underline transition">Privacy policy</router-link></li>
-                    <li><router-link to="/about" class="hover:text-white hover:underline transition">term of Use</router-link></li>
-                    <li><router-link to="/about" class="hover:text-white hover:underline transition">FAQ</router-link></li>
-                    <li><router-link to="/contact" class="hover:text-white hover:underline transition">Contact</router-link></li>
+                    <li><router-link to="/about" class="hover:text-white hover:underline transition">{{ $t('footer.privacy_policy') }}</router-link></li>
+                    <li><router-link to="/about" class="hover:text-white hover:underline transition">{{ $t('footer.terms_of_use') }}</router-link></li>
+                    <li><router-link to="/about" class="hover:text-white hover:underline transition">{{ $t('footer.faq') }}</router-link></li>
+                    <li><router-link to="/contact" class="hover:text-white hover:underline transition">{{ $t('footer.contact') }}</router-link></li>
                 </ul>
             </div>
 
             <div>
-                <h3 class="font-bold text-base mb-3">Download App</h3>
-                <p class="text-2xs text-gray-300 mb-3 font-light leading-relaxed">Save 20% off on 3 purchase in App New User only</p>
+                <h3 class="font-bold text-base mb-3">{{ $t('footer.download_app') }}</h3>
+                <p class="text-2xs text-gray-300 mb-3 font-light leading-relaxed">{{ $t('footer.download_app_desc') }}</p>
                 <div class="flex gap-2 items-start">
                     <div class="bg-white p-1 rounded-md w-20 h-20 shrink-0">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" alt="QR Code" class="w-full h-full object-contain">
@@ -67,13 +67,13 @@ defineOptions({
                     <div class="flex flex-col gap-1.5">
                         <button class="bg-black text-white px-2 py-1 rounded border border-gray-600 flex items-center gap-1 w-24 hover:bg-gray-800 transition">
                             <div class="text-[8px] text-left">
-                                <div class="leading-none">Get it on</div>
+                                <div class="leading-none">{{ $t('footer.get_it_on') }}</div>
                                 <div class="font-bold text-2xs">Google Play</div>
                             </div>
                         </button>
                         <button class="bg-black text-white px-2 py-1 rounded border border-gray-600 flex items-center gap-1 w-24 hover:bg-gray-800 transition">
                             <div class="text-[8px] text-left">
-                                <div class="leading-none">Download on the</div>
+                                <div class="leading-none">{{ $t('footer.download_on') }}</div>
                                 <div class="font-bold text-2xs">App Store</div>
                             </div>
                         </button>
@@ -89,7 +89,7 @@ defineOptions({
         </div>
 
         <div class="border-t border-[#1a5b72] mt-6 pt-4 text-center text-2xs text-gray-400 font-light tracking-wide">
-            &copy; Copyright e-commerce teams 2025. All right reserved
+            {{$t('footer.copyright')}}
         </div>
     </div>
 

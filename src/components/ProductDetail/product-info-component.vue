@@ -2,8 +2,8 @@
 
 <template>
   <div class="space-y-2 text-[16px] leading-tight">
-    <h2 class="text-[32px]">
-      {{ title }}
+    <h2 class="text-[32px] dark:text-white">
+      {{ $t(title) }}
     </h2>
 
     <div
@@ -11,10 +11,10 @@
       :key="index"
       class="flex"
     >
-      <span class="font-semibold w-32">
+      <span class="font-semibold w-32 dark:text-gray-300">
         {{ item.label }}:
       </span>
-      <span>{{ item.value }}</span>
+      <span class="dark:text-gray-400">{{ item.value }}</span>
     </div>
   </div>
 </template>
@@ -34,11 +34,18 @@ export default defineComponent({
     title: {
       type: String,
       required: false,
-      default: 'Product Info'
+      default: 'productDetailCard.product_info'
     },
     info: {
       type: Array as PropType<ProductInfoItem[]>,
       required: true
+    }
+  },
+
+  computed: {
+    translatedTitle() {
+      // You can access 'this.$t' in Options API
+      return this.$t(this.title)
     }
   }
 })

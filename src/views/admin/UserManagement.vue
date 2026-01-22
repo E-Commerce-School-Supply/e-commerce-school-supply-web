@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { IconDotsVertical } from '@tabler/icons-vue'
 import adminService, { type User } from '@/services/adminService'
-
+import defaultPf from '@/assets/images/pfp_blank.jpeg'
 const users = ref<User[]>([])
 const selectedUsers = ref<string[]>([])
 const loading = ref(true)
@@ -17,7 +17,7 @@ const fetchUsers = async () => {
     users.value = data.map((user) => ({
       ...user,
       // Provide fallback avatar using initials or gravatar
-      avatarUrl: user.avatarUrl || `https://i.pravatar.cc/150?u=${user.email}`,
+      avatarUrl: user.avatarUrl || defaultPf,
     }))
   } catch (err) {
     console.error('Failed to fetch users:', err)
@@ -113,10 +113,10 @@ const format = (date: Date) => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col">
+  <div class="min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors">
     <!-- Main Content -->
-    <div class="flex-1 bg-white rounded shadow p-6">
-      <h1 class="text-xl font-bold mb-6">User Management</h1>
+    <div class="flex-1 bg-white dark:bg-gray-800 dark:border dark:border-gray-700 rounded shadow p-6 transition-colors">
+      <h1 class="text-xl font-bold mb-6 dark:text-gray-100">User Management</h1>
 
       <!-- Error Message -->
       <div v-if="error" class="mb-4 p-4 bg-red-100 text-red-700 rounded">
@@ -125,16 +125,16 @@ const format = (date: Date) => {
       </div>
 
       <!-- Users Table -->
-      <div class="border rounded-lg overflow-hidden">
+      <div class="border rounded-lg overflow-hidden dark:border-gray-700">
         <!-- Table Header -->
-        <div class="bg-gray-50 border-b px-4 py-3 flex items-center justify-between">
+        <div class="bg-gray-50 dark:bg-gray-800 border-b px-4 py-3 flex items-center justify-between border-default dark:border-gray-700 transition-colors">
           <div class="flex items-center gap-2">
             <span class="text-sm font-medium">All Users</span>
-            <span class="text-sm text-gray-500">{{ users.length }}</span>
+            <span class="text-sm text-gray-500 dark:text-gray-300">{{ users.length }}</span>
           </div>
           <button
             @click="fetchUsers"
-            class="px-4 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50 transition flex items-center gap-2"
+            class="px-4 py-1.5 border border-gray-300 dark:border-gray-700 rounded text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition flex items-center gap-2 dark:text-gray-100"
           >
             <svg
               :class="['w-4 h-4', loading ? 'animate-spin' : '']"
@@ -154,7 +154,7 @@ const format = (date: Date) => {
         </div>
 
         <!-- Loading State -->
-        <div v-if="loading && users.length === 0" class="p-8 text-center text-gray-500">
+        <div v-if="loading && users.length === 0" class="p-8 text-center text-gray-500 dark:text-gray-300">
           <div class="inline-block">
             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mb-2"></div>
             Loading users...
@@ -163,7 +163,7 @@ const format = (date: Date) => {
 
         <!-- Table -->
         <table v-else class="w-full">
-          <thead class="bg-gray-50 border-b text-sm text-gray-600">
+          <thead class="bg-gray-50 dark:bg-gray-800 border-b text-sm text-gray-600 dark:text-gray-300 border-default dark:border-gray-700">
             <tr>
               <th class="px-4 py-3 text-left font-medium">
                 <input
@@ -180,8 +180,8 @@ const format = (date: Date) => {
               <th class="px-4 py-3 text-left font-medium">Action</th>
             </tr>
           </thead>
-          <tbody class="divide-y">
-            <tr v-for="user in users" :key="user.id" class="hover:bg-gray-50 transition">
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            <tr v-for="user in users" :key="user.id" class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
               <td class="px-4 py-3">
                 <input
                   type="checkbox"
@@ -197,20 +197,20 @@ const format = (date: Date) => {
                     :alt="user.username"
                     class="w-10 h-10 rounded-full object-cover"
                   />
-                  <span class="text-sm font-medium">{{ user.username }}</span>
+                  <span class="text-sm font-medium dark:text-gray-100">{{ user.username }}</span>
                 </div>
               </td>
-              <td class="px-4 py-3 text-sm text-gray-600">{{ user.email }}</td>
-              <td class="px-4 py-3 text-sm text-gray-600">{{ formatDateTime(user.lastLoginDate) }}</td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{{ user.email }}</td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{{ formatDateTime(user.lastLoginDate) }}</td>
               <td class="px-4 py-3">
-                <button class="p-1 hover:bg-gray-200 rounded transition">
-                  <IconDotsVertical class="w-5 h-5 text-gray-600" />
+                <button class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition">
+                  <IconDotsVertical class="w-5 h-5 text-gray-600 dark:text-gray-300" />
                 </button>
               </td>
             </tr>
             <!-- Empty State -->
             <tr v-if="users.length === 0">
-              <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+              <td colspan="5" class="px-4 py-8 text-center text-gray-500 dark:text-gray-300">
                 No users found
               </td>
             </tr>

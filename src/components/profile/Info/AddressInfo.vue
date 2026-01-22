@@ -4,6 +4,9 @@ import { IconPlus } from '@tabler/icons-vue'
 import AddressEdit from '@/components/profile/edit/AddressEdit.vue'
 import authService from '@/services/authService'
 import { useAuthStore } from '@/stores/authStore'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 type Address = {
   id: number
@@ -160,9 +163,9 @@ function onSave(addr: Address) {
         // give user immediate feedback
         const status = err?.response?.status
         if (status === 401) {
-          window.alert('You must sign in to save addresses')
+          window.alert(t('profile.alerts.sign_in_to_save_address'))
         } else {
-          window.alert('Failed to save addresses. Please try again.')
+          window.alert(t('profile.alerts.save_address_failed'))
         }
       })
   } else {
@@ -176,16 +179,20 @@ function onCancel() {
 </script>
 
 <template>
-  <div class="border border-default border-dashed rounded-base p-5">
+  <div class="border border-default border-dashed rounded-base p-5 bg-white dark:bg-gray-800 dark:border-gray-700 transition-colors">
     <div class="w-full flex flex-row justify-between items-center">
-      <h1>All Address</h1>
-      <button type="button" @click="openAdd" class="flex flex-row gap-2 items-center justify-center text-white bg-secondary box-border border border-transparent hover:bg-secondary/80 focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-md text-sm px-2 py-2 mb-4 focus:outline-none">
-        <IconPlus size="16" /> Add new Address
+      <h1 class="dark:text-white">{{ t('profile.all_address') }}</h1>
+      <button
+        type="button"
+        @click="openAdd"
+        class="flex flex-row gap-2 items-center justify-center text-white bg-secondary box-border border border-transparent hover:bg-secondary/80 focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-md text-sm px-2 py-2 mb-4 focus:outline-none dark:bg-[#1A535C] dark:hover:bg-[#2A7A8F]"
+      >
+        <IconPlus size="16" /> {{ t('profile.add_new_address') }}
       </button>
     </div>
-    <div class="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default">
-      <table class="w-full text-sm text-left rtl:text-right text-body">
-        <thead class="text-sm text-body bg-neutral-secondary-medium border-b border-default-medium">
+    <div class="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default dark:bg-gray-900 dark:border-gray-700 transition-colors">
+      <table class="w-full text-sm text-left rtl:text-right text-body dark:text-gray-200">
+        <thead class="text-sm text-body bg-neutral-secondary-medium border-b border-default-medium dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600">
           <tr>
             <th scope="col" class="p-4">
               <div class="flex items-center">
@@ -193,26 +200,27 @@ function onCancel() {
                 <label for="table-checkbox-38" class="sr-only">Table checkbox</label>
               </div>
             </th>
-            <th scope="col" class="px-3 py-3 font-medium">Address name</th>
-            <th scope="col" class="px-3 py-3 font-medium">Address</th>
-            <th scope="col" class="px-3 py-3 font-medium">Status</th>
-            <th scope="col" class="px-3 py-3 font-medium">Created Date</th>
-            <th scope="col" class="px-3 py-3 font-medium">Action</th>
+            <th scope="col" class="px-3 py-3 font-medium">{{ t('profile.address_name') }}</th>
+            <th scope="col" class="px-3 py-3 font-medium">{{ t('profile.address') }}</th>
+            <th scope="col" class="px-3 py-3 font-medium">{{ t('profile.status') }}</th>
+            <th scope="col" class="px-3 py-3 font-medium">{{ t('profile.created_date') }}</th>
+            <th scope="col" class="px-3 py-3 font-medium">{{ t('profile.action') }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="address in savedAddresses" :key="address.id" class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
+          <tr v-for="address in savedAddresses" :key="address.id" class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium dark:bg-gray-900 dark:border-gray-700 dark:hover:bg-gray-800">
             <td class="w-4 p-4">
               <div class="flex items-center">
-                <input type="checkbox" class="w-4 h-4 border border-default-medium rounded-xs bg-neutral-secondary-medium focus:ring-2 focus:ring-brand-soft" />
+                <input id="table-checkbox-39" type="checkbox" value="" class="w-4 h-4 border border-default-medium rounded-xs bg-neutral-secondary-medium focus:ring-2 focus:ring-brand-soft" />
+                <label for="table-checkbox-39" class="sr-only">Table checkbox</label>
               </div>
             </td>
-            <th scope="row" class="px-3 py-4 font-medium text-heading whitespace-nowrap">{{ address.setName }}</th>
-            <td class="px-3 py-4">{{ address.addressLine1 }} {{ address.street ? ', ' + address.street : '' }} {{ address.houseNumber ? ', ' + address.houseNumber : '' }}, {{ address.province }}, {{ address.country }}</td>
-            <td class="px-3 py-4" :class="address.isDefault ? 'text-success' : 'font-medium text-accent hover:underline'">{{ address.isDefault ? 'Default' : 'Set Default' }}</td>
-            <td class="px-3 py-4">{{ address.createdAt }}</td>
+            <th scope="row" class="px-3 py-4 font-medium text-heading whitespace-nowrap dark:text-gray-100">{{ address.setName }}</th>
+            <td class="px-3 py-4 dark:text-gray-200">{{ address.addressLine1 }} {{ address.street ? ', ' + address.street : '' }} {{ address.houseNumber ? ', ' + address.houseNumber : '' }}, {{ address.province }}, {{ address.country }}</td>
+            <td class="px-3 py-4" :class="address.isDefault ? 'text-success' : 'font-medium text-accent hover:underline dark:text-[#1A535C]'">{{ address.isDefault ? t('profile.default') : t('profile.set_default') }}</td>
+            <td class="px-3 py-4 dark:text-gray-200">{{ address.createdAt }}</td>
             <td class="px-3 py-4">
-              <a href="#" class="font-medium text-accent hover:underline" @click.prevent="openEdit(address)">Edit</a>
+              <a href="#" class="font-medium text-accent hover:underline dark:text-[#1A535C]" @click.prevent="openEdit(address)">{{ t('profile.edit') }}</a>
             </td>
           </tr>
         </tbody>
@@ -220,9 +228,11 @@ function onCancel() {
     </div>
 
     <div v-if="showEdit" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div class="bg-white w-full max-w-3xl p-6 rounded-lg">
+      <div class="bg-white dark:bg-gray-800 dark:text-gray-100 dark:border dark:border-gray-700 w-full max-w-3xl p-6 rounded-lg transition-colors">
         <AddressEdit :address="editing" @save="onSave" @cancel="onCancel" />
       </div>
     </div>
   </div>
 </template>
+
+

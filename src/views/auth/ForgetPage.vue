@@ -1,5 +1,20 @@
 <script setup lang="ts">
 import { IconArrowBack } from '@tabler/icons-vue'
+import { onMounted, onBeforeUnmount } from 'vue'
+
+// Force light mode for auth pages
+let wasDarkMode = false
+
+onMounted(() => {
+  wasDarkMode = document.documentElement.classList.contains('dark')
+  document.documentElement.classList.remove('dark')
+})
+
+onBeforeUnmount(() => {
+  if (wasDarkMode) {
+    document.documentElement.classList.add('dark')
+  }
+})
 </script>
 
 <template>

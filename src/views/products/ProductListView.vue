@@ -1,18 +1,18 @@
 <template>
-  <div class="product-list-view w-full flex justify-center items-center">
+  <div class="product-list-view w-full flex justify-center items-center bg-white dark:bg-gray-900 transition-colors">
 
     <div class="w-18/20 relative ...">
       <div>
-        <h1 class="text-[20px] my-10 ...">Home / Products</h1>
+        <h1 class="text-[20px] my-10 text-gray-900 dark:text-white ...">{{ $t('productList.breadcrumb') }}</h1>
       </div>
 
       <div class="grid grid-cols-5 gap-4 ...">
         <!-- Category -->
         <div class="col-span-1 mb-20 ...">
           <div class="sticky top-32">
-            <h1 class="text-[20px] font-semibold mb-5">Category</h1>
+            <h1 class="text-[20px] font-semibold mb-5 text-gray-900 dark:text-white">{{ $t('productList.category') }}</h1>
 
-            <div class="text-base/8 text-[15px]">
+            <div class="text-base/8 text-[15px] text-gray-700 dark:text-gray-300">
               <div
                 v-for="cat in categories"
                 :key="cat"
@@ -21,35 +21,35 @@
               >
                 <div
                   class="h-5 w-5 rounded-full border-2 transition-all flex items-center justify-center"
-                  :class="selectedCategory === cat ? 'border-[#1A535C] ring-2 ring-offset-2 ring-[#1A535C]' : 'border-black'"
+                  :class="selectedCategory === cat ? 'border-[#1A535C] dark:border-[#4EB8D4]' : 'border-black dark:border-gray-400'"
                 >
-                  <div v-if="selectedCategory === cat" class="h-2.5 w-2.5 rounded-full bg-[#1A535C]"></div>
+                  <div v-if="selectedCategory === cat" class="h-2.5 w-2.5 rounded-full bg-[#1A535C] dark:bg-cyan-300"></div>
                 </div>
                 <p class="ml-2 text-[15px]">{{ cat }}</p>
               </div>
             </div>
 
             <div class="pr-20">
-              <h1 class="text-[20px] font-semibold my-5">Price</h1>
+              <h1 class="text-[20px] font-semibold my-5 text-gray-900 dark:text-white">{{ $t('productList.price') }}</h1>
 
-              <div class="flex justify-between">
-                <p>Range</p>
+              <div class="flex justify-between text-gray-700 dark:text-gray-300">
+                <p>{{ $t('productList.range') }}</p>
                 <p>${{ Math.round(priceMin) }}-{{ Math.round(priceMax) }}</p>
               </div>
 
               <div class="my-3 relative h-6">
-                <div class="absolute top-1/2 -translate-y-1/2 w-full h-3 bg-[#E6E6E6] rounded-full"></div>
+                <div class="absolute top-1/2 -translate-y-1/2 w-full h-3 bg-[#E6E6E6] dark:bg-gray-700 rounded-full"></div>
                 <div
-                  class="absolute top-1/2 -translate-y-1/2 h-3 bg-black rounded-full"
+                  class="absolute top-1/2 -translate-y-1/2 h-3 bg-black dark:bg-cyan-300 rounded-full"
                   :style="{ left: minPercent + '%', width: Math.max(0, maxPercent - minPercent) + '%' }"
                 ></div>
 
                 <div
-                  class="absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-black z-10"
+                  class="absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-black dark:bg-cyan-300 z-10"
                   :style="{ left: 'calc(' + minPercent + '% - 10px)' }"
                 ></div>
                 <div
-                  class="absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-black z-10"
+                  class="absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-black dark:bg-cyan-300 z-10"
                   :style="{ left: 'calc(' + maxPercent + '% - 10px)' }"
                 ></div>
 
@@ -73,8 +73,8 @@
             </div>
 
             <div class="mb-10 mt-5">
-              <h1 class="text-[20px] font-semibold mb-5">Customer Review</h1>
-              <div class="text-base/8 text-[15px]">
+              <h1 class="text-[20px] font-semibold mb-5 text-gray-900 dark:text-white">{{ $t('productList.customer_review') }}</h1>
+              <div class="text-base/8 text-[15px] text-gray-700 dark:text-gray-300">
                 <div
                   v-for="r in ratingOptions"
                   :key="r"
@@ -83,15 +83,15 @@
                 >
                   <div
                     class="h-5 w-5 rounded-full border-2 transition-all flex items-center justify-center"
-                    :class="selectedMinRating === r ? 'border-[#1A535C] ring-2 ring-offset-2 ring-[#1A535C]' : 'border-black'"
+                    :class="selectedMinRating === r ? 'border-[#1A535C] dark:border-[#4EB8D4] ring-2 ring-offset-2 ring-[#1A535C] dark:ring-[#4EB8D4] dark:ring-offset-gray-900' : 'border-black dark:border-gray-400'"
                   >
-                    <div v-if="selectedMinRating === r" class="h-2.5 w-2.5 rounded-full bg-[#1A535C]"></div>
+                    <div v-if="selectedMinRating === r" class="h-2.5 w-2.5 rounded-full bg-[#1A535C] dark:bg-cyan-300"></div>
                   </div>
                   <div class="ml-2 text-[#FF6B6B] text-[24px] flex items-baseline">
                     <template v-for="n in 5" :key="n">
                       <span>{{ n <= r ? '★' : '☆' }}</span>
                     </template>
-                    <p class="ml-2 text-black text-[16px] font-light">{{ r.toFixed(1) }}</p>
+                    <p class="ml-2 text-black dark:text-white text-[16px] font-light">{{ r.toFixed(1) }}</p>
                   </div>
                 </div>
               </div>
@@ -102,23 +102,27 @@
         <!-- Product List -->
         <div class="col-start-2 col-end-6 ...">
           <div class="flex justify-between mb-10 items-baseline">
-            <h1 class="text-[20px]">School Products</h1>
-            <p class="text-[16px] font-light">{{ filteredAllProducts.length }} items</p>
+            <h1 class="text-[20px] text-gray-900 dark:text-white">{{ selectedCategory ? `'${selectedCategory}'` : $t('productList.school_products') }}</h1>
+            <p class="text-[16px] font-light text-gray-600 dark:text-gray-400">{{ $t('productList.items_count', { count: filteredAllProducts.length }) }}</p>
           </div>
           <div v-if="loading">
             <Spinner/>
           </div>
-          <div v-else class="flex flex-wrap gap-5 justify-between">
+          <div v-else-if ="filteredAllProducts.length === 0" class="text-center">
+              <img src="/src/assets/images/empty.png" alt="No products" class="mx-auto w-[430px] h-[430px] mb-4" />
+              <p class="text-[24px] font-medium text-[#BFBFBF]">{{ $t('productList.no_items') }}</p>
+          </div>
+          <div v-else class="flex flex-wrap gap-5">
             <product-card-component :products="products" />
           </div>
 
-          <div v-if="totalPages() > 1" class="flex justify-end my-20 items-center gap-6 text-[16px]">
+          <div v-if="totalPages() > 0" class="flex justify-end my-20 items-center gap-6 text-[16px] text-gray-700 dark:text-gray-300">
             <!-- Previous -->
             <div
               @click="previousPage"
-              :class="currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-[#757575] cursor-pointer hover:text-black'"
+              :class="currentPage === 1 ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'text-[#757575] dark:text-gray-400 cursor-pointer hover:text-black dark:hover:text-white'"
             >
-              &larr; Previous
+              &larr; {{ $t('productList.previous') }}
             </div>
 
             <!-- Page Numbers -->
@@ -130,8 +134,8 @@
                 :class="[
                   'h-10 w-10 rounded-lg flex items-center justify-center cursor-pointer transition-colors',
                   currentPage === page
-                    ? 'text-white bg-[#2C2C2C]'
-                    : 'hover:bg-gray-100'
+                    ? 'text-white bg-[#2C2C2C] dark:bg-[#1A535C] dark:text-gray-100'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-800'
                 ]"
               >
                 {{ page }}
@@ -141,9 +145,9 @@
             <!-- Next -->
             <div
               @click="nextPage"
-              :class="currentPage === totalPages() ? 'text-gray-300 cursor-not-allowed' : 'cursor-pointer hover:text-black'"
+              :class="currentPage === totalPages() ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'cursor-pointer hover:text-black dark:hover:text-white'"
             >
-              Next &rarr;
+              {{ $t('productList.next') }} &rarr;
             </div>
           </div>
         </div>
@@ -163,6 +167,7 @@ import { initFlowbite } from 'flowbite'
 import Spinner from '@/components/ui/Spinner.vue'
 import { storeToRefs } from 'pinia'
 import type { Product } from '@/types/product'
+import { useRoute } from 'vue-router'
 
 export default {
   name: 'product-list-view',
@@ -183,11 +188,13 @@ export default {
 
   setup() {
     const productStore = useProductStore()
+    const route = useRoute()
     const allProducts = ref<Product[]>([])
     const products = ref<Product[]>([])
     const currentPage = ref(1)
-    const itemsPerPage =10
-
+    const itemsPerPage =12
+    const searchQuery = ref('')
+    
     const categories = ref<string[]>([
       'Writing Instruments',
       'Paper Products',
@@ -229,7 +236,7 @@ export default {
           imageUrl: product.imageUrl || 'https://via.placeholder.com/300x300?text=No+Image',
           name: product.name,
           price: product.price,
-          rating: product.averageRating || product.rating || 0,
+          averageRating: product.averageRating || 0,
           discount: product.discount || null,
           stockQuantity: product.stockQuantity ?? 0,
           status: (product.stockQuantity ?? 0) > 0 ? 'In Stock' : 'Out of stock',
@@ -264,7 +271,18 @@ export default {
 
     const filteredAllProducts = computed(() => {
       const selected = selectedCategory.value?.toLowerCase() || null
+      const search = searchQuery.value.toLowerCase().trim()
+      
       return allProducts.value.filter((p) => {
+        // Search filter
+        if (search) {
+          const name = String(p?.name ?? '').toLowerCase()
+          const brand = String(p?.mainCategory ?? '').toLowerCase()
+          const subCat = String(p?.subCategory ?? '').toLowerCase()
+          const matchSearch = name.includes(search) || brand.includes(search) || subCat.includes(search)
+          if (!matchSearch) return false
+        }
+        
         if (selected) {
           const main = String(p?.mainCategory ?? '').toLowerCase()
           const sub = String(p?.subCategory ?? '').toLowerCase()
@@ -277,7 +295,7 @@ export default {
         if (price < priceMin.value || price > priceMax.value) return false
 
         if (selectedMinRating.value != null) {
-          const rating = Number(p.rating ?? 0)
+          const rating = Number(p.averageRating ?? 0)
           if (rating < selectedMinRating.value) return false
         }
 
@@ -307,10 +325,19 @@ export default {
       selectedMinRating.value = selectedMinRating.value === rating ? null : rating
     }
 
-    watch([selectedCategory, priceMin, priceMax, selectedMinRating], () => {
+    watch([selectedCategory, priceMin, priceMax, selectedMinRating, searchQuery], () => {
       currentPage.value = 1
       updatePaginatedProducts()
     })
+
+    // Watch for search query from route
+    watch(
+      () => route.query.search,
+      (newSearch) => {
+        searchQuery.value = typeof newSearch === 'string' ? newSearch : ''
+      },
+      { immediate: true }
+    )
 
     const goToPage = (page: number) => {
       if (page >= 1 && page <= totalPages()) {

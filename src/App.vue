@@ -18,7 +18,7 @@ onMounted(() => {
 </script>
 
 <template>
-<div class="flex flex-col min-h-screen">
+<div class="flex flex-col min-h-screen bg-white dark:bg-gray-900 transition-colors">
 
     <Header v-if="!hideHeaderFooter"/>
 

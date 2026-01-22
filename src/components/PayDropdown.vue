@@ -31,11 +31,11 @@ function handleChange(event: Event) {
 
 <template>
   <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">
+    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
       Select your credit card
     </label>
     <select
-      class="w-full px-3 py-2 border rounded-md"
+      class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
       @change="handleChange"
     >
       <!-- Disabled placeholder -->

@@ -14,11 +14,10 @@ const route = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/contact',
-    name: 'Contact us',
-    component: () => import('../views/ContactView.vue'),
-    meta: { requiresAuth: true }
-  },
+      path: '/contact',
+      name: 'Contact us',
+      component: () => import('../views/ContactView.vue')
+    },
   {
     path: '/signin',
     name: 'signin',
@@ -59,7 +58,7 @@ const route = [
   {
     path: '/product/:id',
     name: 'product-detail',
-    component: () => import('../views/ProductDetailView.vue'),
+    component: () => import('../views/products/ProductDetailView.vue'),
     meta: { requiresAuth: true }
   },
   {
@@ -72,7 +71,7 @@ const route = [
     path: '/admin',
     name: 'Admin Dashboard',
     component: () => import('../views/admin/AdminDashboard.vue'),
-    meta: { requiresAuth: true, hideLayout: true }
+    meta: { requiresAuth: true, requiresAdmin: true, hideLayout: true }
   },
   {
     path: '/cart',
@@ -110,6 +109,11 @@ const route = [
     component: () => import('../views/favorites/MyFavoritesView.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('../views/NotFoundView.vue'),
+  },
 ]
 
 const router = createRouter({
@@ -117,14 +121,45 @@ const router = createRouter({
   routes: route,
 })
 
-// Navigation guard to check authentication
+// Navigation guard to check authentication and authorization
 router.beforeEach((to, from, next) => {
   const token = sessionStorage.getItem('accessToken')
   const guestMode = sessionStorage.getItem('guestMode')
   const isAuthenticated = !!token
+  
+  // Parse user object from sessionStorage to get role
+  let userRole = null
+  const userString = sessionStorage.getItem('user')
+  if (userString) {
+    try {
+      const user = JSON.parse(userString)
+      userRole = user.role // Extract role from user object
+    } catch (e) {
+      console.error('Failed to parse user from sessionStorage', e)
+    }
+  }
 
+  // If user is authenticated and is ADMIN
+  if (isAuthenticated && userRole === 'ADMIN') {
+    // Only allow access to admin routes
+    if (to.meta.requiresAdmin) {
+      next()
+    } else {
+      // Redirect to admin dashboard for all non-admin routes
+      next({ name: 'Admin Dashboard' })
+    }
+  }
+  // If route requires admin access and user is not admin
+  else if (to.meta.requiresAdmin) {
+    if (!isAuthenticated) {
+      next({ name: 'signin' })
+    } else {
+      // Non-admin users cannot access /admin, redirect to home
+      next({ name: 'home' })
+    }
+  }
   // If route requires auth and user is not authenticated
-  if (to.meta.requiresAuth && !isAuthenticated) {
+  else if (to.meta.requiresAuth && !isAuthenticated) {
     // Allow home page access for guests
     if (to.name === 'home' && guestMode === 'true') {
       next()

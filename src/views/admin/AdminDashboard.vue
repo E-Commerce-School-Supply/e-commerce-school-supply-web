@@ -1,14 +1,25 @@
 <template>
-  <div class="min-h-screen bg-gray-100 text-sm text-gray-800">
+  <div class="min-h-screen bg-gray-100 dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 transition-colors">
     <!-- Admin Header -->
-    <header class="bg-white shadow-sm">
+    <header class="bg-white dark:bg-gray-800 shadow-sm transition-colors">
       <div class="max-w-7xl mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
-            <h1 class="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Admin Dashboard</h1>
           </div>
           <div class="flex items-center space-x-4">
-            <span class="text-gray-700">Welcome, Admin</span>
+            <!-- Theme Toggle -->
+            <button
+              @click="themeStore.toggleTheme()"
+              class="p-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              :aria-label="themeStore.isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+              title="Toggle theme"
+            >
+              <IconSun v-if="!themeStore.isDark" :size="20" class="text-gray-700" />
+              <IconMoon v-else :size="20" class="text-gray-200" />
+            </button>
+
+            <span class="text-gray-700 dark:text-gray-200">Welcome, Admin</span>
             <button @click="handleSignOut" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
               Sign Out
             </button>
@@ -19,19 +30,19 @@
 
     <!-- Breadcrumb + content -->
     <div class="max-w-7xl mx-auto px-6 py-6">
-      <div class="text-xs text-gray-500 mb-4">Home / My Account</div>
+      <div class="text-xs text-gray-500 dark:text-gray-300 mb-4">Home / My Account</div>
 
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- Admin Sidebar -->
-        <aside class="bg-white rounded-lg shadow p-4">
+        <aside class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 transition-colors">
           <nav class="space-y-1">
             <button
               @click="currentTab = 'dashboard'"
               :class="[
                 'w-full text-left px-4 py-3 rounded-lg transition',
                 currentTab === 'dashboard'
-                  ? 'bg-blue-50 text-blue-600 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
+                  ? 'bg-blue-50 dark:bg-[#1A535C]/20 text-blue-600 dark:text-[#38b8cc] font-medium'
+                  : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
               ]"
             >
               Dashboard
@@ -41,8 +52,8 @@
               :class="[
                 'w-full text-left px-4 py-3 rounded-lg transition',
                 currentTab === 'profile'
-                  ? 'bg-blue-50 text-blue-600 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
+                  ? 'bg-blue-50 dark:bg-[#1A535C]/20 text-blue-600 dark:text-[#38b8cc] font-medium'
+                  : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
               ]"
             >
               My Profile
@@ -52,8 +63,8 @@
               :class="[
                 'w-full text-left px-4 py-3 rounded-lg transition',
                 currentTab === 'userManagement'
-                  ? 'bg-blue-50 text-blue-600 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
+                  ? 'bg-blue-50 dark:bg-[#1A535C]/20 text-blue-600 dark:text-[#38b8cc] font-medium'
+                  : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
               ]"
             >
               User Management
@@ -63,8 +74,8 @@
               :class="[
                 'w-full text-left px-4 py-3 rounded-lg transition',
                 currentTab === 'productManagement'
-                  ? 'bg-blue-50 text-blue-600 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
+                  ? 'bg-blue-50 dark:bg-[#1A535C]/20 text-blue-600 dark:text-[#38b8cc] font-medium'
+                  : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
               ]"
             >
               Product Management
@@ -74,8 +85,8 @@
               :class="[
                 'w-full text-left px-4 py-3 rounded-lg transition',
                 currentTab === 'orderManagement'
-                  ? 'bg-blue-50 text-blue-600 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
+                  ? 'bg-blue-50 dark:bg-[#1A535C]/20 text-blue-600 dark:text-[#38b8cc] font-medium'
+                  : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
               ]"
             >
               Order Management
@@ -85,8 +96,8 @@
               :class="[
                 'w-full text-left px-4 py-3 rounded-lg transition',
                 currentTab === 'reviewManagement'
-                  ? 'bg-blue-50 text-blue-600 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
+                  ? 'bg-blue-50 dark:bg-[#1A535C]/20 text-blue-600 dark:text-[#38b8cc] font-medium'
+                  : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
               ]"
             >
               Review Management
@@ -114,12 +125,12 @@
           <!-- Show Dashboard content when dashboard tab is active -->
           <template v-else>
             <!-- Profile Card -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition-colors">
               <div class="flex items-center space-x-4">
-                <img :src="userAvatarSrc" alt="Profile" class="w-16 h-16 rounded-full object-cover">
+                <img :src="userAvatarSrc" alt="Profile" class="w-16 h-16 rounded-full object-cover border border-gray-200 dark:border-gray-700">
                 <div>
-                  <h2 class="text-lg font-semibold text-gray-900">{{ adminName }}</h2>
-                  <p class="text-sm text-gray-500">{{ adminRole }}</p>
+                  <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ adminName }}</h2>
+                  <p class="text-sm text-gray-500 dark:text-gray-300">{{ adminRole }}</p>
                 </div>
               </div>
             </div>
@@ -127,52 +138,52 @@
             <!-- Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <!-- Total Sales -->
-              <div class="bg-white rounded-lg shadow p-6">
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition-colors">
                 <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-sm font-medium text-gray-500">Total Sales</h3>
-                  <div class="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center">
-                    <i class="pi pi-dollar text-red-500"></i>
+                  <h3 class="text-sm font-medium text-gray-500 dark:text-gray-300">Total Sales</h3>
+                  <div class="w-10 h-10 bg-red-50 dark:bg-[#1A535C]/20 rounded-full flex items-center justify-center">
+                    <i class="pi pi-dollar text-red-500 dark:text-[#38b8cc]"></i>
                   </div>
                 </div>
-                <p class="text-3xl font-bold text-gray-900">${{ totalSales.toFixed(2) }}</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">${{ totalSales.toFixed(2) }}</p>
               </div>
 
               <!-- Total Orders -->
-              <div class="bg-white rounded-lg shadow p-6">
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition-colors">
                 <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-sm font-medium text-gray-500">Total Orders</h3>
-                  <div class="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center">
-                    <i class="pi pi-shopping-cart text-red-500"></i>
+                  <h3 class="text-sm font-medium text-gray-500 dark:text-gray-300">Total Orders</h3>
+                  <div class="w-10 h-10 bg-red-50 dark:bg-[#1A535C]/20 rounded-full flex items-center justify-center">
+                    <i class="pi pi-shopping-cart text-red-500 dark:text-[#38b8cc]"></i>
                   </div>
                 </div>
-                <p class="text-3xl font-bold text-gray-900">{{ totalOrders.toLocaleString() }}</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ totalOrders.toLocaleString() }}</p>
               </div>
 
               <!-- Total Products -->
-              <div class="bg-white rounded-lg shadow p-6">
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition-colors">
                 <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-sm font-medium text-gray-500">Total Products</h3>
-                  <div class="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center">
-                    <i class="pi pi-box text-red-500"></i>
+                  <h3 class="text-sm font-medium text-gray-500 dark:text-gray-300">Total Products</h3>
+                  <div class="w-10 h-10 bg-red-50 dark:bg-[#1A535C]/20 rounded-full flex items-center justify-center">
+                    <i class="pi pi-box text-red-500 dark:text-[#38b8cc]"></i>
                   </div>
                 </div>
-                <p class="text-3xl font-bold text-gray-900">{{ totalProducts.toLocaleString() }}</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ totalProducts.toLocaleString() }}</p>
               </div>
             </div>
 
             <!-- Charts Row -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <!-- Daily Sales Trend -->
-              <div class="lg:col-span-2 bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Daily Sales Trend (Last 30 Days)</h3>
+              <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition-colors">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Daily Sales Trend (Last 30 Days)</h3>
                 <div style="height: 300px;">
                   <canvas ref="salesChartCanvas"></canvas>
                 </div>
               </div>
 
               <!-- Total Product by Category -->
-              <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Total Product by Category</h3>
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition-colors ">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Total Product by Category</h3>
                 <div style="height: 300px;">
                   <canvas ref="categoryChartCanvas"></canvas>
                 </div>
@@ -182,46 +193,46 @@
             <!-- Tables Row -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <!-- Top Sale Products -->
-              <div class="lg:col-span-2 bg-white rounded-lg shadow p-6">
+              <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition-colors">
                 <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-lg font-semibold text-gray-900">Top Sale Products</h3>
-                  <button class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50">
-                    <i class="pi pi-filter mr-1"></i> Filter
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Top Sale Products</h3>
+                  <button class="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <i class="pi pi-filter mr-1"></i> <span class="text-gray-700 dark:text-gray-200">Filter</span>
                   </button>
                 </div>
                 <div class="overflow-x-auto">
                   <table class="w-full">
                     <thead>
-                      <tr class="border-b border-gray-200">
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Product</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Category</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Price</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Total Sales</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Units Sold</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Stock</th>
+                      <tr class="border-b border-gray-200 dark:border-gray-700">
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300">Product</th>
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300">Category</th>
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300">Price</th>
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300">Total Sales</th>
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300">Units Sold</th>
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-300">Stock</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="product in topProducts" :key="product.id" class="border-b border-gray-100 hover:bg-gray-50">
+                      <tr v-for="product in topProducts" :key="product.id" class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td class="py-3 px-4">
                           <div class="flex items-center space-x-3">
-                            <img :src="product.image" :alt="product.name" class="w-12 h-12 object-cover rounded border border-gray-200">
+                            <img :src="product.image" :alt="product.name" class="w-12 h-12 object-cover rounded border border-gray-200 dark:border-gray-700">
                             <div>
-                              <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
-                              <div class="text-xs text-gray-500">ID: {{ product.id }}</div>
+                              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ product.name }}</div>
+                              <div class="text-xs text-gray-500 dark:text-gray-400">ID: {{ product.id }}</div>
                             </div>
                           </div>
                         </td>
-                        <td class="py-3 px-4 text-sm text-gray-600">{{ product.category }}</td>
-                        <td class="py-3 px-4 text-sm font-semibold text-gray-900">${{ product.price }}</td>
+                        <td class="py-3 px-4 text-sm text-gray-600 dark:text-gray-300">{{ product.category }}</td>
+                        <td class="py-3 px-4 text-sm font-semibold text-gray-900 dark:text-gray-100">${{ product.price }}</td>
                         <td class="py-3 px-4 text-sm font-bold text-green-600">${{ product.sales.toFixed(2) }}</td>
-                        <td class="py-3 px-4 text-sm text-gray-900">{{ product.orderCount }}</td>
+                        <td class="py-3 px-4 text-sm text-gray-900 dark:text-gray-100">{{ product.orderCount }}</td>
                         <td class="py-3 px-4">
                           <span :class="[
                             'px-2 py-1 text-xs rounded-full font-medium',
-                            product.stockQuantity > 50 ? 'bg-green-100 text-green-700' :
-                            product.stockQuantity > 20 ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-red-100 text-red-700'
+                            product.stockQuantity > 50 ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-200' :
+                            product.stockQuantity > 20 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-200' :
+                            'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-200'
                           ]">
                             {{ product.stockQuantity }}
                           </span>
@@ -233,18 +244,18 @@
               </div>
 
               <!-- Low Stock Alert -->
-              <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Low Stock Alert</h3>
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 transition-colors">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Low Stock Alert</h3>
                 <div class="space-y-4">
                   <div v-for="item in lowStockItems" :key="item.id" class="space-y-2">
                     <div class="flex items-center space-x-3">
-                      <img :src="item.image" :alt="item.name" class="w-10 h-10 object-cover rounded">
+                      <img :src="item.image" :alt="item.name" class="w-10 h-10 object-cover rounded border border-gray-200 dark:border-gray-700">
                       <div class="flex-1">
-                        <p class="text-sm font-medium text-gray-900">{{ item.name }}</p>
-                        <p class="text-xs text-gray-500">{{ item.quantity }} left in stock</p>
+                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ item.quantity }} left in stock</p>
                       </div>
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                       <div
                         :class="[
                           'h-2 rounded-full',
@@ -256,12 +267,12 @@
                     <div class="flex items-center text-xs">
                       <span :class="[
                         'font-medium',
-                        item.alertLevel === 'critical' ? 'text-red-600' : 'text-yellow-600'
+                        item.alertLevel === 'critical' ? 'text-red-600 dark:text-red-300' : 'text-yellow-600 dark:text-yellow-200'
                       ]">
                         <i class="pi pi-exclamation-circle mr-1"></i>
                         {{ item.alertLevel === 'critical' ? 'Critical' : 'Low Stock' }}
                       </span>
-                      <span class="ml-auto text-gray-500">{{ item.percentage }}%</span>
+                      <span class="ml-auto text-gray-500 dark:text-gray-300">{{ item.percentage }}%</span>
                     </div>
                   </div>
                 </div>
@@ -274,9 +285,9 @@
     </div>
 
     <!-- Admin Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-8">
+    <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-8 transition-colors">
       <div class="max-w-7xl mx-auto px-6 py-4">
-        <div class="text-center text-gray-600 text-sm">
+        <div class="text-center text-gray-600 dark:text-gray-300 text-sm">
           © 2025 E-Commerce Admin Panel. All rights reserved.
         </div>
       </div>
@@ -293,6 +304,8 @@ import ReviewManagement from './ReviewManagement.vue'
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { useThemeStore } from '@/stores/themeStore'
+import { IconSun, IconMoon } from '@tabler/icons-vue'
 import Chart from 'chart.js/auto'
 import adminService from '@/services/adminService'
 import { productService } from '@/services/productService'
@@ -301,6 +314,7 @@ import BlankProfile from '@/assets/images/pfp_blank.jpeg'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const themeStore = useThemeStore()
 const currentTab = ref('dashboard')
 
 // Admin Info
@@ -340,15 +354,45 @@ const fetchDashboardStats = async () => {
     totalProducts.value = products.length
 
     // Fetch ALL orders using admin endpoint for proper total calculations
-    const orders = await adminService.getAllOrders()
+    let orders = []
+    try {
+      orders = await adminService.getAllOrders()
+      console.log('Orders fetched from admin endpoint:', orders.length)
+    } catch (error) {
+      console.error('Failed to fetch orders from admin endpoint:', error)
+    }
+    
+    // If no orders, try alternative endpoint
+    if (orders.length === 0) {
+      try {
+        orders = await adminService.getAllOrdersAlternative()
+        console.log('Orders fetched from alternative endpoint:', orders.length)
+      } catch (error) {
+        console.error('Failed to fetch orders from alternative endpoint:', error)
+      }
+    }
+    
+    // If still no orders, try fallback to regular order service
+    if (orders.length === 0) {
+      try {
+        orders = await orderService.getOrders()
+        console.log('Orders fetched from regular endpoint:', orders.length)
+      } catch (error) {
+        console.error('Failed to fetch orders from regular endpoint:', error)
+        orders = []
+      }
+    }
+    
     totalOrders.value = orders.length
+    console.log('Total orders set to:', totalOrders.value)
 
     // Calculate total sales from all orders (sum of order totals)
     const sales = orders.reduce((sum: number, order: any) => {
-      const orderTotal = Number(order.total || order.totalAmount || 0)
+      const orderTotal = Number(order.total || order.totalAmount || order.finalTotal || 0)
       return sum + orderTotal
     }, 0)
     totalSales.value = sales
+    console.log('Total sales set to:', totalSales.value)
 
     // Calculate product sales from orders
     const productSales: any = {}
@@ -428,8 +472,10 @@ const fetchDashboardStats = async () => {
 
           if (!isNaN(date.getTime()) && date >= thirtyDaysAgo && date <= today) {
             const dayKey = date.toISOString().split('T')[0] // YYYY-MM-DD format
-            dailyData[dayKey] = (dailyData[dayKey] || 0) + orderTotal
-            console.log(`Added $${orderTotal} to day ${dayKey}`);
+            if (dayKey) {
+              dailyData[dayKey] = (dailyData[dayKey] ?? 0) + orderTotal
+              console.log(`Added $${orderTotal} to day ${dayKey}`)
+            }
           }
         } catch (e) {
           console.warn('Invalid date:', dateStr)
@@ -471,7 +517,12 @@ const initializeCharts = () => {
       const label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 
       dayLabels.push(label)
-      salesByDay.push(monthlySalesData.value[dayKey] || 0)
+      if (dayKey && monthlySalesData.value && typeof monthlySalesData.value === 'object') {
+        const value = (monthlySalesData.value as any)[dayKey] ?? 0
+        salesByDay.push(typeof value === 'number' ? value : 0)
+      } else {
+        salesByDay.push(0)
+      }
     }
 
     console.log('Sales by day array:', salesByDay)
@@ -515,8 +566,12 @@ const initializeCharts = () => {
           },
           tooltip: {
             callbacks: {
-              label: function(context) {
-                return 'Sales: $' + context.parsed.y.toFixed(2)
+              label: function(context: any) {
+                const value = context.parsed?.y
+                if (typeof value === 'number') {
+                  return 'Sales: $' + value.toFixed(2)
+                }
+                return 'Sales: $0.00'
               }
             }
           }
@@ -594,7 +649,7 @@ const initializeCharts = () => {
               padding: 12,
               font: {
                 size: 12,
-                weight: '500'
+                weight: 500 as any
               },
               boxWidth: 15,
               boxHeight: 15,
@@ -602,18 +657,23 @@ const initializeCharts = () => {
               pointStyle: 'circle',
               generateLabels: function(chart) {
                 const data = chart.data
-                if (data.labels && data.datasets.length) {
-                  return data.labels.map((label: any, i: number) => {
-                    const value = data.datasets[0].data[i]
-                    const total = data.datasets[0].data.reduce((a: any, b: any) => a + b, 0)
-                    const percentage = ((value / total) * 100).toFixed(1)
-                    return {
-                      text: `${label}: ${value} (${percentage}%)`,
-                      fillStyle: data.datasets[0].backgroundColor[i],
-                      hidden: false,
-                      index: i
-                    }
-                  })
+                if (data.labels && data.datasets.length && data.datasets[0]) {
+                  const dataset = data.datasets[0]
+                  if (dataset.data) {
+                    return (data.labels as any[]).map((label: any, i: number) => {
+                      const dataArray = dataset.data as (number | null)[]
+                      const value = dataArray[i] ?? 0
+                      const total = dataArray.reduce((a: number, b: any) => a + (typeof b === 'number' ? b : 0), 0)
+                      const percentage = total > 0 ? ((Number(value) / total) * 100).toFixed(1) : '0'
+                      const bgColor = (dataset.backgroundColor as any)?.[i] || '#000000'
+                      return {
+                        text: `${label}: ${value} (${percentage}%)`,
+                        fillStyle: bgColor,
+                        hidden: false,
+                        index: i
+                      }
+                    })
+                  }
                 }
                 return []
               }
@@ -646,6 +706,8 @@ const initializeCharts = () => {
 }
 
 onMounted(async () => {
+  // Initialize theme from localStorage or system
+  themeStore.initTheme()
   // Fetch dashboard stats
   await fetchDashboardStats()
 

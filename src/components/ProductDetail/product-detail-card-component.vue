@@ -1,26 +1,26 @@
 <template>
-    <div class="rounded-md p-8 space-y-6">
+    <div class="rounded-md p-8 space-y-6 dark:bg-gray-800">
 
         <!-- Product Name -->
-        <h1 class="text-[36px] font-bold leading-tight">
+        <h1 class="text-[36px] font-bold leading-tight dark:text-white">
             {{ product.name }}
         </h1>
 
         <!-- Rating + Reviews + Stock -->
-        <div class="flex items-center gap-2 text-gray-600 text-sm">
+        <div class="flex items-center gap-2 text-gray-600 text-sm dark:text-gray-400">
             <div class="flex items-center mb-3 text-[#FF6B6B]">
-                <span class="mr-2 font-semibold text-gray-800">{{ (0).toFixed(1) }}</span>
+                <span class="mr-2 font-semibold text-gray-800 dark:text-gray-200">{{ (product.rating ?? 0).toFixed(1) }}</span>
                 <span class="text-[20px]">
                     <template v-for="n in 5" :key="n">
-                        <span v-if="n <= Math.floor(0)">★</span>
-                        <span v-else-if="n - 0 <= 0.9">⯪</span>
+                        <span v-if="n <= Math.floor(product.rating ?? 0)">★</span>
+                        <span v-else-if="n - (product.rating ?? 0) <= 0.9">⯪</span>
                         <span v-else>☆</span>
                     </template>
                 </span>
-                <span class="text-black">({{ product.reviews }} reviews)</span>
-                <span class="mx-1 text-black">|</span>
-                <span v-if="product.stock > 0" class="text-green-500 font-medium">{{product.stock}} In Stock</span>
-                <span v-else class="text-red-500 font-medium">Out Of Stock</span>
+                <span class="text-black dark:text-gray-300">{{$t("productDetailCard.reviews", {count: product.reviews})}}</span>
+                <span class="mx-1 text-black dark:text-gray-300">|</span>
+                <span v-if="product.stock > 0" class="text-green-500 font-medium">{{ $t("productDetailCard.in_stock", {count: product.stock}) }}</span>
+                <span v-else class="text-red-500 font-medium">{{$t("productDetailCard.out_of_stock")}}</span>
             </div>
         </div>
 
@@ -35,15 +35,15 @@
             </div>
         </div>
 
-        <div class="w-[90%] h-[1.5px] bg-gray-300"></div>
+        <div class="w-[90%] h-[1.5px] bg-gray-300 dark:bg-gray-700"></div>
 
         <!-- Product Info -->
         <ProductInfoComponent :info="productInfo" />
 
         <!-- Product Description -->
         <div class="space-y-1">
-            <h2 class="text-[32px]">Description</h2>
-            <p class="text-[#5E5B5B] text-[20px] leading-relaxed text-balance break-normal">
+            <h2 class="text-[32px] dark:text-white">{{ $t("productDetailCard.description") }}</h2>
+            <p class="text-[#5E5B5B] text-[20px] leading-relaxed text-balance break-normal dark:text-gray-300">
                 {{ product.description }}
             </p>
         </div>
@@ -59,19 +59,19 @@
         <div class="flex items-center w-[90%]">
             <div class="flex items-center">
                     <button
-                    class="w-9 h-10 flex justify-center items-center border rounded-l-sm text-lg font-bold hover:bg-[#1A535C] hover:text-white hover:border-[#1A535C]"
+                    class="w-9 h-10 flex justify-center items-center border rounded-l-sm text-lg font-bold hover:bg-[#1A535C] hover:text-white hover:border-[#1A535C] dark:text-white dark:hover:border-white"
                     @click="decrease"
                     >-</button>
-                    <span class="h-10 w-15 flex justify-center items-center border-y text-lg font-semibold">{{ quantity }}</span>
+                    <span class="h-10 w-15 flex justify-center items-center border-y text-lg font-semibold dark:text-white">{{ quantity }}</span>
                     <button
-                    class="w-9 h-10 flex justify-center items-center border rounded-r-sm text-lg font-bold hover:bg-[#1A535C] hover:text-white hover:border-[#1A535C]"
+                    class="w-9 h-10 flex justify-center items-center border rounded-r-sm text-lg font-bold hover:bg-[#1A535C] hover:text-white hover:border-[#1A535C] dark:text-white dark:hover:border-white"
                     @click="increase"
                     >+</button>
             </div>
 
             <!-- Favorite Button -->
             <button
-                class="w-10 h-10 ml-5 border p-1 rounded-md flex justify-center items-center"
+                class="w-10 h-10 ml-5 border p-1 rounded-md flex justify-center items-center dark:bg-gray-300"
                 @click="toggleFavorite"
             >
                 <img v-if="!isFavorite" src="/src/assets/images/Heart.png" alt="Favorite" />
@@ -85,13 +85,13 @@
             @click="addToCart"
             class="w-full h-15 text-white font-semibold rounded-lg text-lg"
             >
-            <div v-if="!isInCart" class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm">Add to Cart</div>
-            <div v-else class="bg-[#df6868] w-full h-full flex justify-center items-center rounded-sm">Add another cart</div>
+            <div v-if="!isInCart" class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm">{{ $t("productDetailCard.add_to_cart") }}</div>
+            <div v-else class="bg-[#df6868] w-full h-full flex justify-center items-center rounded-sm">{{ $t("productDetailCard.add_another_cart") }}</div>
         </button>
 
         <!-- Buy Now -->
         <button v-if="product.stock > 0" class="w-full h-15 text-white font-semibold rounded-lg text-lg" @click="buyNow">
-            <div class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm">Buy Now</div>
+            <div class="bg-[#1A535C] w-full h-full flex justify-center items-center rounded-sm">{{ $t("productDetailCard.buy_now") }}</div>
         </button>
 
         <!-- Back to Products -->
@@ -101,19 +101,19 @@
             class="w-full h-15 font-semibold rounded-lg text-lg"
         >
             <div class="w-full h-full flex justify-center items-center rounded-sm border border-[#1A535C] text-[#1A535C]">
-                Back to Products
+                {{ $t("productDetailCard.back_to_products") }}
             </div>
         </button>
 
         <div v-if="product.stock === 0" class="w-full flex flex-col items-center text-[24px] mt-10 text-red-500">
-            <h1>This product is out of our stock!!</h1>
+            <h1>{{ $t("productDetailCard.out_of_stock") }}</h1>
 
             <button
                 @click="goBackToProducts"
                 class="mt-6 w-full max-w-xs h-12 font-semibold rounded-lg text-lg"
             >
                 <div class="w-full h-full flex justify-center items-center rounded-sm border border-[#1A535C] text-[#1A535C]">
-                    Back to Products
+                    {{ $t("productDetailCard.back_to_products") }}
                 </div>
             </button>
         </div>
@@ -225,13 +225,19 @@
                     return
                 }
 
+                // Ensure product id exists before creating favorite payload
+                if (!props.product.id) {
+                    console.error('Missing product id; cannot add to favorites')
+                    return
+                }
+
                 const favPayload: FavoriteProduct = {
-                    id: props.product.id,
+                    id: props.product.id, // Now guaranteed to be non-null
                     name: props.product.name,
                     price: props.product.price,
-                    rating: props.product.rating,
-                    discount: props.product.discount,
-                    imageUrl: props.product.imageUrl,
+                    rating: props.product.rating ?? 0,
+                    discount: props.product.discount ?? null,
+                    imageUrl: props.product.imageUrl || '',
                 }
 
                 await favStore.toggleFavorite(favPayload)

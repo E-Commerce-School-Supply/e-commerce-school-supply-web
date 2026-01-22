@@ -1,38 +1,38 @@
 <template>
-  <div class="bg-white rounded shadow p-6">
+  <div class="bg-white dark:bg-gray-900 rounded shadow p-6 transition-colors">
     <div class="mb-6">
       <div class="flex items-center justify-between mb-2">
-        <h1 class="text-xl font-bold">Review Management</h1>
+        <h1 class="text-xl font-bold dark:text-gray-100">Review Management</h1>
       </div>
-      <div class="text-sm text-gray-500">All Reviews / <span class="text-teal-700">Review Management</span></div>
+      <div class="text-sm text-gray-500 dark:text-gray-300">All Reviews / <span class="text-teal-700 dark:text-[#1A535C]">Review Management</span></div>
     </div>
 
     <!-- Stats Summary -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-      <div class="bg-blue-50 p-4 rounded-lg">
-        <div class="text-sm text-gray-600">Total Reviews</div>
-        <div class="text-2xl font-bold text-blue-600">{{ reviews.length }}</div>
+      <div class="bg-blue-50 dark:bg-blue-900/40 p-4 rounded-lg">
+        <div class="text-sm text-gray-600 dark:text-gray-200">Total Reviews</div>
+        <div class="text-2xl font-bold text-blue-600 dark:text-blue-300">{{ reviews.length }}</div>
       </div>
-      <div class="bg-green-50 p-4 rounded-lg">
-        <div class="text-sm text-gray-600">Average Rating</div>
-        <div class="text-2xl font-bold text-green-600">{{ averageRating.toFixed(1) }} ★</div>
+      <div class="bg-green-50 dark:bg-green-900/40 p-4 rounded-lg">
+        <div class="text-sm text-gray-600 dark:text-gray-200">Average Rating</div>
+        <div class="text-2xl font-bold text-green-600 dark:text-green-300">{{ averageRating.toFixed(1) }} ★</div>
       </div>
-      <div class="bg-yellow-50 p-4 rounded-lg">
-        <div class="text-sm text-gray-600">5-Star Reviews</div>
-        <div class="text-2xl font-bold text-yellow-600">{{ fiveStarCount }}</div>
+      <div class="bg-yellow-50 dark:bg-yellow-900/40 p-4 rounded-lg">
+        <div class="text-sm text-gray-600 dark:text-gray-200">5-Star Reviews</div>
+        <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-300">{{ fiveStarCount }}</div>
       </div>
-      <div class="bg-purple-50 p-4 rounded-lg">
-        <div class="text-sm text-gray-600">Verified Purchases</div>
-        <div class="text-2xl font-bold text-purple-600">{{ verifiedCount }}</div>
+      <div class="bg-purple-50 dark:bg-purple-900/40 p-4 rounded-lg">
+        <div class="text-sm text-gray-600 dark:text-gray-200">Verified Purchases</div>
+        <div class="text-2xl font-bold text-purple-600 dark:text-purple-300">{{ verifiedCount }}</div>
       </div>
     </div>
 
     <!-- Filters and Search -->
-    <div class="border rounded-lg overflow-hidden">
-      <div class="bg-gray-50 border-b px-4 py-3 flex items-center justify-between">
+    <div class="border rounded-lg overflow-hidden dark:border-gray-700">
+      <div class="bg-gray-50 dark:bg-gray-800 border-b px-4 py-3 flex items-center justify-between border-default dark:border-gray-700 transition-colors">
         <div class="flex items-center gap-3">
           <span class="text-sm font-medium">All Reviews</span>
-          <span class="text-sm text-gray-500">{{ filtered.length }}</span>
+          <span class="text-sm text-gray-500 dark:text-gray-300">{{ filtered.length }}</span>
         </div>
 
         <div class="flex items-center gap-3">
@@ -41,11 +41,11 @@
               v-model="search"
               type="text"
               placeholder="Search reviews..."
-              class="border rounded px-3 py-1.5 pr-8 text-sm w-64"
+              class="border rounded px-3 py-1.5 pr-8 text-sm w-64 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
             />
             <span class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
           </div>
-          <select v-model="filterRating" class="border rounded px-3 py-1.5 text-sm">
+          <select v-model="filterRating" class="border rounded px-3 py-1.5 text-sm bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
             <option value="">All Ratings</option>
             <option value="5">5 Stars</option>
             <option value="4">4 Stars</option>
@@ -53,22 +53,22 @@
             <option value="2">2 Stars</option>
             <option value="1">1 Star</option>
           </select>
-          <button @click="loadReviews" class="px-3 py-1.5 bg-teal-700 text-white rounded text-sm hover:bg-teal-800">
+          <button @click="loadReviews" class="px-3 py-1.5 bg-teal-700 text-white rounded text-sm hover:bg-teal-800 dark:bg-[#1A535C] dark:hover:bg-[#2A7A8F]">
             Refresh
           </button>
         </div>
       </div>
 
-      <div v-if="loading" class="p-8 text-center text-gray-500">
+      <div v-if="loading" class="p-8 text-center text-gray-500 dark:text-gray-300">
         Loading reviews...
       </div>
 
-      <div v-else-if="paginatedReviews.length === 0" class="p-8 text-center text-gray-500">
+      <div v-else-if="paginatedReviews.length === 0" class="p-8 text-center text-gray-500 dark:text-gray-300">
         No reviews found.
       </div>
 
       <table v-else class="w-full">
-        <thead class="bg-gray-50 border-b text-xs text-gray-600">
+        <thead class="bg-gray-50 dark:bg-gray-800 border-b text-xs text-gray-600 dark:text-gray-300 border-default dark:border-gray-700">
           <tr>
             <th class="py-3 px-4 text-left w-12">
               <input type="checkbox" class="rounded" />
@@ -82,34 +82,34 @@
           </tr>
         </thead>
         <tbody class="text-sm">
-          <tr v-for="review in paginatedReviews" :key="review.id" class="border-b hover:bg-gray-50">
+          <tr v-for="review in paginatedReviews" :key="review.id" class="border-b hover:bg-gray-50 dark:hover:bg-gray-800 border-default dark:border-gray-700 transition-colors">
             <td class="py-3 px-4"><input type="checkbox" class="rounded" /></td>
             <td class="py-3 px-4">
-              <div class="font-medium text-gray-900">{{ getProductName(review.productId) }}</div>
-              <div class="text-xs text-gray-500">ID: {{ review.productId }}</div>
+              <div class="font-medium text-gray-900 dark:text-gray-100">{{ getProductName(review.productId) }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">ID: {{ review.productId }}</div>
             </td>
             <td class="py-3 px-4">
-              <div class="font-medium text-gray-900">{{ review.userName || review.userId }}</div>
-              <div v-if="review.verified" class="text-xs text-green-600">✓ Verified</div>
+              <div class="font-medium text-gray-900 dark:text-gray-100">{{ review.userName || review.userId }}</div>
+              <div v-if="review.verified" class="text-xs text-green-500">✓ Verified</div>
             </td>
             <td class="py-3 px-4">
               <div class="flex items-center gap-1">
                 <span v-for="i in 5" :key="i" :class="i <= review.rating ? 'text-yellow-400' : 'text-gray-300'">★</span>
-                <span class="ml-1 text-gray-600">({{ review.rating }})</span>
+                <span class="ml-1 text-gray-600 dark:text-gray-300">({{ review.rating }})</span>
               </div>
               <div v-if="review.recommend" class="text-xs text-green-600 mt-1">Recommends</div>
             </td>
             <td class="py-3 px-4">
               <div class="max-w-md">
-                <div v-if="review.title" class="font-medium text-gray-900 mb-1 truncate">{{ review.title }}</div>
-                <div class="text-gray-600 line-clamp-2">{{ review.body || 'No comment' }}</div>
+                <div v-if="review.title" class="font-medium text-gray-900 dark:text-gray-100 mb-1 truncate">{{ review.title }}</div>
+                <div class="text-gray-600 dark:text-gray-300 line-clamp-2">{{ review.body || 'No comment' }}</div>
               </div>
             </td>
-            <td class="py-3 px-4 text-gray-600">{{ formatDate(review.createdAt) }}</td>
+            <td class="py-3 px-4 text-gray-600 dark:text-gray-300">{{ formatDate(review.createdAt) }}</td>
             <td class="py-3 px-4">
               <button
                 @click="openDetail(review)"
-                class="text-teal-700 hover:underline mr-3">
+                class="text-teal-700 dark:text-[#1A535C] hover:underline mr-3">
                 View
               </button>
               <button
@@ -123,45 +123,45 @@
       </table>
 
       <!-- Pagination -->
-      <div class="p-4 flex items-center justify-between text-sm text-gray-600">
+      <div class="p-4 flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
         <div>Showing {{ startIndex + 1 }} to {{ endIndex }} of {{ filtered.length }} entries</div>
         <div class="flex items-center gap-2">
           <button
             @click="prevPage"
             :disabled="currentPage === 1"
-            :class="currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'"
-            class="px-3 py-1 border rounded">Previous</button>
+            :class="currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'"
+            class="px-3 py-1 border rounded dark:border-gray-700 dark:text-gray-200">Previous</button>
           <button
             v-for="page in displayPages"
             :key="page"
             @click="goToPage(page)"
-            :class="page === currentPage ? 'bg-gray-800 text-white' : 'hover:bg-gray-100'"
-            class="px-3 py-1 border rounded">{{ page }}</button>
+            :class="page === currentPage ? 'bg-gray-800 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-800'"
+            class="px-3 py-1 border rounded dark:border-gray-700 dark:text-gray-200">{{ page }}</button>
           <button
             @click="nextPage"
             :disabled="currentPage === totalPages"
-            :class="currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'"
-            class="px-3 py-1 border rounded">Next</button>
+            :class="currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'"
+            class="px-3 py-1 border rounded dark:border-gray-700 dark:text-gray-200">Next</button>
         </div>
       </div>
     </div>
 
     <!-- Review Detail Modal -->
     <div v-if="showDetail" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[80vh] overflow-y-auto">
+      <div class="bg-white dark:bg-gray-800 dark:text-gray-100 rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[80vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-semibold">Review Details</h2>
-          <button @click="closeDetail" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+          <button @click="closeDetail" class="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100 text-2xl">&times;</button>
         </div>
         <div v-if="selectedReview" class="space-y-4">
           <div>
             <label class="text-sm font-medium text-gray-600">Product</label>
-            <div class="text-gray-900">{{ getProductName(selectedReview.productId) }}</div>
-            <div class="text-xs text-gray-500">ID: {{ selectedReview.productId }}</div>
+            <div class="text-gray-900 dark:text-gray-100">{{ getProductName(selectedReview.productId) }}</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">ID: {{ selectedReview.productId }}</div>
           </div>
           <div>
             <label class="text-sm font-medium text-gray-600">User</label>
-            <div class="text-gray-900">{{ selectedReview.userName || selectedReview.userId }}</div>
+            <div class="text-gray-900 dark:text-gray-100">{{ selectedReview.userName || selectedReview.userId }}</div>
             <div v-if="selectedReview.verified" class="text-xs text-green-600">✓ Verified Purchase</div>
           </div>
           <div>

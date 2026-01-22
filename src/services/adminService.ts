@@ -53,11 +53,43 @@ const adminService = {
 
   getAllOrders: async () => {
     try {
+      // Try admin endpoint first
       const response = await apiClient.get('/api/admin/orders')
+      console.log('getAllOrders response:', response.data)
       return response.data || []
     } catch (error) {
-      console.error('Error fetching all orders:', error)
-      throw error
+      console.error('Error fetching all orders from /api/admin/orders:', error)
+      // If admin endpoint doesn't exist, return empty array
+      return []
+    }
+  },
+
+  // Get all orders for admin dashboard (alternative endpoint if /api/admin/orders doesn't exist)
+  getAllOrdersAlternative: async () => {
+    try {
+      // This is a fallback that tries different endpoints
+      const endpoints = [
+        '/api/orders/all',
+        '/api/orders',
+        '/api/admin/orders'
+      ]
+      
+      for (const endpoint of endpoints) {
+        try {
+          const response = await apiClient.get(endpoint)
+          if (response.data && (Array.isArray(response.data) || response.data.data)) {
+            console.log(`Successfully fetched orders from ${endpoint}:`, response.data)
+            return Array.isArray(response.data) ? response.data : response.data.data || []
+          }
+        } catch (e) {
+          console.log(`Endpoint ${endpoint} failed, trying next...`)
+          continue
+        }
+      }
+      return []
+    } catch (error) {
+      console.error('All order endpoints failed:', error)
+      return []
     }
   },
 }

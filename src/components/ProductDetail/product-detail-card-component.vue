@@ -9,11 +9,11 @@
         <!-- Rating + Reviews + Stock -->
         <div class="flex items-center gap-2 text-gray-600 text-sm dark:text-gray-400">
             <div class="flex items-center mb-3 text-[#FF6B6B]">
-                <span class="mr-2 font-semibold text-gray-800 dark:text-gray-200">{{ (product.rating ?? 0).toFixed(1) }}</span>
+                <span class="mr-2 font-semibold text-gray-800 dark:text-gray-200">{{ (averageRating ?? 0).toFixed(1) }}</span>
                 <span class="text-[20px]">
                     <template v-for="n in 5" :key="n">
-                        <span v-if="n <= Math.floor(product.rating ?? 0)">★</span>
-                        <span v-else-if="n - (product.rating ?? 0) <= 0.9">⯪</span>
+                        <span v-if="n <= Math.floor(averageRating ?? 0)">★</span>
+                        <span v-else-if="n - (averageRating ?? 0) <= 0.9">⯪</span>
                         <span v-else>☆</span>
                     </template>
                 </span>
@@ -139,6 +139,7 @@
         description: string
         discount: number | null
         stock: number
+        images?: string[]
         imageUrl?: string
     }
 
@@ -149,7 +150,8 @@
         props: {
             product: { type: Object as () => Product, required: true },
             productInfo: { type: Array as () => { label: string; value: string }[], required: true },
-            productColors: { type: Array as () => string[], required: true }
+            productColors: { type: Array as () => string[], required: true },
+            averageRating: { type: Number, default: 0 }
         },
 
         setup(props) {
@@ -160,6 +162,17 @@
 
             const quantity = ref(1)
             const isInCart = ref(false)
+
+            const resolveProductImage = () => {
+                const raw = (props.product.images && props.product.images[0]) || props.product.imageUrl || ''
+                const cleaned = typeof raw === 'string' ? raw.trim() : ''
+                if (!cleaned) return ''
+                if (cleaned.startsWith('/')) {
+                    const base = import.meta.env.VITE_API_URL || ''
+                    return `${String(base).replace(/\/$/, '')}${cleaned}`
+                }
+                return cleaned
+            }
 
             const isFavorite = computed(() => favStore.isFavorited(props.product.id))
 
@@ -201,10 +214,11 @@
                         itemNo: props.product.id,
                         brand,
                         color,
-                        rating: Number(props.product.rating) || 0,
+                        rating: Number(props.averageRating) || 0,
                         price: getDiscountedPriceValue(props.product),
                         quantity: quantity.value,
-                        image: props.product.imageUrl || '',
+                        image: resolveProductImage(),
+                        images: props.product.images && props.product.images.length > 0 ? props.product.images : [resolveProductImage()].filter(Boolean),
                     })
                     isInCart.value = true
                 } catch (error) {
@@ -235,9 +249,11 @@
                     id: props.product.id, // Now guaranteed to be non-null
                     name: props.product.name,
                     price: props.product.price,
-                    rating: props.product.rating ?? 0,
+                    rating: Number(props.averageRating) ?? 0,
+                    averageRating: Number(props.averageRating) ?? 0,
                     discount: props.product.discount ?? null,
-                    imageUrl: props.product.imageUrl || '',
+                    imageUrl: resolveProductImage() || undefined,
+                    images: props.product.images,
                 }
 
                 await favStore.toggleFavorite(favPayload)
@@ -252,6 +268,7 @@
                 increase, decrease, addToCart, buyNow, toggleFavorite,
                 getDiscountedPrice,
                 goBackToProducts,
+                resolveProductImage,
             }
         }
     })

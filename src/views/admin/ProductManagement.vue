@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, onBeforeUnmount } from 'vue'
-import { IconDotsVertical } from '@tabler/icons-vue'
+import { useI18n } from 'vue-i18n'
+import { IconDotsVertical, IconSearch } from '@tabler/icons-vue'
 import { productService } from '@/services/productService'
 import type { Product } from '@/types/product'
 import BlankProfile from '@/assets/images/pfp_blank.jpeg'
+
+const API_BASE_URL = import.meta.env.VITE_API_URL as string
+const { t } = useI18n()
 
 const products = ref<Product[]>([])
 const selectedProducts = ref<string[]>([])
@@ -13,6 +17,16 @@ const showAddForm = ref(false)
 const isEditMode = ref(false)
 const editingProductId = ref<string | null>(null)
 const openDropdown = ref<string | null>(null)
+const selectedFile = ref<File | null>(null);
+
+interface ProductImage {
+  id: string;        // Unique ID for v-for key
+  preview: string;   // The URL to show in <img> (Base64 or Server URL)
+  file?: File;       // The raw file to upload (only for new images)
+}
+
+
+const productImages = ref<ProductImage[]>([])
 
 const productForm = reactive({
   name: '',
@@ -82,7 +96,7 @@ const resetForm = () => {
   productForm.stockQuantity = 0
   productForm.salePrice = 0
   productForm.discount = 0
-  productForm.images = []
+  productImages.value = [] // Clear previews
   isEditMode.value = false
   editingProductId.value = null
 }
@@ -93,6 +107,7 @@ const openAddForm = () => {
 }
 
 const openEditForm = (product: Product) => {
+  resetForm() // Reset previews first
   isEditMode.value = true
   editingProductId.value = product.id || null
   productForm.name = product.name || ''
@@ -107,7 +122,18 @@ const openEditForm = (product: Product) => {
   productForm.stockQuantity = product.stockQuantity || 0
   productForm.salePrice = product.price || 0
   productForm.discount = product.discount || 0
-  productForm.images = product.imageUrl ? [product.imageUrl] : []
+  
+  // Populate previews from existing product images
+  const existingImages = (Array.isArray(product.images) && product.images.length > 0)
+    ? product.images
+    : (product.imageUrl ? [product.imageUrl] : [])
+
+  productImages.value = existingImages.map(url => ({
+    id: url, // Use URL as a temporary unique ID
+    preview: resolveProductImage({ ...product, imageUrl: url, images: [] }), // Use resolver for full URL
+    file: undefined // No raw file for existing images
+  }))
+
   showAddForm.value = true
 }
 
@@ -115,10 +141,11 @@ const closeAddForm = () => {
   showAddForm.value = false
 }
 
-const onFilesSelected = (e: Event) => {
-  const input = e.target as HTMLInputElement
-  if (!input.files) return
-  processFiles(input.files)
+const onFilesSelected = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+    if (target.files) {
+      processFiles(target.files);
+    }
 }
 
 const processFiles = (files: FileList) => {
@@ -131,9 +158,17 @@ const processFiles = (files: FileList) => {
       alert('Image size should be less than 10MB')
       return
     }
+
+    // Create a local preview and store the file
     const reader = new FileReader()
     reader.onload = () => {
-      if (typeof reader.result === 'string') productForm.images.push(reader.result)
+      if (typeof reader.result === 'string') {
+        productImages.value.push({
+          id: Date.now() + Math.random().toString(), // Temp ID
+          preview: reader.result,
+          file: file // <--- Store the file here!
+        })
+      }
     }
     reader.readAsDataURL(file)
   })
@@ -153,7 +188,7 @@ const onDrop = (e: DragEvent) => {
 }
 
 const removeImage = (index: number) => {
-  productForm.images.splice(index, 1)
+  productImages.value.splice(index, 1)
 }
 
 const saveProduct = async () => {
@@ -165,6 +200,42 @@ const saveProduct = async () => {
       alert('Please login first to ' + (isEditMode.value ? 'update' : 'add') + ' products')
       return
     }
+
+    // Separate new files from existing image URLs
+    const newFiles = productImages.value.map(img => img.file).filter((file): file is File => !!file)
+    const existingImageUrls = productImages.value
+      .filter(img => !img.file) // Keep all non-file-based images
+      .map(img => {
+        // The goal is to store the relative path, e.g., /products/image.jpg
+        // If the preview URL is a full URL, strip the origin.
+        try {
+          const url = new URL(img.preview)
+          if (url.origin === API_BASE_URL || window.location.origin) {
+            return url.pathname // This gives /products/....
+          }
+        } catch (e) {
+          // Not a full URL, assume it's already a relative path
+        }
+        return img.preview
+      })
+
+    // Upload new files and get their URLs
+    const uploadedImageUrls = []
+    for (const file of newFiles) {
+      try {
+        // productService.uploadImage is expected to return the relative path, e.g., /products/new-image.jpg
+        const imageUrl = await productService.uploadImage(file)
+        uploadedImageUrls.push(imageUrl)
+      } catch (uploadError) {
+        console.error('Failed to upload an image:', uploadError)
+        alert('An error occurred while uploading an image. Please try again.')
+        loading.value = false
+        return
+      }
+    }
+
+    // Combine existing and newly uploaded image URLs
+    const allImageUrls = [...existingImageUrls, ...uploadedImageUrls]
 
     if (!productForm.name || !productForm.salePrice) {
       alert('Please fill in product name and price')
@@ -185,7 +256,8 @@ const saveProduct = async () => {
       stockQuantity: productForm.stockQuantity,
       price: productForm.salePrice,
       discount: productForm.discount,
-      imageUrl: productForm.images.length > 0 ? productForm.images[0] : BlankProfile,
+      images: allImageUrls, // Send the final combined list of image URLs
+      imageUrl: allImageUrls[0] || '' // For legacy support
     }
 
     if (isEditMode.value && editingProductId.value) {
@@ -211,7 +283,7 @@ const saveProduct = async () => {
 }
 
 const deleteProduct = async (productId: string) => {
-  if (!confirm('Are you sure you want to delete this product?')) return
+  if (!confirm(t('admin.product_management.confirm_delete'))) return
 
   try {
     loading.value = true
@@ -253,10 +325,10 @@ onBeforeUnmount(() => {
 })
 
 const toggleSelectAll = () => {
-  if (selectedProducts.value.length === filteredProducts.value.length) {
+  if (selectedProducts.value.length === paginatedProducts.value.length) {
     selectedProducts.value = []
   } else {
-    selectedProducts.value = filteredProducts.value.map((p) => p.id!)
+    selectedProducts.value = paginatedProducts.value.map((p) => p.id!)
   }
 }
 
@@ -288,254 +360,342 @@ const closeDropdown = () => {
 const isDropdownOpen = (productId: string) => {
   return openDropdown.value === productId
 }
+
+const resolveProductImage = (product: Product) => {
+  const raw = (product.images && product.images[0]) || product.imageUrl || (product as any).imageURL || ''
+  const cleaned = typeof raw === 'string' ? raw.trim() : ''
+  if (!cleaned) return BlankProfile
+  if (cleaned.startsWith('/')) return `${API_BASE_URL}${cleaned}`
+  return cleaned
+}
+
+// Pagination refs and computed properties
+const currentPage = ref(1)
+const itemsPerPage = 10
+
+const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage))
+
+const startIndex = computed(() => (currentPage.value - 1) * itemsPerPage)
+const endIndex = computed(() => Math.min(startIndex.value + itemsPerPage, filteredProducts.value.length))
+
+const paginatedProducts = computed(() => {
+  return filteredProducts.value.slice(startIndex.value, endIndex.value)
+})
+
+const displayPages = computed(() => {
+  const pages: number[] = []
+  const total = totalPages.value
+  const current = currentPage.value
+
+  // Show max 5 page numbers
+  let start = Math.max(1, current - 2)
+  let end = Math.min(total, start + 4)
+
+  // Adjust start if we're near the end
+  if (end - start < 4) {
+    start = Math.max(1, end - 4)
+  }
+
+  for (let i = start; i <= end; i++) {
+    pages.push(i)
+  }
+
+  return pages
+})
+
+const goToPage = (page: number) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+  }
+}
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+  }
+}
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--
+  }
+}
 </script>
 
 <template>
   <div class="bg-white dark:bg-gray-900 rounded shadow p-6 transition-colors">
     <!-- Header Section -->
     <div class="mb-6">
-      <div class="flex items-center justify-between mb-2">
-        <h1 class="text-xl font-bold dark:text-gray-100">Product Management</h1>
-        <button @click="openAddForm" class="bg-teal-700 text-white px-4 py-2 rounded text-sm hover:bg-teal-800 dark:bg-[#1A535C] dark:hover:bg-[#2A7A8F] flex items-center gap-2">
-          <span class="text-lg">+</span> Add New Product
+      <div class="flex flex-col md:flex-row items-center justify-between mb-2 gap-4">
+        <h1 class="text-xl font-bold dark:text-gray-100">{{ $t('admin.product_management.title') }}</h1>
+        <button @click="openAddForm" class="bg-teal-700 text-white px-4 py-2 rounded text-sm hover:bg-teal-800 dark:bg-[#1A535C] dark:hover:bg-[#2A7A8F] flex items-center gap-2 w-full md:w-auto">
+          <span class="text-lg">+</span> {{ $t('admin.product_management.add_product') }}
         </button>
       </div>
       <div class="text-sm text-gray-500 dark:text-gray-300">
-        Product Management / <span class="text-teal-700 dark:text-[#1A535C]">Add New Product</span>
+        {{ $t('admin.sidebar.product_management') }} / <span class="text-teal-700 dark:text-[#1A535C]">{{ $t('admin.product_management.add_product') }}</span>
       </div>
     </div>
 
     <!-- Table Container -->
     <div class="border rounded-lg overflow-hidden dark:border-gray-700">
       <!-- Table Controls -->
-      <div class="bg-gray-50 dark:bg-gray-800 border-b px-4 py-3 flex items-center justify-between border-default dark:border-gray-700 transition-colors">
+      <div class="bg-gray-50 dark:bg-gray-800 border-b px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4 border-default dark:border-gray-700 transition-colors">
         <div class="flex items-center gap-3">
-          <span class="text-sm font-medium">All Product</span>
+          <span class="text-sm font-medium">{{ $t('admin.product_management.all_products') }}</span>
           <span class="text-sm text-gray-500 dark:text-gray-300">{{ products.length }}</span>
         </div>
-        <div class="flex items-center gap-3">
-          <div class="relative">
+        <div class="flex items-center gap-3 w-full md:w-auto">
+          <div class="relative w-full md:w-auto">
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Search Product..."
-              class="border rounded px-3 py-1.5 pr-8 text-sm w-64 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+              class="border rounded px-3 py-1.5 pr-8 text-sm w-full md:w-64 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
             />
-            <span class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+            <span class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"><IconSearch size="16"/></span>
           </div>
-          <button class="border rounded px-3 py-1.5 text-sm flex items-center gap-1 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
+          <!-- <button class="border rounded px-3 py-1.5 text-sm flex items-center gap-1 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
             <span>⚙️</span>
-          </button>
+          </button> -->
         </div>
       </div>
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-8 text-gray-500 dark:text-gray-300">
-        Loading products...
+        {{ $t('admin.product_management.loading') }}
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="filteredProducts.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-300">
-        No products found
+      <div v-else-if="paginatedProducts.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-300">
+        {{ $t('admin.product_management.no_products') }}
       </div>
 
       <!-- Table -->
-      <table v-else class="w-full">
-        <thead class="bg-gray-50 dark:bg-gray-800 border-b text-xs text-gray-600 dark:text-gray-300 border-default dark:border-gray-700">
-          <tr>
-            <th class="py-3 px-4 text-left w-12">
-              <input
-                type="checkbox"
-                :checked="selectedProducts.length === filteredProducts.length && filteredProducts.length > 0"
-                @change="toggleSelectAll"
-                class="rounded"
-              />
-            </th>
-            <th class="py-3 px-4 text-left">Product</th>
-            <th class="py-3 px-4 text-left">Category</th>
-            <th class="py-3 px-4 text-left">Stock</th>
-            <th class="py-3 px-4 text-left">Price</th>
-            <th class="py-3 px-4 text-left">Status</th>
-            <th class="py-3 px-4 text-left">Action</th>
-          </tr>
-        </thead>
-        <tbody class="text-sm">
-          <tr
-            v-for="product in filteredProducts"
-            :key="product.id"
-            class="border-b hover:bg-gray-50 dark:hover:bg-gray-800 border-default dark:border-gray-700 transition-colors"
-          >
-            <!-- Select checkbox -->
-            <td class="py-3 px-4">
-              <input
-                type="checkbox"
-                :checked="isSelected(product.id!)"
-                @change="toggleSelectProduct(product.id!)"
-                class="rounded"
-              />
-            </td>
-
-            <!-- Product image + name -->
-            <td class="py-3 px-4">
-              <div class="flex items-center gap-3">
-                <img
-                  :src="product.imageUrl && product.imageUrl.trim() !== '' ? product.imageUrl : BlankProfile"
-                  :alt="product.name"
-                  @error="(e) => (e.target as HTMLImageElement).src = BlankProfile"
-                  class="w-10 h-10 rounded object-cover bg-gray-100 dark:bg-gray-700"
+      <div v-else class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50 dark:bg-gray-800 border-b text-xs text-gray-600 dark:text-gray-300 border-default dark:border-gray-700 hidden md:table-header-group">
+            <tr>
+              <th class="py-3 px-4 text-left w-12">
+                <input
+                  type="checkbox"
+                  :checked="selectedProducts.length === paginatedProducts.length && paginatedProducts.length > 0"
+                  @change="toggleSelectAll"
+                  class="rounded"
                 />
-                <span class="font-medium dark:text-gray-100">{{ product.name }}</span>
-              </div>
-            </td>
+              </th>
+              <th class="py-3 px-4 text-left">{{ $t('admin.product_management.product_name') }}</th>
+              <th class="py-3 px-4 text-left">{{ $t('admin.product_management.category') }}</th>
+              <th class="py-3 px-4 text-left">{{ $t('admin.product_management.stock') }}</th>
+              <th class="py-3 px-4 text-left">{{ $t('admin.product_management.price') }}</th>
+              <th class="py-3 px-4 text-left">{{ $t('admin.product_management.status') }}</th>
+              <th class="py-3 px-4 text-left">{{ $t('admin.product_management.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm">
+            <tr
+              v-for="product in paginatedProducts"
+              :key="product.id"
+              class="border-b hover:bg-gray-50 dark:hover:bg-gray-800 border-default dark:border-gray-700 transition-colors flex flex-col md:table-row"
+            >
+              <!-- Select checkbox -->
+              <td class="py-3 px-4 flex justify-between items-center md:table-cell">
+                <span class="font-bold md:hidden">Select</span>
+                <input
+                  type="checkbox"
+                  :checked="isSelected(product.id!)"
+                  @change="toggleSelectProduct(product.id!)"
+                  class="rounded"
+                />
+              </td>
 
-            <!-- Category -->
-            <td class="py-3 px-4 text-gray-600 dark:text-gray-300">{{ product.mainCategory || 'N/A' }}</td>
-
-            <!-- Stock -->
-            <td class="py-3 px-4 text-gray-600 dark:text-gray-300">{{ product.stockQuantity || 0 }}</td>
-
-            <!-- Price -->
-            <td class="py-3 px-4 font-medium dark:text-gray-100">${{ product.price?.toFixed(2) || '0.00' }}</td>
-
-            <!-- Status -->
-            <td class="py-3 px-4">
-              <span
-                v-if="(product.stockQuantity ?? 0) > 0"
-                class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium"
-              >
-                In Stock
-              </span>
-              <span
-                v-else
-                class="inline-block bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-medium"
-              >
-                Out of stock
-              </span>
-            </td>
-
-            <!-- Action dropdown -->
-            <td class="py-3 px-4">
-              <div class="relative">
-                <button @click.stop="toggleDropdown(product.id || '')" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-gray-600">
-                  <IconDotsVertical :size="20" />
-                </button>
-                <div v-if="isDropdownOpen(product.id || '')" class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 dark:border-gray-700 border rounded shadow-lg z-10">
-                  <button @click="openEditForm(product); closeDropdown()" class="block w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
-                    Edit
-                  </button>
-                  <button @click="deleteProduct(product.id!); closeDropdown()" class="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-50 dark:hover:bg-gray-700">
-                    Delete
-                  </button>
+              <!-- Product image + name -->
+              <td class="py-3 px-4 flex justify-between items-center md:table-cell">
+                <span class="font-bold md:hidden">{{ $t('admin.product_management.product_name') }}</span>
+                <div class="flex items-center gap-3">
+                  <img
+                    :src="resolveProductImage(product)"
+                    :alt="product.name"
+                    @error="(e) => (e.target as HTMLImageElement).src = BlankProfile"
+                    class="w-10 h-10 rounded object-cover bg-gray-100 dark:bg-gray-700"
+                  />
+                  <span class="font-medium dark:text-gray-100">{{ product.name }}</span>
                 </div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              </td>
+
+              <!-- Category -->
+              <td class="py-3 px-4 text-gray-600 dark:text-gray-300 flex justify-between items-center md:table-cell"><span class="font-bold md:hidden">{{ $t('admin.product_management.category') }}</span>{{ product.mainCategory || 'N/A' }}</td>
+
+              <!-- Stock -->
+              <td class="py-3 px-4 text-gray-600 dark:text-gray-300 flex justify-between items-center md:table-cell"><span class="font-bold md:hidden">{{ $t('admin.product_management.stock') }}</span>{{ product.stockQuantity || 0 }}</td>
+
+              <!-- Price -->
+              <td class="py-3 px-4 font-medium dark:text-gray-100 flex justify-between items-center md:table-cell"><span class="font-bold md:hidden">{{ $t('admin.product_management.price') }}</span>${{ product.price?.toFixed(2) || '0.00' }}</td>
+
+              <!-- Status -->
+              <td class="py-3 px-4 flex justify-between items-center md:table-cell">
+                <span class="font-bold md:hidden">{{ $t('admin.product_management.status') }}</span>
+                <span
+                  v-if="(product.stockQuantity ?? 0) > 0"
+                  class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium"
+                >
+                  {{ $t('admin.product_management.in_stock') }}
+                </span>
+                <span
+                  v-else
+                  class="inline-block bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-medium"
+                >
+                  {{ $t('admin.product_management.out_of_stock') }}
+                </span>
+              </td>
+
+              <!-- Action dropdown -->
+              <td class="py-3 px-4 flex justify-between items-center md:table-cell">
+                <span class="font-bold md:hidden">{{ $t('admin.product_management.actions') }}</span>
+                <div class="relative">
+                  <button @click.stop="toggleDropdown(product.id || '')" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-gray-600">
+                    <IconDotsVertical :size="20" />
+                  </button>
+                  <div v-if="isDropdownOpen(product.id || '')" class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 dark:border-gray-700 border rounded shadow-lg z-10">
+                    <button @click="openEditForm(product); closeDropdown()" class="block w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+                      {{ $t('admin.product_management.edit') }}
+                    </button>
+                    <button @click="deleteProduct(product.id!); closeDropdown()" class="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                      {{ $t('admin.product_management.delete') }}
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Pagination -->
+      <div class="p-4 flex flex-col md:flex-row items-center justify-between text-sm text-gray-600 dark:text-gray-300 gap-4">
+        <div>{{ $t('admin.order_management.showing') }} {{ startIndex + 1 }} {{ $t('admin.order_management.to') }} {{ endIndex }} {{ $t('admin.order_management.of') }} {{ filteredProducts.length }} {{ $t('admin.order_management.entries') }}</div>
+        <div class="flex items-center gap-2">
+          <button
+            @click="prevPage"
+            :disabled="currentPage === 1"
+            :class="currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'"
+            class="px-3 py-1 border rounded dark:border-gray-700 dark:text-gray-200">{{ $t('admin.order_management.previous') }}</button>
+          <button
+            v-for="page in displayPages"
+            :key="page"
+            @click="goToPage(page)"
+            :class="page === currentPage ? 'bg-gray-800 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-800'"
+            class="px-3 py-1 border rounded dark:border-gray-700 dark:text-gray-200">{{ page }}</button>
+          <button
+            @click="nextPage"
+            :disabled="currentPage === totalPages"
+            :class="currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'"
+            class="px-3 py-1 border rounded dark:border-gray-700 dark:text-gray-200">{{ $t('admin.order_management.next') }}</button>
+        </div>
+      </div>
     </div>
 
     <!-- Add / Edit Drawer -->
     <transition name="fade">
       <div
         v-if="showAddForm"
-        class="fixed inset-y-0 right-0 w-full md:w-1/2 lg:w-2/5 bg-white dark:bg-gray-800 shadow-xl border-l dark:border-gray-700 z-50 overflow-auto transition-colors"
+        class="fixed inset-y-0 right-0 w-full md:w-1/2 lg:w-2/5 bg-white dark:bg-gray-800 shadow-xl border-l dark:border-gray-700 z-50 overflow-auto transition-colors p-4 sm:p-6"
       >
         <div class="p-6">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ isEditMode ? 'Edit Product' : 'Add New Product' }}</h2>
+            <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ isEditMode ? $t('admin.product_management.form.name') : $t('admin.product_management.add_product') }}</h2>
             <button class="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200" @click="closeAddForm">✕</button>
           </div>
 
           <div class="space-y-5">
             <!-- Basic Information -->
             <div class="space-y-4">
-              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 pb-2">Basic Information</h3>
+              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 pb-2">{{ $t('admin.product_management.form.basic_info') }}</h3>
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Product Name <span class="text-red-500">*</span></label>
-                <input v-model="productForm.name" type="text" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Enter product name" />
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('admin.product_management.form.name') }} <span class="text-red-500">*</span></label>
+                <input v-model="productForm.name" type="text" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" :placeholder="$t('admin.product_management.form.name')" />
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                <textarea v-model="productForm.description" rows="4" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Enter product description"></textarea>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('admin.product_management.form.description') }}</label>
+                <textarea v-model="productForm.description" rows="4" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" :placeholder="$t('admin.product_management.form.description')"></textarea>
               </div>
             </div>
 
             <!-- Category Information -->
             <div class="space-y-4">
-              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 pb-2">Category & Details</h3>
-              <div class="grid grid-cols-2 gap-4">
+              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 pb-2">{{ $t('admin.product_management.form.category_details') }}</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Main Category <span class="text-red-500">*</span></label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('admin.product_management.form.main_category') }} <span class="text-red-500">*</span></label>
                   <select
                     v-model="productForm.mainCategory"
                     @change="productForm.subCategory = ''"
                     class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                   >
-                    <option value="">Select Category</option>
+                    <option value="">{{ $t('admin.product_management.form.select_category') }}</option>
                     <option v-for="(subs, category) in categories" :key="category" :value="category">
                       {{ category }}
                     </option>
                   </select>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sub Category</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('admin.product_management.form.sub_category') }}</label>
                   <select
                     v-model="productForm.subCategory"
                     :disabled="!productForm.mainCategory"
                     class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   >
-                    <option value="">Select Sub Category</option>
+                    <option value="">{{ $t('admin.product_management.form.select_sub_category') }}</option>
                     <option v-for="sub in availableSubCategories" :key="sub" :value="sub">
                       {{ sub }}
                     </option>
                   </select>
-                  <p v-if="!productForm.mainCategory" class="text-xs text-gray-500 dark:text-gray-400 mt-1">Select main category first</p>
+                  <p v-if="!productForm.mainCategory" class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $t('admin.product_management.form.select_first') }}</p>
                 </div>
               </div>
 
-              <div class="grid grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('admin.product_management.form.type') }}</label>
                   <input v-model="productForm.type" placeholder="e.g., Ballpoint, Spiral, Canvas" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Size</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('admin.product_management.form.size') }}</label>
                   <input v-model="productForm.size" placeholder="e.g., A4, Small, 15 inch" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
                 </div>
               </div>
 
-              <div class="grid grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('admin.product_management.form.color') }}</label>
                   <input v-model="productForm.color" placeholder="e.g., Blue, Multicolor, Black" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Material</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('admin.product_management.form.material') }}</label>
                   <input v-model="productForm.material" placeholder="e.g., Paper, Plastic, Canvas" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
                 </div>
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Brand Name</label>
-                <input v-model="productForm.brandName" type="text" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Enter brand name" />
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('admin.product_management.form.brand') }}</label>
+                <input v-model="productForm.brandName" type="text" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" :placeholder="$t('admin.product_management.form.brand')" />
               </div>
             </div>
 
             <!-- Pricing & Inventory -->
             <div class="space-y-4">
-              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 pb-2">Pricing & Inventory</h3>
-              <div class="grid grid-cols-3 gap-4">
+              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 pb-2">{{ $t('admin.product_management.form.pricing_inventory') }}</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock Quantity <span class="text-red-500">*</span></label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('admin.product_management.form.stock_quantity') }} <span class="text-red-500">*</span></label>
                   <input v-model.number="productForm.stockQuantity" type="number" min="0" placeholder="0" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sale Price ($) <span class="text-red-500">*</span></label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('admin.product_management.form.price') }} <span class="text-red-500">*</span></label>
                   <input v-model.number="productForm.salePrice" type="number" step="0.01" min="0" placeholder="0.00" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Discount (%)</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('admin.product_management.form.discount') }}</label>
                   <input v-model.number="productForm.discount" type="number" min="0" max="100" placeholder="0" class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
                 </div>
               </div>
@@ -543,9 +703,9 @@ const isDropdownOpen = (productId: string) => {
 
             <!-- Product Images -->
             <div class="space-y-4">
-              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 pb-2">Product Images</h3>
+              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 pb-2">{{ $t('admin.product_management.form.images') }}</h3>
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Images</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $t('admin.product_management.form.upload_images') }}</label>
                 <div
                   @dragover="onDragOver"
                   @drop="onDrop"
@@ -559,17 +719,17 @@ const isDropdownOpen = (productId: string) => {
                     </div>
                     <div class="text-sm text-gray-600 dark:text-gray-300">
                       <label class="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300">
-                        <span>Click to upload</span>
-                        <input type="file" multiple accept="image/*" @change="onFilesSelected" class="sr-only" />
+                        <span>{{ $t('admin.product_management.form.click_to_upload') }}</span>
+                        <input type="file" multiple accept="image/*" @change="onFilesSelected" @click="($event.target as HTMLInputElement).value = ''" class="sr-only" />
                       </label>
-                      <span class="text-gray-500 dark:text-gray-400">or drag and drop</span>
+                      <span class="text-gray-500 dark:text-gray-400">{{ $t('admin.product_management.form.or_drag') }}</span>
                     </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF up to 10MB</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('admin.product_management.form.file_info') }}</p>
                   </div>
                 </div>
-                <div v-if="productForm.images.length > 0" class="flex gap-3 mt-4 flex-wrap">
-                  <div v-for="(img, idx) in productForm.images" :key="idx" class="relative group">
-                    <img :src="img" class="w-24 h-24 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-700" />
+                <div v-if="productImages.length > 0" class="flex gap-3 mt-4 flex-wrap">
+                  <div v-for="(img, idx) in productImages" :key="img.id" class="relative group">
+                    <img :src="img.preview" class="w-24 h-24 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-700" />
                     <button @click.prevent="removeImage(idx)" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-600">×</button>
                   </div>
                 </div>
@@ -577,10 +737,10 @@ const isDropdownOpen = (productId: string) => {
             </div>
 
             <div class="flex items-center justify-end gap-3 pt-6 border-t dark:border-gray-700">
-              <button @click="closeAddForm" class="px-6 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+              <button @click="closeAddForm" class="px-6 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">{{ $t('admin.product_management.cancel') }}</button>
               <button @click="saveProduct" :disabled="loading" class="px-6 py-2.5 bg-teal-700 dark:bg-[#1A535C] text-white rounded-lg text-sm font-medium hover:bg-teal-800 dark:hover:bg-[#2A7A8F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
-                <span v-if="loading">{{ isEditMode ? 'Updating...' : 'Saving...' }}</span>
-                <span v-else>{{ isEditMode ? 'Update Product' : 'Save Product' }}</span>
+                <span v-if="loading">{{ isEditMode ? $t('admin.product_management.form.updating') : $t('admin.product_management.form.saving') }}</span>
+                <span v-else>{{ isEditMode ? $t('admin.product_management.form.update_product') : $t('admin.product_management.form.save_product') }}</span>
               </button>
             </div>
           </div>

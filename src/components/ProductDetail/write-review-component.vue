@@ -13,7 +13,7 @@
     <!-- Show Form if no review submitted -->
         <!-- Show Form if no review submitted -->
     <div v-else>
-      <h2 class="text-2xl font-bold">{{ $t('writeReview.title') }}</h2>
+      <h2 class="text-2xl font-bold dark:text-white">{{ $t('writeReview.title') }}</h2>
       <div class="flex gap-4 mt-4">
         <!-- Profile -->
         <img :src="profilePicSrc" class="w-[50px] h-[50px] rounded-full bg-gray-400" />
@@ -46,10 +46,18 @@
         </div>
 
         <button
+          v-if="isEditing"
+          @click="cancelEdit"
+          class="mt-6 px-6 py-3 bg-gray-500 text-white rounded-sm font-semibold dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-700"
+        >
+          {{ $t('writeReview.cancel_button') || 'Cancel' }}
+        </button>
+
+        <button
           @click="submitReview"
           class="mt-6 px-6 py-3 bg-[#1A535C] text-white rounded-sm font-semibold dark:bg-[#1A535C] dark:text-gray-100 dark:hover:bg-[#2A7A8F]"
         >
-          {{ $t('writeReview.post_button') }}
+          {{ isEditing ? ($t('writeReview.update_button') || 'Update') : $t('writeReview.post_button') }}
         </button>
       </div>
     </div>
@@ -61,6 +69,8 @@ import { computed, defineComponent, ref, type PropType } from "vue";
 import DropDownComponent from "./drop-down-component.vue";
 import ReviewCardComponent from "./review-card-component.vue";
 import BlankProfile from '@/assets/images/pfp_blank.jpeg'
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || ''
 
 interface Review {
   id: string | number;
@@ -93,22 +103,25 @@ export default defineComponent({
     }
   },
 
-  emits: ["submit-review", "delete-review"],
+  emits: ["submit-review", "delete-review", "cancel-edit", "edit-review"],
 
   setup(props, { emit }) {
-        const profilePicSrc = computed(() => {
-          const raw = props.profilePic
-          if (typeof raw !== 'string') return BlankProfile
-          const s = raw.trim()
-          if (!s) return BlankProfile
-          if (/^(https?:\/\/|data:image\/|blob:|\/|\.{1,2}\/)/.test(s)) return s
-          return BlankProfile
-        })
+    const profilePicSrc = computed(() => {
+      const raw = props.profilePic
+      if (typeof raw !== 'string') return BlankProfile
+      const s = raw.trim()
+      if (!s) return BlankProfile
+      if (s.startsWith('/')) return `${String(API_BASE_URL).replace(/\/$/, '')}${s}`
+      if (/^(https?:\/\/|data:image\/|blob:|\.{1,2}\/)/.test(s)) return s
+      return BlankProfile
+    })
 
     const title = ref("");
     const body = ref("");
     const starOption = ref("0");
     const recommendOption = ref("true");
+    const isEditing = ref(false);
+    const originalReview = ref<Review | null>(null);
 
     const recommendOptions = [
       { label: "Yes", value: "true" },
@@ -148,13 +161,35 @@ export default defineComponent({
 
     const editReview = () => {
       if (!props.userReview) return;
+  console.log('📝 Edit review clicked:', props.userReview);
+
+      // Store original review for cancel
+      originalReview.value = { ...props.userReview };
+      isEditing.value = true;
 
       title.value = props.userReview.title;
       body.value = props.userReview.body;
       starOption.value = props.userReview.rating.toString();
       recommendOption.value = props.userReview.recommend ? "true" : "false";
+  console.log('📝 Form populated:', { title: title.value, body: body.value, rating: starOption.value });
 
-      emit("delete-review", props.userReview.id);
+      // Emit edit event to hide review card (don't delete from backend)
+      emit("edit-review");
+    };
+
+    const cancelEdit = () => {
+      // Clear form
+      title.value = "";
+      body.value = "";
+      starOption.value = "0";
+      recommendOption.value = "true";
+      isEditing.value = false;
+      
+      // Restore original review by re-emitting it
+      if (originalReview.value) {
+        emit("cancel-edit", originalReview.value);
+        originalReview.value = null;
+      }
     };
 
     const deleteReview = () => {
@@ -170,8 +205,10 @@ export default defineComponent({
       recommendOption,
       recommendOptions,
       starOptions,
+      isEditing,
       submitReview,
       editReview,
+      cancelEdit,
       deleteReview
     };
   }

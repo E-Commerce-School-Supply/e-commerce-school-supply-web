@@ -7,6 +7,7 @@ import orderService from '@/services/orderService'
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
+const API_BASE_URL = import.meta.env.VITE_API_URL || ''
 const order = ref<any | null>(null)
 const loading = ref(false)
 const id = route.params.id as string
@@ -61,9 +62,12 @@ const formatAddress = (addr: any) => {
 
 // Helper to pick image url from order item
 const itemImage = (it: any) => {
-  return (
-    it.imageURL || it.imageUrl || it.image || it.productImage || it.product?.imageUrl || 'https://via.placeholder.com/80'
-  )
+  const firstFromList = Array.isArray(it?.images) && it.images.length > 0 ? it.images[0] : ''
+  const raw = firstFromList || it.imageURL || it.imageUrl || it.image || it.productImage || it.product?.imageUrl || ''
+  const cleaned = typeof raw === 'string' ? raw.trim() : ''
+  if (!cleaned) return 'https://via.placeholder.com/80'
+  if (cleaned.startsWith('/')) return `${String(API_BASE_URL).replace(/\/$/, '')}${cleaned}`
+  return cleaned
 }
 </script>
 

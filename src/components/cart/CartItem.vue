@@ -8,6 +8,16 @@ const props = defineProps<{
   item: Item
 }>()
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || ''
+
+const resolveItemImage = (item: Item) => {
+  const raw = (Array.isArray(item.images) && item.images[0]) || item.image || ''
+  const cleaned = typeof raw === 'string' ? raw.trim() : ''
+  if (!cleaned) return '/Photo/ourproduct.png'
+  if (cleaned.startsWith('/')) return `${String(API_BASE_URL).replace(/\/$/, '')}${cleaned}`
+  return cleaned
+}
+
 // Define emits for parent communication
 const emit = defineEmits<{
   (e: 'update-quantity', productId: string, newQuantity: number): void
@@ -20,7 +30,7 @@ const emit = defineEmits<{
     <div class="relative sm:grid sm:grid-cols-5 gap-4 items-center">
       <div class="col-span-2">
         <div class="flex gap-10">
-          <img :src="item.image" :alt="item.name" class="w-24 h-24 object-cover rounded" />
+          <img :src="resolveItemImage(item)" :alt="item.name" class="w-24 h-24 object-cover rounded" />
 
           <div class="flex-1">
             <h3 class="text-[20px] font-medium mb-2 dark:text-white">
@@ -51,7 +61,7 @@ const emit = defineEmits<{
 
       <button 
         @click="emit('remove', item.productId)" 
-        class="absolute right-5 top-5 lg:static lg:justify-self-end hover:text-red-500 dark:hover:text-red-400 transition-colors"
+        class="absolute right-5 top-5 lg:static lg:justify-self-end dark:text-white hover:text-red-500 dark:hover:text-red-400 transition-colors"
       >
         <svg class="w-5 h-5 text-neutral-black-500" viewBox="0 0 20 20" fill="currentColor">
           <path

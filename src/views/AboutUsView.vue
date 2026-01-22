@@ -4,7 +4,7 @@
       <!-- Background image with dark overlay -->
       <div class="absolute inset-0">
         <img
-          :src="image37"
+          :src="bgSchool"
           alt="Back-to-school scene"
           class="w-full h-full object-cover"
         />
@@ -108,6 +108,6 @@
 
 
 <script setup lang="ts">
-import image37 from '@/components/bgSchool.png'
+import bgSchool from '@/assets/images/image37.jpg'
 import MemberCard from '@/components/MemberCard.vue'
 </script>

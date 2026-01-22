@@ -1,5 +1,5 @@
 <template>
-  <div class="dark:bg-gray-800 p-4 rounded-md">
+  <div class="p-4 rounded-md">
     <h3 class="text-xl font-bold mb-4 dark:text-white">{{ $t('ratingGraph.title') }}</h3>
 
     <!-- Rating Bars -->
@@ -11,7 +11,7 @@
       >
         <span class="w-3 text-sm font-medium dark:text-gray-300">{{ item.stars }}</span>
         <span class="text-[#FF6B6B] text-[20px]">★</span>
-        <div class="flex-1 h-4 bg-gray-300 rounded-md overflow-hidden dark:bg-gray-700">
+        <div class="flex-1 h-4 bg-gray-300 rounded-md overflow-hidden ">
           <div 
             class="h-full bg-[#FF6B6B] rounded-md" 
             :style="{ width: item.percentage + '%' }"

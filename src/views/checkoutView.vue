@@ -299,9 +299,9 @@
           </svg>
         </div>
       </div>
-      <h3 class="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">{{ $t('checkout.order_success_title') }}</h3>
-      <p class="text-gray-600 dark:text-gray-300 mb-4">{{ $t('checkout.order_success_msg') }}</p>
-      <p class="font-semibold mb-6 text-gray-900 dark:text-gray-100">{{ $t('cart.total') }}: ${{ successTotal.toFixed(2) }}</p>
+      <h3 class="text-2xl font-bold mb-2 text-gray-900 ">{{ $t('checkout.order_success_title') }}</h3>
+      <p class="text-gray-600 mb-4">{{ $t('checkout.order_success_msg') }}</p>
+      <p class="font-semibold mb-6 text-gray-900">{{ $t('cart.total') }}: ${{ successTotal.toFixed(2) }}</p>
       <div class="flex gap-3 justify-center">
         <button @click="goToOrders" class="px-6 py-3 bg-[#1A535C] text-white rounded-md font-medium hover:bg-[#2A7A8F] transition-colors">{{ $t('checkout.view_orders') }}</button>
         <button @click="continueShopping" class="px-6 py-3 bg-gray-100 dark:bg-gray-800 dark:text-gray-100 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">{{ $t('common.continue_shopping') }}</button>

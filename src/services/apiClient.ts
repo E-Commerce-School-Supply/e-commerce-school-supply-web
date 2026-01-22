@@ -43,4 +43,39 @@ apiClient.interceptors.request.use(
   }
 );
 
+// Interceptor to handle responses and errors
+apiClient.interceptors.response.use(
+  (response) => {
+    console.log('✅ API Success Response:', response.status, response.data);
+    return response;
+  },
+  (error: AxiosError) => {
+    console.error('❌ API Error in interceptor:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message,
+      isAxiosError: error.isAxiosError
+    });
+    
+    // Handle errors with response data
+    if (error.response?.data) {
+      const data = error.response.data as any;
+      const message = data.message || data.error || 'An error occurred';
+      console.error('🚫 Creating error with message:', message);
+      
+      // Create a proper Error and attach response info
+      const customError = new Error(message);
+      (customError as any).response = error.response;
+      (customError as any).status = error.response.status;
+      (customError as any).isAxiosError = true;
+      
+      return Promise.reject(customError);
+    }
+    
+    console.error('🚫 Rejecting with original error');
+    return Promise.reject(error);
+  }
+);
+
 export default apiClient;

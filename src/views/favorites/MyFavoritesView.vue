@@ -64,6 +64,15 @@ const cartStore = useCartStore()
 const toastStore = useToastStore()
 const favorites = ref<Product[]>([])
 const loading = ref(true)
+const API_BASE_URL = import.meta.env.VITE_API_URL || ''
+
+const resolveProductImage = (product: Product) => {
+  const raw = (product.images && product.images[0]) || (product as any).image || product.imageUrl || product.imageURL || '/Photo/ourproduct.png'
+  const cleaned = typeof raw === 'string' ? raw.trim() : ''
+  if (!cleaned) return '/Photo/ourproduct.png'
+  if (cleaned.startsWith('/')) return `${String(API_BASE_URL).replace(/\/$/, '')}${cleaned}`
+  return cleaned
+}
 
 onMounted(async () => {
   await loadFavorites()
@@ -73,7 +82,10 @@ const loadFavorites = async () => {
   try {
     loading.value = true
     await favoriteStore.fetchFavorite()
-    favorites.value = favoriteStore.favProduct
+    favorites.value = favoriteStore.favProduct.map(p => ({
+      ...p,
+      imageUrl: resolveProductImage(p),
+    }))
   } catch (error) {
     console.error('Error loading favorites:', error)
     toastStore.showToast('Failed to load favorites', 'error')
@@ -96,6 +108,7 @@ const removeFromFavorites = async (productId?: string) => {
 
 const addToCart = async (product: Product) => {
   try {
+    const image = resolveProductImage(product)
     const price = product.discount
       ? Number(product.price) * (1 - Number(product.discount) / 100)
       : Number(product.price)
@@ -109,7 +122,8 @@ const addToCart = async (product: Product) => {
       rating: Number(product.rating) || 0,
       price,
       quantity: 1,
-      image: (product as any).image || product.imageUrl || '',
+      image,
+      images: Array.isArray(product.images) && product.images.length > 0 ? product.images : [image].filter(Boolean),
     })
 
     toastStore.showToast(t('favorites.add_to_cart_success'), 'success')

@@ -3,14 +3,14 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full">
     <div
       v-for="(product, index) in products"
-      :key="index"
+      :key="product.id || index"
       class="bg-white dark:bg-gray-800 rounded-[20px] overflow-hidden border border-gray-400 dark:border-gray-700 hover:-translate-y-1 hover:shadow-lg transition cursor-pointer"
       @click="goToDetail(product.id)"
     >
     <!-- Image Section -->
     <div class="relative flex justify-center items-center h-40">
       <img
-        :src="product.imageUrl"
+        :src="resolveProductImage(product)"
         :alt="product.name"
         class="w-full max-h-40 object-contain"
       />
@@ -169,6 +169,18 @@ export default defineComponent({
       }
     }
 
+    const resolveProductImage = (product: Product) => {
+      const raw = (product.images && product.images[0]) || product.imageUrl || (product as any).imageURL || (product as any).image || '/Photo/ourproduct.png'
+      if (typeof raw !== 'string') return '/Photo/ourproduct.png'
+      const trimmed = raw.trim()
+      if (!trimmed) return '/Photo/ourproduct.png'
+      if (trimmed.startsWith('/')) {
+        const base = import.meta.env.VITE_API_URL || ''
+        return `${String(base).replace(/\/$/, '')}${trimmed}`
+      }
+      return trimmed
+    }
+
     const btnLink = async (index: number) => {
       if (!isAuthenticated.value) {
         alert(t('productCard.alert_signin_cart'))
@@ -176,7 +188,10 @@ export default defineComponent({
       }
 
       const product = props.products[index]
+      if (!product) return
+      
       try {
+        const image = resolveProductImage(product)
         // Add item to cart - map product fields correctly
         await cartStore.addToCart({
           productId: product?.id || `product-${index}`,
@@ -187,7 +202,8 @@ export default defineComponent({
           rating: product?.averageRating || 0,
           price: product?.price || 0,
           quantity: 1,
-          image: product?.imageUrl || '',
+          image,
+          images: Array.isArray(product?.images) && product.images.length > 0 ? product.images : [image].filter(Boolean),
         })
         linkBtn.value[index] = true
         addedQuantity.value[index] = (addedQuantity.value[index] || 0) + 1
@@ -209,6 +225,7 @@ export default defineComponent({
       btnLink,
       goToDetail,
       getDiscountedPrice,
+      resolveProductImage,
     }
   },
 })

@@ -39,7 +39,15 @@ export const useAuthStore = defineStore('auth', () => {
       sessionStorage.setItem('user', JSON.stringify(user.value))
       sessionStorage.setItem('accessToken', token.value)
     } catch (err: unknown) {
-      const error_message = err instanceof Error ? err.message : 'Login Failed'
+      let error_message = 'Login Failed'
+      if (err instanceof Error) {
+        error_message = err.message
+      } else if (typeof err === 'object' && err !== null && 'response' in err) {
+        const response = (err as any).response
+        if (response?.data?.message) {
+          error_message = response.data.message
+        }
+      }
       error.value = error_message
       console.log(err)
       throw err
@@ -52,13 +60,33 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
     isLoading.value = true
     try {
-      await authService.register(userData)
+      console.log('🔵 authStore: Calling authService.register...')
+      const response = await authService.register(userData)
+      console.log('🟢 authStore: Registration successful, response:', response)
+      // If response is successful, return normally
+      return response
     } catch (err: unknown) {
-      const error_message = err instanceof Error ? err.message : 'An unknown error occurred. Please try again.'
+      console.log('🔴 authStore: Caught error in register function:', err)
+      let error_message = 'An unknown error occurred. Please try again.'
+      
+      if (err instanceof Error) {
+        console.log('🔴 authStore: Error is instance of Error, message:', err.message)
+        error_message = err.message
+      } else if (typeof err === 'object' && err !== null && 'response' in err) {
+        const response = (err as any).response
+        console.log('🔴 authStore: Error has response property:', response)
+        if (response?.data?.message) {
+          error_message = response.data.message
+          console.log('🔴 authStore: Extracted message from response:', error_message)
+        }
+      }
+      
       error.value = error_message
-      console.log(err)
+      console.error('🔴 authStore: About to throw error with message:', error_message)
+      throw new Error(error_message)
     } finally {
       isLoading.value = false
+      console.log('🔵 authStore: Finally block executed, isLoading set to false')
     }
   }
 
@@ -129,6 +157,23 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function fetchUser() {
+    if (token.value) {
+      try {
+        const res = await authService.getProfile()
+        user.value = {
+          ...res.data,
+          avatarUrl: res.data.avatarUrl || ''
+        }
+        sessionStorage.setItem('user', JSON.stringify(user.value))
+      } catch (error) {
+        console.error('Failed to fetch user profile:', error)
+        // Token might be invalid, so log out
+        logout()
+      }
+    }
+  }
+
   return {
     user,
     login,
@@ -137,5 +182,6 @@ export const useAuthStore = defineStore('auth', () => {
     updateProfile,
     changePassword,
     uploadAvatar,
+    fetchUser
   }
 })

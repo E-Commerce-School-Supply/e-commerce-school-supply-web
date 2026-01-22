@@ -12,6 +12,7 @@ type PurchasedProduct = {
 const router = useRouter()
 const products = ref<PurchasedProduct[]>([])
 const loading = ref(false)
+const API_BASE_URL = import.meta.env.VITE_API_URL || ''
 
 const extractOrderItems = (o: any): any[] => {
   if (Array.isArray(o?.orderItems)) return o.orderItems
@@ -30,9 +31,12 @@ const extractProductName = (it: any): string => {
 }
 
 const extractProductImage = (it: any): string | undefined => {
-  const raw = it?.imageUrl ?? it?.imageURL ?? it?.image ?? it?.productImage ?? it?.product?.imageUrl
+  const listImage = Array.isArray(it?.images) && it.images.length > 0 ? it.images[0] : ''
+  const raw = listImage ?? it?.imageUrl ?? it?.imageURL ?? it?.image ?? it?.productImage ?? it?.product?.imageUrl
   const s = String(raw ?? '').trim()
-  return s || undefined
+  if (!s) return undefined
+  if (s.startsWith('/')) return `${String(API_BASE_URL).replace(/\/$/, '')}${s}`
+  return s
 }
 
 const sortedProducts = computed(() => {

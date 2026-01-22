@@ -33,33 +33,80 @@ const passwordsMismatch = computed(() => {
   return form.value.confirmPassword.length > 0 && form.value.password !== form.value.confirmPassword
 })
 
+// Email validation regex
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
+
+// Username validation - must be between 3 and 20 characters
+const isValidUsername = (username: string): boolean => {
+  return username.length >= 3 && username.length <= 20
+}
+
 // 4. Handle Form Submission
 const handleRegister = async () => {
-  // Double check validation before sending
+  // Validate username
+  if (!form.value.username.trim()) {
+    toast.showToast(t('auth.username_required'), 'error')
+    return
+  }
+  if (!isValidUsername(form.value.username)) {
+    toast.showToast(t('auth.username_length'), 'error')
+    return
+  }
+
+  // Validate email
+  if (!form.value.email.trim()) {
+    toast.showToast(t('auth.email_required'), 'error')
+    return
+  }
+  if (!isValidEmail(form.value.email)) {
+    toast.showToast(t('auth.email_invalid'), 'error')
+    return
+  }
+
+  // Validate password
+  if (!form.value.password.trim()) {
+    toast.showToast(t('auth.password_required'), 'error')
+    return
+  }
   if (form.value.password.length < 8) {
     toast.showToast(t('auth.alert_password_short'), 'error')
+    return
+  }
+
+  // Validate confirm password
+  if (!form.value.confirmPassword.trim()) {
+    toast.showToast(t('auth.confirm_password_required'), 'error')
     return
   }
   if (form.value.password !== form.value.confirmPassword) {
     toast.showToast(t('auth.password_mismatch'), 'error')
     return
   }
+
   const userData = {
     username: form.value.username,
     email: form.value.email,
     password: form.value.password,
+    confirmPassword: form.value.confirmPassword,
   }
 
   try {
+    console.log('Attempting registration with:', { username: userData.username, email: userData.email })
     await authStore.register(userData)
+    // Only show success message if registration was successful (no error thrown)
+    console.log('Registration successful')
     toast.showToast(t('auth.register_success'), 'success')
 
     setTimeout(() => {
       router.push('/signin')
     }, 1500)
   } catch (error: any) {
+    // Error is already handled and displayed, no need to show success
+    console.error('Registration failed with error:', error)
     const msg = error.message || t('auth.register_error')
-
     toast.showToast(msg, 'error')
   }
 }

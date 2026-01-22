@@ -92,6 +92,26 @@ const adminService = {
       return []
     }
   },
+
+  deactivateUser: async (email: string) => {
+    try {
+      // Calls the backend endpoint: PATCH /api/admin/users/{email}/deactivate
+      await apiClient.patch(`/api/admin/users/${email}/deactivate`)
+    } catch (error) {
+      console.error('Error deactivating user:', error)
+      throw error
+    }
+  },
+
+  activateUser: async (email: string) => {
+    try {
+      // Calls the backend endpoint: PATCH /api/admin/users/{email}/activate
+      await apiClient.patch(`/api/admin/users/${email}/activate`)
+    } catch (error) {
+      console.error('Error activating user:', error)
+      throw error
+    }
+  },
 }
 
 export default adminService

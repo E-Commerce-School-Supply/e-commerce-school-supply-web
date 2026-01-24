@@ -19,9 +19,9 @@
 </template>
 
 <script setup lang="ts">
-import fb from "@/components/facebook.png"
-import gh from "@/components/github.png"
-import li from "@/components/Vector.png"
+import fb from "@/assets/images/facebook.png"
+import gh from "@/assets/images/github.png"
+import li from "@/assets/images/Vector.png"
 defineProps<{
   name: string
   role: string

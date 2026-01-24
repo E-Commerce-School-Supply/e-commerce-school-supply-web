@@ -11,7 +11,7 @@
         <!-- Dark overlay -->
         <div class="absolute inset-0 bg-black opacity-50"></div>
       </div>
-  
+
       <!-- Overlay content -->
       <div class="relative z-10 flex flex-col justify-between h-full text-white">
         <!-- Top left content -->
@@ -21,7 +21,7 @@
             {{ $t('aboutUs.description') }}
           </p>
         </div>
-  
+
         <!-- Bottom right content -->
         <div class="flex justify-end mr-20 mb-10">
             <p class="font-bold text-6xl/relaxed italic text-right w-[850px]">
@@ -29,9 +29,9 @@
           </p>
         </div>
       </div>
-  
+
     </section>
-  
+
     <section class="flex items-center justify-around w-full py-12 px-4 bg-white dark:bg-gray-800 transition-colors">
       <div class="bg-[#1A535C] dark:bg-[#1A535C] rounded-xl text-white p-8 w-3xl">
         <h2 class="text-[55px] font-bold font-quicksand dark:text-white">{{ $t('aboutUs.goal_title') }}</h2>
@@ -39,7 +39,7 @@
           {{ $t('aboutUs.goal_description') }}
         </p>
       </div>
-  
+
       <div class="bg-[#1A535C] dark:bg-[#1A535C] rounded-xl text-white p-8 w-3xl">
         <h2 class="text-[55px] font-bold font-quicksand dark:text-white">{{ $t('aboutUs.goal_title') }}</h2>
         <p class="text-[20px] font-lato dark:text-gray-100">
@@ -47,10 +47,10 @@
         </p>
       </div>
     </section>
-  
+
     <section class="py-12 px-6 bg-gray-50 dark:bg-gray-800 transition-colors">
       <h2 class="text-[55px] font-bold text-center mb-10 font-quicksand dark:text-white">{{ $t('aboutUs.team_title') }}</h2>
-  
+
       <div class="flex gap-10 mb-10 justify-center">
         <MemberCard
           name="Lim Kity"
@@ -100,7 +100,7 @@
           linkedin="https://linkedin.com/in/vireak"
         />
       </div>
-  
+
     </section>
   </div>
 
@@ -108,6 +108,6 @@
 
 
 <script setup lang="ts">
-import bgSchool from '@/assets/images/image37.jpg'
+import bgSchool from '@/assets/images/bgSchool.png'
 import MemberCard from '@/components/MemberCard.vue'
 </script>

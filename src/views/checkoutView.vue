@@ -168,7 +168,7 @@
                   <!-- Product Image -->
                   <div class="shrink-0">
                     <img
-                      :src="item.image"
+                      :src="resolveItemImage(item)"
                       :alt="item.name"
                       class="w-20 h-20 object-cover rounded"
                     />
@@ -215,7 +215,7 @@
                   <span>{{ $t('cart.tax') }}</span>
                   <span>${{ tax.toFixed(2) }}</span>
                 </div>
-                
+
                 <div class="flex justify-between items-center text-xl text-gray-900 dark:text-gray-100">
                   <span>{{ $t('cart.shipping') }}</span>
                   <span>{{ Shipping }}</span>
@@ -334,6 +334,17 @@ import aba from '@/assets/images/aba.png'
 import khqr from '@/assets/images/khqr.png'
 import QRImage from '@/assets/images/QR.jpg'
 import authBackground from '@/assets/images/auth_background.jpg'
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || ''
+
+// Gracefully resolve item image from api path, array, or fallback
+const resolveItemImage = (item: any) => {
+  const raw = (Array.isArray(item.images) && item.images[0]) || item.image || ''
+  const cleaned = typeof raw === 'string' ? raw.trim() : ''
+  if (!cleaned) return '/Photo/ourproduct.png'
+  if (cleaned.startsWith('/')) return `${String(API_BASE_URL).replace(/\/$/, '')}${cleaned}`
+  return cleaned
+}
 
 
 //shipping and Payment option

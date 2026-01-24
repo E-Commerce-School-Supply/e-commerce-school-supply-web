@@ -1,7 +1,9 @@
 <template>
   <div
-    class="flex w-full h-[102px] items-center justify-between p-4 border rounded-lg cursor-pointer bg-white dark:bg-gray-800 dark:border-gray-700 transition-colors"
-    :class="{ 'border-[#1A535C] bg-[#1A535C] text-white': selected }"
+    class="flex w-full h-[102px] items-center justify-between p-4 rounded-lg cursor-pointer transition-colors"
+    :class="selected
+      ? 'bg-[#1A535C] border-[#1A535C] text-white dark:!bg-[#1A535C] dark:!border-[#1A535C]'
+      : 'border dark:bg-gray-800 dark:border-gray-700 text-black dark:text-gray-100'"
     @click="emitPay('select')"
   >
     <!-- Radio Button -->
@@ -18,10 +20,12 @@
 
       <!-- Label and Description -->
       <div>
-        <p class="font-semibold text-black dark:text-gray-100" :class="{'text-white':selected}">
-          {{ label }}</p>
-        <p class="text-sm text-gray-500 dark:text-gray-300" :class="{'text-white':selected}">
-          {{ description }}</p>
+        <p :class="selected ? 'text-white font-semibold' : 'text-black dark:text-gray-100 font-semibold'">
+          {{ label }}
+        </p>
+        <p :class="selected ? 'text-white text-sm' : 'text-gray-500 dark:text-gray-300 text-sm'">
+          {{ description }}
+        </p>
       </div>
     </div>
 

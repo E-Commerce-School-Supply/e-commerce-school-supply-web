@@ -422,7 +422,13 @@ onBeforeUnmount(() => {
 			<div class="hidden w-full md:hidden border-t border-gray-100 dark:border-gray-700" id="navbar-user">
 				<ul class="flex flex-col font-medium p-4 bg-gray-50 dark:bg-gray-800 space-y-2">
 					<li>
-						<router-link to="/" class="block py-2 px-3 text-gray-900 dark:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{{ $t('common.home') }}</router-link>
+						<router-link 
+							to="/" 
+							class="block py-2 px-3 text-gray-900 dark:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+							:class="isHome ? 'text-white bg-[#EF4444]' : 'text-gray-900 hover:bg-gray-100'"
+							>{{ $t('common.home') }}
+							
+						</router-link>
 					</li>
 					<li>
 						<router-link
@@ -439,14 +445,24 @@ onBeforeUnmount(() => {
 						</router-link>
 					</li> -->
 					<li>
-						<router-link to="/contact" class="block py-2 px-3 text-gray-900 dark:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+						<router-link 
+						to="/contact" 
+						class="block py-2 px-3 text-gray-900 dark:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+						:class="isContact ? 'text-white bg-[#EF4444]' : 'text-gray-900 hover:bg-gray-100'"
+						>
 							{{ $t('common.contact_us') }}
 						</router-link>
 					</li>
 					<li>
-						<router-link to="/about" class="block py-2 px-3 text-gray-900 dark:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{{ $t('common.about_us') }}</router-link>
+						<router-link 
+						to="/about" 
+						class="block py-2 px-3 text-gray-900 dark:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+						:class="isAbout ? 'text-white bg-[#EF4444]' : 'text-gray-900 hover:bg-gray-100'"
+						>
+							{{ $t('common.about_us') }}
+						</router-link>
 					</li>
-				<li class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700" @click.stop>
+				<li class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 relative" @click.stop>
 					<input
 						type="text"
 						v-model="searchQuery"
@@ -455,6 +471,28 @@ onBeforeUnmount(() => {
 						:placeholder="$t('header.search_placeholder')"
 						class="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-[#114B5F] dark:focus:ring-[#4EB8D4] focus:border-[#114B5F] dark:focus:border-[#4EB8D4] block p-2.5 placeholder-gray-500 dark:placeholder-gray-400"
 						>
+					
+					<!-- Mobile Search Results Dropdown -->
+					<div
+						v-if="isSearchFocused && searchQuery"
+						class="absolute top-full left-0 w-full mt-2 bg-white dark:bg-gray-700 rounded-lg shadow-xl border border-gray-100 dark:border-gray-600 z-50 overflow-hidden"
+					>
+						<ul v-if="searchResults.length > 0" class="max-h-60 overflow-y-auto">
+							<li
+								v-for="item in searchResults"
+								:key="item.id"
+								@click="goToProduct(item)"
+								class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer flex items-center gap-3 border-b border-gray-50 dark:border-gray-600 last:border-0"
+							>
+								<img :src="resolveProductImage(item)" class="w-8 h-8 object-contain">
+								<div>
+									<p class="text-sm font-medium text-gray-900 dark:text-white">{{ item.name }}</p>
+									<p class="text-xs text-gray-500 dark:text-gray-400">${{ Number(item.price || 0).toFixed(2) }}</p>
+								</div>
+							</li>
+						</ul>
+						<div v-else class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">No products found.</div>
+					</div>
 					</li>
 				</ul>
 			</div>

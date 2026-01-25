@@ -1,22 +1,56 @@
 <template>
   <div class="product-list-view w-full flex justify-center items-center bg-white dark:bg-gray-900 transition-colors">
 
-    <div class="w-18/20 relative ...">
-      <div>
-        <h1 class="text-[20px] my-10 text-gray-900 dark:text-white ...">{{ $t('productList.breadcrumb') }}</h1>
+    <div class="w-full lg:w-10/12 relative p-4 md:p-0">
+      <div class="flex justify-between items-center">
+        <h1 class="text-lg md:text-xl my-5 md:my-10 text-gray-900 dark:text-white ...">{{ $t('productList.breadcrumb') }}</h1>
+        <button
+          class="md:hidden text-gray-900 dark:text-white"
+          type="button"
+          data-drawer-target="drawer-filter"
+          data-drawer-show="drawer-filter"
+          aria-controls="drawer-filter"
+        >
+          <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path clip-rule="evenodd" fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path>
+          </svg>
+        </button>
       </div>
 
-      <div class="grid grid-cols-5 gap-4 ...">
-        <!-- Category -->
-        <div class="col-span-1 mb-20 ...">
-          <div class="sticky top-32">
+      <!-- Drawer -->
+      <div
+        id="drawer-filter"
+        class="fixed top-0 left-0 z-999  h-screen p-4 overflow-y-auto transition-transform -translate-x-full bg-white w-80 dark:bg-gray-800"
+        tabindex="-1"
+        aria-labelledby="drawer-filter-label"
+        data-drawer-backdrop="true"
+      >
+        <h5 id="drawer-filter-label" class="inline-flex items-center mb-4 text-base font-semibold text-gray-500 dark:text-gray-400">
+          <svg class="w-4 h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+          </svg>
+          {{ $t('productList.filters') }}
+        </h5>
+        <button
+          type="button"
+          data-drawer-hide="drawer-filter"
+          aria-controls="drawer-filter"
+          class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white"
+        >
+          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+          </svg>
+          <span class="sr-only">Close menu</span>
+        </button>
+        <div class="col-span-1 mb-10 md:mb-20 ...">
+          <div class="md:sticky top-32">
             <h1 class="text-[20px] font-semibold mb-5 text-gray-900 dark:text-white">{{ $t('productList.category') }}</h1>
 
             <div class="text-base/8 text-[15px] text-gray-700 dark:text-gray-300">
               <div
                 v-for="cat in categories"
                 :key="cat"
-                class="flex items-center cursor-pointer select-none"
+                class="flex items-center cursor-pointer select-none mb-2"
                 @click="selectCategory(cat)"
               >
                 <div
@@ -29,7 +63,7 @@
               </div>
             </div>
 
-            <div class="pr-20">
+            <div class="pr-0 md:pr-20">
               <h1 class="text-[20px] font-semibold my-5 text-gray-900 dark:text-white">{{ $t('productList.price') }}</h1>
 
               <div class="flex justify-between text-gray-700 dark:text-gray-300">
@@ -78,7 +112,101 @@
                 <div
                   v-for="r in ratingOptions"
                   :key="r"
-                  class="flex items-center cursor-pointer select-none"
+                  class="flex items-center cursor-pointer select-none mb-2"
+                  @click="selectMinRating(r)"
+                >
+                  <div
+                    class="h-5 w-5 rounded-full border-2 transition-all flex items-center justify-center"
+                    :class="selectedMinRating === r ? 'border-[#1A535C] dark:border-[#4EB8D4] ring-[#1A535C] dark:ring-[#4EB8D4] dark:ring-offset-gray-900' : 'border-black dark:border-gray-400'"
+                  >
+                    <div v-if="selectedMinRating === r" class="h-2.5 w-2.5 rounded-full bg-[#1A535C] dark:bg-cyan-300"></div>
+                  </div>
+                  <div class="ml-2 text-[#FF6B6B] text-[24px] flex items-baseline">
+                    <template v-for="n in 5" :key="n">
+                      <span>{{ n <= r ? '★' : '☆' }}</span>
+                    </template>
+                    <p class="ml-2 text-black dark:text-white text-[16px] font-light">{{ r.toFixed(1) }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4 ...">
+        <!-- Category -->
+        <div class="hidden md:block col-span-1 mb-10 md:mb-20 ...">
+          <div class="md:sticky top-32">
+            <h1 class="text-[20px] font-semibold mb-5 text-gray-900 dark:text-white">{{ $t('productList.category') }}</h1>
+
+            <div class="text-base/8 text-[15px] text-gray-700 dark:text-gray-300">
+              <div
+                v-for="cat in categories"
+                :key="cat"
+                class="flex items-center cursor-pointer select-none mb-2"
+                @click="selectCategory(cat)"
+              >
+                <div
+                  class="h-5 w-5 rounded-full border-2 transition-all flex items-center justify-center"
+                  :class="selectedCategory === cat ? 'border-[#1A535C] dark:border-[#4EB8D4]' : 'border-black dark:border-gray-400'"
+                >
+                  <div v-if="selectedCategory === cat" class="h-2.5 w-2.5 rounded-full bg-[#1A535C] dark:bg-cyan-300"></div>
+                </div>
+                <p class="ml-2 text-[15px]">{{ cat }}</p>
+              </div>
+            </div>
+
+            <div class="pr-0 md:pr-20">
+              <h1 class="text-[20px] font-semibold my-5 text-gray-900 dark:text-white">{{ $t('productList.price') }}</h1>
+
+              <div class="flex justify-between text-gray-700 dark:text-gray-300">
+                <p>{{ $t('productList.range') }}</p>
+                <p>${{ Math.round(priceMin) }}-{{ Math.round(priceMax) }}</p>
+              </div>
+
+              <div class="my-3 relative h-6">
+                <div class="absolute top-1/2 -translate-y-1/2 w-full h-3 bg-[#E6E6E6] dark:bg-gray-700 rounded-full"></div>
+                <div
+                  class="absolute top-1/2 -translate-y-1/2 h-3 bg-black dark:bg-cyan-300 rounded-full"
+                  :style="{ left: minPercent + '%', width: Math.max(0, maxPercent - minPercent) + '%' }"
+                ></div>
+
+                <div
+                  class="absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-black dark:bg-cyan-300 z-10"
+                  :style="{ left: 'calc(' + minPercent + '% - 10px)' }"
+                ></div>
+                <div
+                  class="absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-black dark:bg-cyan-300 z-10"
+                  :style="{ left: 'calc(' + maxPercent + '% - 10px)' }"
+                ></div>
+
+                <input
+                  type="range"
+                  class="absolute inset-0 w-full opacity-0 cursor-pointer"
+                  :min="priceMinLimit"
+                  :max="priceMaxLimit"
+                  v-model.number="priceMin"
+                  @input="onPriceMinInput"
+                />
+                <input
+                  type="range"
+                  class="absolute inset-0 w-full opacity-0 cursor-pointer"
+                  :min="priceMinLimit"
+                  :max="priceMaxLimit"
+                  v-model.number="priceMax"
+                  @input="onPriceMaxInput"
+                />
+              </div>
+            </div>
+
+            <div class="mb-10 mt-5">
+              <h1 class="text-[20px] font-semibold mb-5 text-gray-900 dark:text-white">{{ $t('productList.customer_review') }}</h1>
+              <div class="text-base/8 text-[15px] text-gray-700 dark:text-gray-300">
+                <div
+                  v-for="r in ratingOptions"
+                  :key="r"
+                  class="flex items-center cursor-pointer select-none mb-2"
                   @click="selectMinRating(r)"
                 >
                   <div
@@ -100,7 +228,7 @@
         </div>
 
         <!-- Product List -->
-        <div class="col-start-2 col-end-6 ...">
+        <div class="col-span-1 md:col-span-4 ...">
           <div class="flex justify-between mb-10 items-baseline">
             <h1 class="text-[20px] text-gray-900 dark:text-white">{{ selectedCategory ? `'${selectedCategory}'` : $t('productList.school_products') }}</h1>
             <p class="text-[16px] font-light text-gray-600 dark:text-gray-400">{{ $t('productList.items_count', { count: filteredAllProducts.length }) }}</p>
@@ -109,20 +237,28 @@
             <Spinner/>
           </div>
           <div v-else-if ="filteredAllProducts.length === 0" class="text-center">
-              <img src="/src/assets/images/empty.png" alt="No products" class="mx-auto w-[430px] h-[430px] mb-4" />
+              <img src="/src/assets/images/empty.png" alt="No products" class="mx-auto w-[280px] h-[280px] md:w-[430px] md:h-[430px] mb-4" />
               <p class="text-[24px] font-medium text-[#BFBFBF]">{{ $t('productList.no_items') }}</p>
           </div>
-          <div v-else class="flex flex-wrap gap-5">
+          <div v-else class="flex flex-wrap gap-5 justify-center md:justify-start">
             <product-card-component :products="products" />
           </div>
 
-          <div v-if="totalPages() > 0" class="flex justify-end my-20 items-center gap-6 text-[16px] text-gray-700 dark:text-gray-300">
+          <div v-if="totalPages() > 0" class="flex justify-center md:justify-end my-20 items-center gap-2 md:gap-6 text-[16px] text-gray-700 dark:text-gray-300">
             <!-- Previous -->
             <div
               @click="previousPage"
               :class="currentPage === 1 ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'text-[#757575] dark:text-gray-400 cursor-pointer hover:text-black dark:hover:text-white'"
+              class="hidden md:block"
             >
               &larr; {{ $t('productList.previous') }}
+            </div>
+             <div
+              @click="previousPage"
+              :class="currentPage === 1 ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'text-[#757575] dark:text-gray-400 cursor-pointer hover:text-black dark:hover:text-white'"
+              class="block md:hidden text-2xl"
+            >
+              &larr;
             </div>
 
             <!-- Page Numbers -->
@@ -146,15 +282,23 @@
             <div
               @click="nextPage"
               :class="currentPage === totalPages() ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'cursor-pointer hover:text-black dark:hover:text-white'"
+              class="hidden md:block"
             >
               {{ $t('productList.next') }} &rarr;
+            </div>
+            <div
+              @click="nextPage"
+              :class="currentPage === totalPages() ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'cursor-pointer hover:text-black dark:hover:text-white'"
+              class="block md:hidden text-2xl"
+            >
+              &rarr;
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="w-1/20"></div>
+    <div class="w-0 lg:w-1/20"></div>
   </div>
 </template>
 

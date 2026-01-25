@@ -39,7 +39,7 @@
     <!-- Info Section -->
     <div class="p-4 bg-[#F5F5F5] dark:bg-gray-700 m-2 rounded-[20px]">
       <!-- Product Name -->
-      <h1 class="text-[14px] font-bold text-gray-900 dark:text-white">{{ product.name }}</h1>
+      <h1 class="w-full max-w-sm text-[14px] font-bold text-gray-900 dark:text-white truncate">{{ product.name }}</h1>
 
       <!-- Rating -->
       <StarRating :rating="product.averageRating" :showNumber="true" class="mb-3" />

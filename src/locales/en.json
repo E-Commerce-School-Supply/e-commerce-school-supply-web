@@ -208,6 +208,7 @@
   "productList": {
     "breadcrumb": "Home / Products",
     "category": "Category",
+    "filters": "Filter",
     "price": "Price",
     "range": "Range",
     "customer_review": "Customer Review",
@@ -388,6 +389,8 @@
     "mission": "We combine quality, convenience, and care to deliver a smooth shopping experience.",
     "goal_title": "Our goal",
     "goal_description": "Our goal is to provide students, parents, and educators with easy access to affordable, high-quality school supplies through a seamless and reliable online shopping experience.",
+    "vision_title": "Our vision",
+    "vision_description": "Our vision is to improve accessibility to school supplies for students and educational institutions. The platform aims to simplify the purchasing process while ensuring convenience, reliability, and user-friendliness.",
     "team_title": "Meet Our Team",
     "role_backend": "Back-end developer",
     "role_frontend_designer": "Front-end developer, designer",

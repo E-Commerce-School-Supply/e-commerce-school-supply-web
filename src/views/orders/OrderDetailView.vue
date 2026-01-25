@@ -77,7 +77,7 @@ const itemImage = (it: any) => {
     <div v-else-if="!order" class="text-gray-700 dark:text-gray-300">{{ $t('order_detail.not_found') }}</div>
     <div v-else class="relative text-gray-900 dark:text-gray-100">
       <div class="mb-6 flex items-center justify-between">
-        <h1 class="text-2xl font-semibold">{{ $t('order_detail.title') }}: {{ order.id || order.orderId }}</h1>
+        <h1 class="text-2xl font-semibold truncate w-full max-w-sm">{{ $t('order_detail.title') }}: {{ order.id || order.orderId }}</h1>
         <div>
           <button @click="$router.back()" class="px-4 py-2 border rounded-base bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">{{ $t('order_detail.back') }}</button>
         </div>

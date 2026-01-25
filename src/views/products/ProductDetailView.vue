@@ -207,7 +207,9 @@ import { useI18n } from "vue-i18n";
 
             const productColors = computed(() => {
                 const p = backendProduct.value
-                return p?.color ? [p.color] : []
+                const colorString = p?.color || ''
+                // Split comma-separated color string into array
+                return colorString.split(',').map(c => c.trim()).filter(Boolean)
             })
 
             function resolveBackendUrl(maybeUrl: unknown): string {

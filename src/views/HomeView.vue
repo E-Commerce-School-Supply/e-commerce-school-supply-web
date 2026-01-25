@@ -4,6 +4,8 @@ import { initFlowbite } from 'flowbite'
 import { useAuthStore } from '@/stores/authStore'
 import { useProductStore } from '@/stores/productStore'
 import { useCartStore } from '@/stores/cartStore'
+import { useFavoriteStore } from '@/stores/favoriteStore'
+import { useToastStore } from '@/stores/toastStore'
 import { useRouter } from 'vue-router'
 import Spinner from '@/components/ui/Spinner.vue'
 import { useI18n } from 'vue-i18n' // Import i18n
@@ -13,6 +15,8 @@ import ColourPickerComponent from '@/components/ProductDetail/colour-picker-comp
 const authStore = useAuthStore()
 const productStore = useProductStore()
 const cartStore = useCartStore()
+const favoriteStore = useFavoriteStore()
+const toastStore = useToastStore()
 const router = useRouter()
 const { t } = useI18n() // Destructure t function
 const API_BASE_URL = import.meta.env.VITE_API_URL || ''
@@ -98,8 +102,33 @@ const addToCart = async (product: any) => {
   }
 }
 
-const addToWishlist = () => {
-  wishlistCount.value++
+const addToWishlist = async (product: any) => {
+  if (!isAuthenticated.value) {
+    activeAuthTab.value = 'signin'
+    showAuthPrompt.value = true
+    return
+  }
+
+  if (!product?.id) return
+
+  try {
+    if (isFavorited(product.id)) {
+      await favoriteStore.deleteFavorite(product.id)
+      toastStore.showToast(t('productCard.toast_favorite_deleted') || 'Removed from favorites', 'error')
+      wishlistCount.value--
+    } else {
+      await favoriteStore.addFavorite(product)
+      toastStore.showToast(t('productCard.toast_favorite_saved') || 'Added to favorites!', 'success')
+      wishlistCount.value++
+    }
+  } catch (error) {
+    console.error('Error toggling favorite:', error)
+  }
+}
+
+const isFavorited = (productId: string | undefined) => {
+  if (!productId) return false
+  return favoriteStore.favProduct.some((p: any) => p.id === productId)
 }
 
 // --- HELPERS ---
@@ -249,6 +278,11 @@ const scrollRight = () => productScrollContainer.value?.scrollBy({ left: 320, be
 onMounted(() => {
   initFlowbite()
   loadProducts()
+  if (isAuthenticated.value) {
+    favoriteStore.fetchFavorite().catch(() => {
+      // ignore
+    })
+  }
 })
 </script>
 
@@ -271,12 +305,9 @@ onMounted(() => {
             {{ $t('home.hero_btn') }}
           </router-link>
         </div>
-        <div class="hidden lg:mt-0 lg:col-span-6 lg:flex justify-end relative">
+        <div class="mt-0 col-span-6 flex justify-end relative">
           <div class="absolute bg-white rounded-full h-[500px] w-[500px] -z-10 top-1/2 right-0 transform -translate-y-1/2 scale-90 opacity-50 shadow-sm"></div>
           <img src="/Photo/Logo.JPG" alt="School Supplies" class="relative z-10 w-full max-w-lg object-contain drop-shadow-2xl rounded-xl">
-        </div>
-        <div class="lg:hidden mt-8 flex justify-center relative w-full">
-          <img src="https://images.unsplash.com/photo-1452860606245-08befc0ff44b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="School Supplies" class="relative z-10 w-full max-w-md rounded-lg shadow-lg">
         </div>
       </div>
     </section>
@@ -411,8 +442,10 @@ onMounted(() => {
                 <div v-if="(product.stockQuantity ?? 0) <= 0" class="absolute top-3 left-3 bg-red-600 text-white text-[12px] px-2 py-1 rounded">
                   {{ $t('home.out_of_stock') }}
                 </div>
-                <button @click.stop="addToWishlist" class="absolute top-3 right-3 text-gray-400 dark:text-gray-500 hover:text-red-500 transition-colors">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                <button @click.stop="addToWishlist(product)" class="absolute top-3 right-3 bg-white dark:bg-gray-700 rounded-full p-2 hover:shadow-md transition">
+                  <svg class="w-5 h-5" :class="isFavorited(product.id) ? 'text-red-500 fill-current' : 'text-gray-400 dark:text-gray-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                  </svg>
                 </button>
                 <img :src="product.image" :alt="product.name" class="h-48 object-contain mix-blend-multiply dark:mix-blend-normal">
               </div>

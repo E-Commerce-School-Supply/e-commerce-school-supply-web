@@ -13,10 +13,10 @@
     <!-- Show Form if no review submitted -->
         <!-- Show Form if no review submitted -->
     <div v-else>
-      <h2 class="text-2xl font-bold dark:text-white">{{ $t('writeReview.title') }}</h2>
-      <div class="flex gap-4 mt-4">
+      <h2 class="text-lg md:text-xl lg:text-2xl font-bold dark:text-white">{{ $t('writeReview.title') }}</h2>
+      <div class="flex flex-col sm:flex-row gap-3 md:gap-4 mt-4">
         <!-- Profile -->
-        <img :src="profilePicSrc" class="w-[50px] h-[50px] rounded-full bg-gray-400" />
+        <img :src="profilePicSrc" class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gray-400 self-start" />
 
         <!-- Form -->
         <div class="flex-1 space-y-3">
@@ -24,23 +24,23 @@
             type="text"
             :placeholder="$t('writeReview.placeholder_title')"
             v-model="title"
-            class="w-full h-10 px-3 rounded-sm focus:outline-none bg-white dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+            class="w-full h-9 md:h-10 px-3 text-sm md:text-base rounded-sm focus:outline-none focus:ring-2 focus:ring-[#1A535C] bg-white dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
           />
           <textarea
             :placeholder="$t('writeReview.placeholder_body')"
             v-model="body"
-            class="w-full h-[150px] px-3 py-2 rounded-sm resize-none focus:outline-none bg-white dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+            class="w-full h-32 md:h-40 px-3 py-2 text-sm md:text-base rounded-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#1A535C] bg-white dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
           ></textarea>
         </div>
       </div>
 
-      <div class="flex items-center gap-4 flex-wrap justify-end mt-4">
-        <div class="flex flex-col text-sm dark:text-gray-300">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4 flex-wrap justify-end mt-4">
+        <div class="flex flex-col text-xs md:text-sm dark:text-gray-300">
           <label class="font-semibold mb-1">{{ $t('writeReview.recommend_prompt') }}</label>
           <drop-down-component v-model="recommendOption" :options="recommendOptions" />
         </div>
 
-        <div class="flex flex-col text-sm dark:text-gray-300">
+        <div class="flex flex-col text-xs md:text-sm dark:text-gray-300">
           <label class="font-semibold mb-1">{{ $t('writeReview.rating_prompt') }}</label>
           <drop-down-component v-model="starOption" :options="starOptions" />
         </div>
@@ -48,14 +48,14 @@
         <button
           v-if="isEditing"
           @click="cancelEdit"
-          class="mt-6 px-6 py-3 bg-gray-500 text-white rounded-sm font-semibold dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-700"
+          class="sm:mt-6 px-4 md:px-6 py-2 md:py-3 text-sm md:text-base bg-gray-500 text-white rounded-sm font-semibold dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-700 transition"
         >
           {{ $t('writeReview.cancel_button') || 'Cancel' }}
         </button>
 
         <button
           @click="submitReview"
-          class="mt-6 px-6 py-3 bg-[#1A535C] text-white rounded-sm font-semibold dark:bg-[#1A535C] dark:text-gray-100 dark:hover:bg-[#2A7A8F]"
+          class="sm:mt-6 px-4 md:px-6 py-2 md:py-3 text-sm md:text-base bg-[#1A535C] text-white rounded-sm font-semibold dark:bg-[#1A535C] dark:text-gray-100 dark:hover:bg-[#2A7A8F] transition"
         >
           {{ isEditing ? ($t('writeReview.update_button') || 'Update') : $t('writeReview.post_button') }}
         </button>

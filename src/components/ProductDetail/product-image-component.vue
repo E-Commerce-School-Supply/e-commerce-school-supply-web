@@ -17,13 +17,13 @@
         </div>
 
         <!-- Thumbnail Images (Bottom Row) -->
-        <div v-if="images.length > 1" class="flex flex-wrap gap-3 justify-start">
+        <div v-if="images.length > 1" class="flex flex-wrap gap-2 md:gap-3 justify-start">
             <button
                 v-for="(image, index) in images"
                 :key="index"
                 type="button"
                 @click="selectImage(index)"
-                class="w-16 h-16 sm:w-20 sm:h-20 cursor-pointer border rounded-md overflow-hidden hover:border-[#1A535C] transition bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1A535C]"
+                class="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 cursor-pointer border rounded-md overflow-hidden hover:border-[#1A535C] transition bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1A535C]"
                 :class="{ 'border-[#1A535C] border-2': selectedIndex === index }"
                 :aria-pressed="selectedIndex === index"
             >

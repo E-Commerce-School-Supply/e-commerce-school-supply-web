@@ -1,6 +1,6 @@
 <template>
-  <div class="bg-white dark:bg-gray-800 dark:border dark:border-gray-700 rounded-xl shadow-md p-6 text-center w-full max-w-xs transition-colors">
-    <img :src="avatar" alt="Avatar" class="w-24 h-24 mx-auto rounded-full object-cover mb-4" />
+  <div class="bg-white dark:bg-gray-800 dark:border dark:border-gray-700 rounded-xl shadow-md p-6 text-center w-full transition-colors">
+    <img :src="avatar" alt="Avatar" class="w-24 h-24 mx-auto rounded-full object-cover object-top mb-4" />
     <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">{{ name }}</h3>
     <p class="text-sm text-gray-500 dark:text-gray-300 mb-2">{{ role }}</p>
     <a

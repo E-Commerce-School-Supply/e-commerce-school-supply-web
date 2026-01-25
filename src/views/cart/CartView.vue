@@ -64,7 +64,7 @@
           <li class="flex justify-between mt-8">
             <span class="text-[#5C5F6A] dark:text-gray-400">{{ $t('cart.shipping') }}</span>
             <span class="text-gray-900 dark:text-white">
-              {{ cartStore.shipping === 0 ? $t('cart.free') : `$${cartStore.shipping.toFixed(2)}` }}
+              --
             </span>
           </li>
 

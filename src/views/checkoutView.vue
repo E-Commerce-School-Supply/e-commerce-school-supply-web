@@ -1,29 +1,29 @@
 <template>
   <div class="min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors">
 
-    <div class="flex justify-around p-10">
+    <div class="flex flex-col lg:flex-row justify-around gap-6 p-4 md:p-6 lg:p-10">
 
     <!-- Left side -->
 
-    <div>
-      <div class="w-5xl p-8 border border-gray-200 dark:border-gray-700 rounded-2xl mb-5 bg-white dark:bg-gray-800 transition-colors">
+    <div class="w-full lg:flex-1">
+      <div class="w-full p-4 md:p-6 lg:p-8 border border-gray-200 dark:border-gray-700 rounded-2xl mb-5 bg-white dark:bg-gray-800 transition-colors">
 
-        <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">{{ $t('checkout.delivery_address') }}</h2>
+        <h2 class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-4">{{ $t('checkout.delivery_address') }}</h2>
 
         <AddDropdown
           :addresses="savedAddresses"
           v-model="selectedAddress"
           class="mb-5"
         />
-        <div class="mt-3 mb-5 flex gap-2">
-          <button v-if="selectedAddress && selectedAddress.id" @click="openEdit" class="px-4 py-2 bg-[#1A535C] text-white rounded hover:bg-[#2A7A8F] transition-colors">{{ $t('checkout.edit_selected_address') }}</button>
-          <button @click="addNewAddress" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">{{ $t('checkout.add_new_address') }}</button>
+        <div class="mt-3 mb-5 flex flex-col sm:flex-row gap-2">
+          <button v-if="selectedAddress && selectedAddress.id" @click="openEdit" class="w-full sm:w-auto px-4 py-2 bg-[#1A535C] text-white rounded hover:bg-[#2A7A8F] transition-colors">{{ $t('checkout.edit_selected_address') }}</button>
+          <button @click="addNewAddress" class="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">{{ $t('checkout.add_new_address') }}</button>
         </div>
 
         <!-- Address Detail Section -->
-        <h3 class="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $t('checkout.address_detail') }}</h3>
+        <h3 class="mb-4 text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $t('checkout.address_detail') }}</h3>
 
-        <div v-if="selectedAddress" class=" grid grid-cols-2 gap-4">
+        <div v-if="selectedAddress" class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">{{ $t('checkout.country') }}</label>
@@ -67,12 +67,12 @@
       </div>
 
         <!-- Shipping option -->
-        <div class="w-5xl border border-gray-200 dark:border-gray-700 rounded-2xl p-8 mb-5 bg-white dark:bg-gray-800 transition-colors">
-          <div class="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-100">
+        <div class="w-full border border-gray-200 dark:border-gray-700 rounded-2xl p-4 md:p-6 lg:p-8 mb-5 bg-white dark:bg-gray-800 transition-colors">
+          <div class="mb-4 text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100">
               {{ $t('checkout.shipping_options') }}
           </div>
 
-          <div class="flex gap-6">
+          <div class="flex flex-col sm:flex-row gap-4 md:gap-6">
           <ShippingOption
             :label="$t('checkout.shipping_standard')"
             :description="$t('checkout.shipping_standard_days')"
@@ -91,8 +91,8 @@
         </div>
 
         <!-- Payment option -->
-         <div class="w-5xl border border-gray-200 dark:border-gray-700 rounded-2xl p-8 bg-white dark:bg-gray-800 transition-colors">
-          <div class="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-100">
+         <div class="w-full border border-gray-200 dark:border-gray-700 rounded-2xl p-4 md:p-6 lg:p-8 bg-white dark:bg-gray-800 transition-colors">
+          <div class="mb-4 text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100">
               {{ $t('checkout.payment_method') }}
           </div>
 
@@ -113,7 +113,7 @@
               v-model="selectedCard"
             />
 
-            <div v-if="selectedCardment === 'card' && selectedCard" class=" grid grid-cols-1 gap-4">
+            <div v-if="selectedCardment === 'card' && selectedCard" class="grid grid-cols-1 gap-4">
 
                 <div>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">{{ $t('checkout.name_on_card') }}</label>
@@ -125,7 +125,7 @@
                   <input v-model="selectedCard.cardNum" placeholder="0000 0000 0000 0000" type="text" class="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors" />
                 </div>
 
-                <div class="flex gap-4">
+                <div class="flex flex-col sm:flex-row gap-4">
                   <div class="flex-1">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">{{ $t('checkout.expiration_date') }}</label>
                     <input v-model="selectedCard.expire" placeholder="00/00" type="text" class="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors" />
@@ -146,9 +146,9 @@
 
 
     <!-- Right side -->
-    <div class="min-h-screen bg-white dark:bg-gray-900 p-4 transition-colors">
+    <div class="w-full lg:w-auto lg:min-w-[400px] bg-white dark:bg-gray-900 p-4 transition-colors">
 
-      <div class="max-w-4xl">
+      <div class="w-full">
         <div class="flex flex-col-reverse">
           <!-- Main content area -->
           <div class="flex-1"></div>
@@ -156,40 +156,40 @@
           <!-- Order Summary Card -->
           <div class="w-full">
               <!-- Title -->
-              <h2 class="text-2xl font-bold mb-8 text-gray-900 dark:text-gray-100">{{ $t('cart.summary_title') }}</h2>
+              <h2 class="text-xl md:text-2xl font-bold mb-4 md:mb-8 text-gray-900 dark:text-gray-100">{{ $t('cart.summary_title') }}</h2>
 
               <!-- Order Items -->
-              <div class="space-y-6 pb-6">
+              <div class="space-y-4 md:space-y-6 pb-4 md:pb-6">
                 <div
                   v-for="item in orderItems"
                   :key="item.productId"
-                  class="flex gap-4"
+                  class="flex gap-3 md:gap-4"
                 >
                   <!-- Product Image -->
                   <div class="shrink-0">
                     <img
                       :src="resolveItemImage(item)"
                       :alt="item.name"
-                      class="w-20 h-20 object-cover rounded"
+                      class="w-16 h-16 md:w-20 md:h-20 object-cover rounded"
                     />
                   </div>
 
                   <!-- Product Details -->
                   <div class="grow">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    <h3 class="text-sm md:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100">
                       {{ item.name }}
                     </h3>
-                    <p class="text-sm font-light mt-1 text-gray-600 dark:text-gray-300">
+                    <p class="text-xs md:text-sm font-light mt-1 text-gray-600 dark:text-gray-300">
                       {{ item.color }}
                     </p>
                   </div>
 
                   <!-- Price -->
                   <div class="shrink-0 text-right">
-                    <p class="text-base font-bold text-gray-900 dark:text-gray-100">
+                    <p class="text-sm md:text-base font-bold text-gray-900 dark:text-gray-100">
                       ${{ item.price.toFixed(2) }}
                     </p>
-                    <p class="text-sm font-light text-gray-500 dark:text-gray-300">
+                    <p class="text-xs md:text-sm font-light text-gray-500 dark:text-gray-300">
                       x{{ item.quantity }}
                     </p>
                   </div>
@@ -200,23 +200,23 @@
               <hr class="border-2 border-gray-200 dark:border-gray-700 mb-6" />
 
               <!-- Price Breakdown -->
-              <div class="space-y-4 mb-6">
-                <div class="flex justify-between items-center text-xl text-gray-900 dark:text-gray-100">
+              <div class="space-y-3 md:space-y-4 mb-4 md:mb-6">
+                <div class="flex justify-between items-center text-base md:text-lg lg:text-xl text-gray-900 dark:text-gray-100">
                   <span>{{ $t('cart.subtotal') }}</span>
                   <span>${{ subtotal.toFixed(2) }}</span>
                 </div>
 
-                <div class="flex justify-between items-center text-xl text-gray-900 dark:text-gray-100">
+                <div class="flex justify-between items-center text-base md:text-lg lg:text-xl text-gray-900 dark:text-gray-100">
                   <span>{{ $t('checkout.discount') }}</span>
                   <span>-${{ discount.toFixed(2) }}</span>
                 </div>
 
-                <div class="flex justify-between items-center text-xl text-gray-900 dark:text-gray-100">
+                <div class="flex justify-between items-center text-base md:text-lg lg:text-xl text-gray-900 dark:text-gray-100">
                   <span>{{ $t('cart.tax') }}</span>
                   <span>${{ tax.toFixed(2) }}</span>
                 </div>
 
-                <div class="flex justify-between items-center text-xl text-gray-900 dark:text-gray-100">
+                <div class="flex justify-between items-center text-base md:text-lg lg:text-xl text-gray-900 dark:text-gray-100">
                   <span>{{ $t('cart.shipping') }}</span>
                   <span>{{ Shipping }}</span>
                 </div>
@@ -226,24 +226,24 @@
               <hr class="border-2 border-gray-200 dark:border-gray-700 mb-6" />
 
               <!-- Total -->
-              <div class="flex justify-between items-center mb-8">
-                <span class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $t('cart.total') }}</span>
-                <span class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+              <div class="flex justify-between items-center mb-4 md:mb-8">
+                <span class="text-lg md:text-xl lg:text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $t('cart.total') }}</span>
+                <span class="text-lg md:text-xl lg:text-2xl font-semibold text-gray-900 dark:text-gray-100">
                   ${{ total.toFixed(2) }}
                 </span>
               </div>
 
               <!-- Discount Code Input -->
-              <div class="flex gap-2 mb-6">
+              <div class="flex flex-col sm:flex-row gap-2 mb-4 md:mb-6">
                 <input
                   type="text"
                   :placeholder="$t('checkout.discount_code')"
                   v-model="discountCode"
-                  class="grow px-4 py-3 border border-gray-300 dark:border-gray-600 rounded text-base bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
+                  class="grow px-3 md:px-4 py-2 md:py-3 border border-gray-300 dark:border-gray-600 rounded text-sm md:text-base bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors"
                 />
                 <button
                   @click="handleApplyDiscount"
-                  class="px-6 py-3 bg-[#1A535C] text-white font-medium rounded hover:bg-[#2A7A8F] transition-colors"
+                  class="w-full sm:w-auto px-4 md:px-6 py-2 md:py-3 bg-[#1A535C] text-white font-medium rounded hover:bg-[#2A7A8F] transition-colors text-sm md:text-base"
                 >
                   {{ $t('common.apply') }}
                 </button>
@@ -253,7 +253,7 @@
               <button
                 @click="handleConfirmPayment"
                 :disabled="isProcessing"
-                class="w-full py-4 bg-[#1A535C] text-white font-bold rounded text-base disabled:opacity-60 hover:bg-[#2A7A8F] transition-colors"
+                class="w-full py-3 md:py-4 bg-[#1A535C] text-white font-bold rounded text-sm md:text-base disabled:opacity-60 hover:bg-[#2A7A8F] transition-colors"
               >
                 <span v-if="isProcessing">{{ $t('common.processing') }}</span>
                 <span v-else>{{ $t('checkout.confirm_pay') }} ${{ total.toFixed(2) }}</span>
@@ -272,15 +272,15 @@
   </div>
 
   <!-- QR overlay shown after clicking Confirm & Pay -->
-  <div v-if="showQR" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-colors">
-    <div class="bg-white p-12 rounded-3xl w-full max-w-2xl text-center shadow-2xl transition-colors">
-      <h3 class="text-2xl font-bold mb-6 text-gray-900">{{ $t('checkout.scan_to_pay') }}</h3>
-      <img :src="QRImage" alt="QR" class="mx-auto mb-6 w-72 h-72 md:w-96 md:h-96 object-contain" />
+  <div v-if="showQR" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-colors p-4">
+    <div class="bg-white p-6 md:p-10 lg:p-12 rounded-2xl md:rounded-3xl w-full max-w-md md:max-w-2xl text-center shadow-2xl transition-colors">
+      <h3 class="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-gray-900">{{ $t('checkout.scan_to_pay') }}</h3>
+      <img :src="QRImage" alt="QR" class="mx-auto mb-4 md:mb-6 w-56 h-56 md:w-72 md:h-72 lg:w-96 lg:h-96 object-contain" />
       <div class="mt-4 flex justify-center">
         <button
           @click="handleDone"
           :disabled="isDoneProcessing"
-          class="px-10 py-4 bg-[#1A535C] text-white rounded-xl text-lg shadow hover:bg-[#2A7A8F] transition-colors disabled:opacity-60"
+          class="w-full sm:w-auto px-8 md:px-10 py-3 md:py-4 bg-[#1A535C] text-white rounded-lg md:rounded-xl text-base md:text-lg shadow hover:bg-[#2A7A8F] transition-colors disabled:opacity-60"
         >
           <span v-if="isDoneProcessing">{{ $t('common.processing') }}</span>
           <span v-else>{{ $t('common.done') }}</span>
@@ -290,21 +290,21 @@
   </div>
 
   <!-- Success overlay shown after order is placed -->
-  <div v-if="showSuccess" class="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-colors" >
-    <div class="bg-white p-8 rounded-3xl w-full max-w-md text-center shadow-2xl transition-colors">
+  <div v-if="showSuccess" class="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-colors p-4" >
+    <div class="bg-white p-6 md:p-8 rounded-2xl md:rounded-3xl w-full max-w-sm md:max-w-md text-center shadow-2xl transition-colors">
       <div class="flex items-center justify-center mb-4">
-        <div class="bg-green-100 text-green-700 rounded-full p-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
+        <div class="bg-green-100 text-green-700 rounded-full p-3 md:p-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 10-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
           </svg>
         </div>
       </div>
-      <h3 class="text-2xl font-bold mb-2 text-gray-900 ">{{ $t('checkout.order_success_title') }}</h3>
-      <p class="text-gray-600 mb-4">{{ $t('checkout.order_success_msg') }}</p>
-      <p class="font-semibold mb-6 text-gray-900">{{ $t('cart.total') }}: ${{ successTotal.toFixed(2) }}</p>
-      <div class="flex gap-3 justify-center">
-        <button @click="goToOrders" class="px-6 py-3 bg-[#1A535C] text-white rounded-md font-medium hover:bg-[#2A7A8F] transition-colors">{{ $t('checkout.view_orders') }}</button>
-        <button @click="continueShopping" class="px-6 py-3 bg-gray-100 dark:bg-gray-800 dark:text-gray-100 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">{{ $t('common.continue_shopping') }}</button>
+      <h3 class="text-xl md:text-2xl font-bold mb-2 text-gray-900 ">{{ $t('checkout.order_success_title') }}</h3>
+      <p class="text-sm md:text-base text-gray-600 mb-3 md:mb-4">{{ $t('checkout.order_success_msg') }}</p>
+      <p class="text-sm md:text-base font-semibold mb-4 md:mb-6 text-gray-900">{{ $t('cart.total') }}: ${{ successTotal.toFixed(2) }}</p>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <button @click="goToOrders" class="w-full sm:w-auto px-4 md:px-6 py-2 md:py-3 bg-[#1A535C] text-white rounded-md font-medium hover:bg-[#2A7A8F] transition-colors text-sm md:text-base">{{ $t('checkout.view_orders') }}</button>
+        <button @click="continueShopping" class="w-full sm:w-auto px-4 md:px-6 py-2 md:py-3 bg-gray-100 dark:bg-gray-800 dark:text-gray-100 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm md:text-base">{{ $t('common.continue_shopping') }}</button>
       </div>
     </div>
   </div>

@@ -32,7 +32,53 @@
             </div>
 
 
-            <div class="grid grid-cols-6 gap-4 relative ...">
+            <!-- Mobile View: Stack Vertically -->
+            <div class="flex flex-col gap-4 lg:hidden">
+                <!-- 1. Overall Rating & Graph -->
+                <div class="bg-[#F5F5F5] dark:bg-gray-800 rounded-md p-4">
+                    <ProductRatingComponent :rating="averageRating" :reviews="productReviews.length" :recommend="recommendCount" />
+                </div>
+                <div class="bg-[#1A535C] rounded-md p-4 text-white dark:text-gray-100">
+                    <rating-graph-component :ratings="ratingData"/>
+                </div>
+
+                <!-- 2. Comment Input -->
+                <div v-if="canWriteReview" class="bg-[#F5F5F5] dark:bg-gray-800 w-full rounded-md p-4 space-y-5">
+                    <write-review-component
+                        :userReview="userReview"
+                        :currentUserName="currentUserName"
+                        :profilePic="currentUserAvatar"
+                        @submit-review="handleSubmitReview"
+                        @delete-review="handleDeleteReview"
+                        @cancel-edit="handleCancelEdit"
+                        @edit-review="handleEditReview"
+                    />
+                </div>
+                <div v-else class="bg-[#F5F5F5] dark:bg-gray-800 w-full rounded-md p-4">
+                    <div v-if="!authStore.user" class="text-sm text-gray-700 dark:text-gray-300">
+                        {{ $t('productDetail.signin_to_review') }}
+                    </div>
+                    <div v-else>
+                        <div class="text-sm text-gray-700 dark:text-gray-300">
+                            {{ $t('productDetail.buy_to_review') }}
+                        </div>
+                        <router-link
+                            :to="{ name: 'profile', query: { tab: 'reviews' } }"
+                            class="inline-block mt-3 font-medium text-[#1A535C] dark:text-cyan-300 hover:underline"
+                        >
+                            {{ $t('productDetail.see_bought_products') }}
+                        </router-link>
+                    </div>
+                </div>
+
+                <!-- 3. Show All Comments -->
+                <div>
+                    <ReviewsComponent :reviews="reviewsForList" :initial-visible-count="6"/>
+                </div>
+            </div>
+
+            <!-- Desktop View: Side by Side Grid -->
+            <div class="hidden lg:grid grid-cols-6 gap-4 relative">
 
                 <!-- left side review =========================================================================================== -->
                 <div class="grid grid-flow-col grid-rows-4 grid-cols-8 col-start-1 col-end-3 h-[600px] sticky top-50">

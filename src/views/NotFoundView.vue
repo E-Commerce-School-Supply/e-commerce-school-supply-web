@@ -14,7 +14,7 @@
         
         
         <!-- Action Buttons -->
-        <div class="flex gap-4 justify-center">
+        <div class="flex flex-col md:flex-row gap-4 justify-center">
             <button
             @click="goHome"
             class="px-8 py-3 bg-[#1A535C] text-white rounded-lg font-semibold hover:bg-[#15444a] dark:bg-[#1A535C] dark:hover:bg-[#2A7A8F] transition"

@@ -7,6 +7,7 @@ import { useCartStore } from '@/stores/cartStore'
 import { useRouter } from 'vue-router'
 import Spinner from '@/components/ui/Spinner.vue'
 import { useI18n } from 'vue-i18n' // Import i18n
+import ColourPickerComponent from '@/components/ProductDetail/colour-picker-component.vue'
 
 // --- STORES & ROUTER ---
 const authStore = useAuthStore()
@@ -21,6 +22,7 @@ const cartCount = ref(0)
 const wishlistCount = ref(0)
 const activeFilter = ref('All')
 const footerEmail = ref('')
+const selectedFeaturedColorIndex = ref(0)
 
 // Auth Modal State
 const showAuthPrompt = ref(false)
@@ -35,6 +37,24 @@ const error = ref();
 // --- COMPUTED ---
 const isAuthenticated = computed(() => !!authStore.user)
 
+const featuredProduct = computed(() => {
+  // Get product with most reviews (highest sales indicator)
+  if (!productStore.products || productStore.products.length === 0) return null
+  
+  const topSalesProduct = [...productStore.products].sort((a: any, b: any) => {
+    const rcA = Number(a.reviewCount || 0)
+    const rcB = Number(b.reviewCount || 0)
+    if (rcB !== rcA) return rcB - rcA
+    const priceA = Number(a.price || 0)
+    const priceB = Number(b.price || 0)
+    return priceB - priceA
+  })[0]
+
+  if (!topSalesProduct) return null
+
+  return mapProductToViewModel(topSalesProduct, 0, 'sales', [])
+})
+
 // --- ACTIONS: AUTH & NAVIGATION ---
 const goToAuthPage = (tab: 'signin' | 'signup' = 'signin') => {
   activeAuthTab.value = tab
@@ -43,6 +63,10 @@ const goToAuthPage = (tab: 'signin' | 'signup' = 'signin') => {
 
 const closeAuthPrompt = () => {
   showAuthPrompt.value = false
+}
+
+const goToProductDetail = (productId: any) => {
+  router.push({ name: 'product-detail', params: { id: productId } })
 }
 
 // --- ACTIONS: CART & WISHLIST ---
@@ -275,20 +299,20 @@ onMounted(() => {
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
 
           <div class="space-y-6 flex flex-col justify-between">
-            <div v-for="product in salesProducts.slice(0, 2)" :key="product.id" :id="'product-'+product.id" class="relative bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition border border-gray-100 dark:border-gray-700">
+            <div v-for="product in salesProducts.slice(0, 2)" :key="product.id" :id="'product-'+product.id" class="relative bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition border border-gray-100 dark:border-gray-700 cursor-pointer" @click="goToProductDetail(product.id)">
               <div v-if="(product.stockQuantity ?? 0) <= 0" class="absolute top-3 left-3 bg-red-600 text-white text-[12px] px-2 py-1 rounded">
                 {{ $t('home.out_of_stock') }}
               </div>
               <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-6 mb-4 flex justify-center">
                 <img :src="product.image" :alt="product.name" class="h-32 object-contain mix-blend-multiply dark:mix-blend-normal">
               </div>
-              <h3 class="font-bold text-gray-900 dark:text-white text-sm mb-1">{{ product.name }}</h3>
+              <h3 class="font-bold text-gray-900 dark:text-white text-sm mb-1 hover:text-[#114B5F] dark:hover:text-[#4EB8D4]">{{ product.name }}</h3>
               <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">{{ product.brand }}</p>
               <p class="font-bold text-gray-900 dark:text-white text-sm">{{ product.price }}</p>
             </div>
           </div>
 
-          <div v-if="salesProducts[2]" :id="'product-'+salesProducts[2].id" class="relative bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border-2 border-blue-400 dark:border-blue-500 flex flex-col h-full">
+          <div v-if="salesProducts[2]" :id="'product-'+salesProducts[2].id" class="relative bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border-2 border-blue-400 dark:border-blue-500 flex flex-col h-full cursor-pointer hover:shadow-xl transition" @click="goToProductDetail(salesProducts[2].id)">
             <div v-if="(salesProducts[2].stockQuantity ?? 0) <= 0" class="absolute top-4 left-4 bg-red-600 text-white text-[12px] px-3 py-1 rounded">
                {{ $t('home.out_of_stock') }}
             </div>
@@ -296,7 +320,7 @@ onMounted(() => {
               <img :src="salesProducts[2].image" :alt="salesProducts[2].name" class="h-64 object-contain mix-blend-multiply dark:mix-blend-normal transform -rotate-12">
             </div>
             <div class="mt-auto">
-              <h3 class="font-bold text-gray-900 dark:text-white text-lg mb-1">{{ salesProducts[2].name }}</h3>
+              <h3 class="font-bold text-gray-900 dark:text-white text-lg mb-1 hover:text-[#114B5F] dark:hover:text-[#4EB8D4]">{{ salesProducts[2].name }}</h3>
               <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ salesProducts[2].brand }}</p>
               <p class="text-sm text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">{{ salesProducts[2].desc }}</p>
               <div class="flex items-center gap-2">
@@ -307,14 +331,14 @@ onMounted(() => {
           </div>
 
           <div class="space-y-6 flex flex-col justify-between">
-            <div v-for="product in salesProducts.slice(3, 5)" :key="product.id" :id="'product-'+product.id" class="relative bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition border border-gray-100 dark:border-gray-700">
+            <div v-for="product in salesProducts.slice(3, 5)" :key="product.id" :id="'product-'+product.id" class="relative bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition border border-gray-100 dark:border-gray-700 cursor-pointer" @click="goToProductDetail(product.id)">
               <div v-if="(product.stockQuantity ?? 0) <= 0" class="absolute top-3 left-3 bg-red-600 text-white text-[12px] px-2 py-1 rounded">
                 {{ $t('home.out_of_stock') }}
               </div>
               <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-6 mb-4 flex justify-center">
                 <img :src="product.image" :alt="product.name" class="h-32 object-contain mix-blend-multiply dark:mix-blend-normal">
               </div>
-              <h3 class="font-bold text-gray-900 dark:text-white text-sm mb-1">{{ product.name }}</h3>
+              <h3 class="font-bold text-gray-900 dark:text-white text-sm mb-1 hover:text-[#114B5F] dark:hover:text-[#4EB8D4]">{{ product.name }}</h3>
               <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">{{ product.brand }}</p>
               <p class="font-bold text-gray-900 dark:text-white text-sm">{{ product.price }}</p>
             </div>
@@ -326,25 +350,33 @@ onMounted(() => {
 
     <section class="bg-gray-50 dark:bg-gray-800 py-16 lg:py-20 transition-colors">
       <div class="max-w-7xl mx-auto px-4">
-        <div class="bg-[#F9FAFB] dark:bg-gray-700 rounded-2xl p-8 md:p-12 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-12">
-          <div class="w-full md:w-1/2 flex justify-center relative">
+        <div v-if="featuredProduct" class="bg-[#F9FAFB] dark:bg-gray-700 rounded-2xl p-8 md:p-12 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-12">
+          <div class="w-full md:w-1/2 flex justify-center relative cursor-pointer" @click="goToProductDetail(featuredProduct.id)">
             <div class="absolute bg-gray-200 rounded-full h-80 w-80 md:h-[450px] md:w-[450px] -z-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
-            <img src="/Photo/afterBestproduct.png" alt="FlexiNote" class="relative z-10 h-80 md:h-[450px] object-contain drop-shadow-xl transform hover:scale-105 transition duration-500">
+            <img :src="featuredProduct.image" :alt="featuredProduct.name" class="relative z-10 h-80 md:h-[450px] object-contain drop-shadow-xl transform hover:scale-105 transition duration-500">
           </div>
           <div class="w-full md:w-1/2 text-center md:text-left">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">{{ $t('home.feature_title') }}</h2>
-            <p class="text-gray-600 dark:text-gray-300 mb-6 text-lg leading-relaxed">{{ $t('home.feature_desc') }}</p>
-            <p class="font-medium text-gray-800 dark:text-gray-200 mb-2">{{ $t('home.feature_brand') }}</p>
-            <div class="flex items-center justify-center md:justify-start gap-3 mb-8">
-              <div class="w-6 h-6 rounded-full bg-[#C49A6C] hover:ring-2 hover:ring-offset-2 hover:ring-[#C49A6C] cursor-pointer"></div>
-              <div class="w-6 h-6 rounded-full bg-black cursor-pointer ring-2 ring-offset-2 ring-black transition"></div>
-              <div class="w-6 h-6 rounded-full bg-gray-400 cursor-pointer hover:ring-2 hover:ring-offset-2 hover:ring-gray-400 transition"></div>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 cursor-pointer hover:text-[#114B5F] dark:hover:text-[#4EB8D4] transition" @click="goToProductDetail(featuredProduct.id)">{{ featuredProduct.name }}</h2>
+            <p class="text-gray-600 dark:text-gray-300 mb-6 text-lg leading-relaxed">{{ featuredProduct.desc || $t('home.feature_desc') }}</p>
+            <p class="font-medium text-gray-800 dark:text-gray-200 mb-4">{{ featuredProduct.brand }}</p>
+            <div class="mb-8">
+              <ColourPickerComponent 
+                v-model="selectedFeaturedColorIndex"
+                :colors="['Standard', 'Black', 'Gray']"
+              />
             </div>
             <div class="flex flex-col md:flex-row items-center gap-6">
-              <span class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('home.feature_price') }}</span>
-              <router-link to="/product-list" class="inline-block px-8 py-3 bg-[#114B5F] dark:bg-[#1A535C] text-white font-semibold rounded-lg hover:bg-[#0d3a4b] dark:hover:bg-[#2A7A8F] transition shadow-md cursor-pointer">
+              <span class="text-2xl font-bold text-gray-900 dark:text-white">{{ featuredProduct.price }}</span>
+              <button
+                v-if="(featuredProduct.stockQuantity ?? 0) > 0"
+                @click="addToCart(featuredProduct)"
+                class="inline-block px-8 py-3 bg-[#114B5F] dark:bg-[#1A535C] text-white font-semibold rounded-lg hover:bg-[#0d3a4b] dark:hover:bg-[#2A7A8F] transition shadow-md cursor-pointer"
+              >
                 {{ $t('home.feature_btn') }}
-              </router-link>
+              </button>
+              <button v-else disabled class="inline-block px-8 py-3 bg-gray-400 dark:bg-gray-600 text-white font-semibold rounded-lg opacity-60 cursor-not-allowed">
+                {{ $t('home.out_of_stock') }}
+              </button>
             </div>
           </div>
         </div>
@@ -374,18 +406,18 @@ onMounted(() => {
           </button>
 
           <div ref="productScrollContainer" class="flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 px-2" style="scrollbar-width: none; -ms-overflow-style: none;">
-            <div v-for="product in filteredProducts" :key="product.id" :id="'product-'+product.id" class="min-w-[280px] md:min-w-[300px] snap-center bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-4 shadow-sm hover:shadow-md transition relative">
+            <div v-for="product in filteredProducts" :key="product.id" :id="'product-'+product.id" class="min-w-[280px] md:min-w-[300px] snap-center bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-4 shadow-sm hover:shadow-md transition relative cursor-pointer" @click="goToProductDetail(product.id)">
               <div class="relative bg-gray-50 dark:bg-gray-700 rounded-lg p-6 mb-4 h-64 flex items-center justify-center">
                 <div v-if="(product.stockQuantity ?? 0) <= 0" class="absolute top-3 left-3 bg-red-600 text-white text-[12px] px-2 py-1 rounded">
                   {{ $t('home.out_of_stock') }}
                 </div>
-                <button @click="addToWishlist" class="absolute top-3 right-3 text-gray-400 dark:text-gray-500 hover:text-red-500 transition-colors">
+                <button @click.stop="addToWishlist" class="absolute top-3 right-3 text-gray-400 dark:text-gray-500 hover:text-red-500 transition-colors">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                 </button>
                 <img :src="product.image" :alt="product.name" class="h-48 object-contain mix-blend-multiply dark:mix-blend-normal">
               </div>
               <div class="text-left">
-                <h3 class="font-bold text-gray-900 dark:text-white text-sm mb-1 truncate">{{ product.name }}</h3>
+                <h3 class="font-bold text-gray-900 dark:text-white text-sm mb-1 truncate hover:text-[#114B5F] dark:hover:text-[#4EB8D4]">{{ product.name }}</h3>
                 <div class="flex text-yellow-400 text-xs mb-3">
                   <span v-for="n in 5" :key="n" :class="n <= product.rating ? 'text-yellow-400' : 'text-gray-300'">★</span>
                 </div>
@@ -393,7 +425,7 @@ onMounted(() => {
                   <span class="font-bold text-lg text-gray-900 dark:text-white">{{ product.price }}</span>
                   <button
                     v-if="(product.stockQuantity ?? 0) > 0"
-                    @click="addToCart(product)"
+                    @click.stop="addToCart(product)"
                     class="px-3 py-1.5 bg-[#114B5F] dark:bg-[#1A535C] text-white text-xs font-bold rounded hover:bg-[#0d3a4b] dark:hover:bg-[#2A7A8F] active:scale-95 transition-transform"
                   >
                     {{ $t('home.add_to_cart') }}

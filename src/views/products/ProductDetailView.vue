@@ -103,7 +103,7 @@
             <!-- Contact -->
             <div class="flex flex-col items-center my-20 ...">
                 <h1 class="text-[24px] text-[#1A535C] dark:text-cyan-300 mb-10">{{ $t('productDetail.problem_prompt') }}</h1>
-                <button class="w-[216px] h-[60px] bg-[#1A535C] dark:bg-[#1A535C] rounded-sm text-white dark:text-gray-100 text-[16px] hover:bg-[#15444a] dark:hover:bg-[#2A7A8F] transition">
+                <button @click="goToContact" class="w-[216px] h-[60px] bg-[#1A535C] dark:bg-[#1A535C] rounded-sm text-white dark:text-gray-100 text-[16px] hover:bg-[#15444a] dark:hover:bg-[#2A7A8F] transition cursor-pointer">
                     {{ $t('productDetail.contact_button') }}
                 </button>
             </div>
@@ -226,6 +226,10 @@ import { useI18n } from "vue-i18n";
 
             const goToProductList = () => {
                 router.push({ name: 'Product List' })
+            }
+
+            const goToContact = () => {
+                router.push({ name: 'Contact us' })
             }
 
             const productImages = computed(() => {
@@ -625,6 +629,7 @@ import { useI18n } from "vue-i18n";
                 products,
                 moreProducts,
                 goToProductList,
+                goToContact,
                 detailProduct,
                 productInfo,
                 productColors,

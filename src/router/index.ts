@@ -11,7 +11,7 @@ const route = [
     path: '/about',
     name: 'about',
     component: () => import('../views/AboutUsView.vue'),
-    meta: { requiresAuth: true }
+
   },
   {
       path: '/contact',
@@ -160,8 +160,8 @@ router.beforeEach((to, from, next) => {
   }
   // If route requires auth and user is not authenticated
   else if (to.meta.requiresAuth && !isAuthenticated) {
-    // Allow home page access for guests
-    if (to.name === 'home' && guestMode === 'true') {
+    // Allow home page and product list access for guests
+    if ((to.name === 'home' || to.name === 'Product List') && guestMode === 'true') {
       next()
     } else {
       next({ name: 'signin' })

@@ -1,4 +1,30 @@
 <template>
+  <div v-if="showAuthPrompt" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" @click.self="closeAuthPrompt">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div class="flex border-b dark:border-gray-700">
+        <button class="flex-1 py-3 text-sm font-semibold" :class="activeAuthTab === 'signin' ? 'text-[#114B5F] dark:text-[#4EB8D4] border-b-2 border-[#114B5F] dark:border-[#4EB8D4]' : 'text-gray-500 dark:text-gray-400'" @click="activeAuthTab = 'signin'">
+          {{ $t('modal.tab_signin') }}
+        </button>
+        <button class="flex-1 py-3 text-sm font-semibold" :class="activeAuthTab === 'signup' ? 'text-[#114B5F] dark:text-[#4EB8D4] border-b-2 border-[#114B5F] dark:border-[#4EB8D4]' : 'text-gray-500 dark:text-gray-400'" @click="activeAuthTab = 'signup'">
+          {{ $t('modal.tab_signup') }}
+        </button>
+      </div>
+      <div class="p-6 space-y-4 text-center">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+            {{ activeAuthTab === 'signup' ? $t('modal.title_signup') : $t('modal.title_signin') }}
+        </h3>
+        <p class="text-sm text-gray-600 dark:text-gray-300">{{ $t('modal.desc') }}</p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <button @click="goToAuthPage(activeAuthTab)" class="flex-1 px-4 py-2.5 rounded-lg text-white bg-[#114B5F] dark:bg-[#1A535C] hover:bg-[#0d3a4b] dark:hover:bg-[#2A7A8F] font-semibold">
+            {{ activeAuthTab === 'signup' ? $t('modal.go_signup') : $t('modal.go_signin') }}
+          </button>
+          <button @click="closeAuthPrompt" class="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-semibold">
+            {{ $t('modal.maybe_later') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- Product grid -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full">
     <div
@@ -118,6 +144,10 @@ export default defineComponent({
     const toast = useToastStore();
     const isAuthenticated = computed(() => !!authStore.user)
 
+    // Auth Modal State
+    const showAuthPrompt = ref(false)
+    const activeAuthTab = ref<'signin' | 'signup'>('signin')
+
     const { t } = useI18n();
     // Create reactive arrays to track like and add-to-cart states for each product
     const linkBtn = ref<boolean[]>([])
@@ -128,10 +158,19 @@ export default defineComponent({
       // If your store uses 'favorites' instead of 'favProduct', change this line
       return favStore.favProduct.some((p: Product) => p.id === productId)
     }
+// --- ACTIONS: AUTH & NAVIGATION ---
+    const goToAuthPage = (tab: 'signin' | 'signup' = 'signin') => {
+      activeAuthTab.value = tab
+      router.push({ name: tab })
+    }
 
+    const closeAuthPrompt = () => {
+      showAuthPrompt.value = false
+    }
     const toggleLike = async (product: Product) => {
       if (!isAuthenticated.value) {
-        alert(t('productCard.alert_signin_favorite'))
+        activeAuthTab.value = 'signin'
+        showAuthPrompt.value = true
         return
       }
   
@@ -183,7 +222,8 @@ export default defineComponent({
 
     const btnLink = async (index: number) => {
       if (!isAuthenticated.value) {
-        alert(t('productCard.alert_signin_cart'))
+        activeAuthTab.value = 'signin'
+        showAuthPrompt.value = true
         return
       }
 
@@ -226,6 +266,10 @@ export default defineComponent({
       goToDetail,
       getDiscountedPrice,
       resolveProductImage,
+      activeAuthTab,
+      showAuthPrompt,
+      goToAuthPage,
+      closeAuthPrompt,
     }
   },
 })
